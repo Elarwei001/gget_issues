@@ -42,77 +42,90 @@
   .toc a:hover{color:var(--acc2)}
   .muted{color:var(--muted)}
   .kbd{font-size:12px;color:var(--muted)}
+  /* 双语：默认显示中文；切到 lang-en 时只隐藏非激活语言，不强改 display（span 保持 inline、块级保持 block） */
+  body.lang-zh .en{display:none}
+  body.lang-en .zh{display:none}
+  .langtoggle{margin-bottom:6px}
+  .langtoggle button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;margin-left:4px}
+  .langtoggle button.active{background:var(--acc2);color:#08121c;border-color:var(--acc2);font-weight:600}
   footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
 </style>
 </head>
-<body>
+<body class="lang-zh">
 <div class="wrap">
 
 <header class="top">
-  <div class="stamp">Generated: 2026-07-01 20:24 SGT<br>by Claude Opus 4.8 (1M)</div>
-  <h1>🍍 <code style="font-size:24px">gget pineapple</code> — PR #245 概览</h1>
-  <div class="sub">把 Pineapple 的策展生物影像数据接入 gget · 设计、用法与 live 测试笔记</div>
+  <div class="stamp">
+    <div class="langtoggle">
+      <button data-l="zh" class="active" onclick="setLang('zh')">中文</button><button data-l="en" onclick="setLang('en')">EN</button>
+    </div>
+    Generated: 2026-07-01 20:24 SGT<br>by Claude Opus 4.8 (1M)
+  </div>
+  <h1>🍍 <code style="font-size:24px">gget pineapple</code> — <span class="zh">PR #245 概览</span><span class="en">PR #245 Overview</span></h1>
+  <div class="sub"><span class="zh">把 Pineapple 的策展生物影像数据接入 gget · 设计、用法与 live 测试笔记</span><span class="en">Bringing Pineapple's curated bio-imaging datasets into gget · design, usage, and live-test notes</span></div>
   <div style="margin-top:10px">
     <span class="pill">PR: scverse/gget#245</span>
     <span class="pill">Issue: #161</span>
-    <span class="pill">上游: tomouellette/pineapple</span>
+    <span class="pill"><span class="zh">上游: tomouellette/pineapple</span><span class="en">upstream: tomouellette/pineapple</span></span>
     <span class="pill">base: dev</span>
     <span class="pill">scope: download-only</span>
   </div>
 </header>
 
 <div class="toc">
-  <a href="#s1">1 · TL;DR 一句话</a>
-  <a href="#s2">2 · 这个 PR 解决什么问题</a>
-  <a href="#s3">3 · 上游 Pineapple 是什么</a>
-  <a href="#s4">4 · 数据托管在哪 / 为何硬编码</a>
-  <a href="#s5">5 · 接入 gget 后如何使用</a>
-  <a href="#s6">6 · Scope：只做下载</a>
-  <a href="#s7">7 · Live data 测试如何设计</a>
-  <a href="#s8">8 · 测试金字塔：mock vs live</a>
-  <a href="#s9">9 · 关键工程决策与权衡</a>
-  <a href="#s10">10 · PR 当前状态</a>
-  <a href="#s11">11 · 未决 / 后续可选项</a>
-  <a href="#s12">12 · 参考链接</a>
+  <a href="#s1">1 · <span class="zh">TL;DR 一句话</span><span class="en">TL;DR in one breath</span></a>
+  <a href="#s2">2 · <span class="zh">这个 PR 解决什么问题</span><span class="en">What problem this PR solves</span></a>
+  <a href="#s3">3 · <span class="zh">上游 Pineapple 是什么</span><span class="en">What upstream Pineapple is</span></a>
+  <a href="#s4">4 · <span class="zh">数据托管在哪 / 为何硬编码</span><span class="en">Where the data lives / why hard-coded</span></a>
+  <a href="#s5">5 · <span class="zh">接入 gget 后如何使用</span><span class="en">How to use it once in gget</span></a>
+  <a href="#s6">6 · <span class="zh">Scope：只做下载</span><span class="en">Scope: download only</span></a>
+  <a href="#s7">7 · <span class="zh">Live data 测试如何设计</span><span class="en">How the live-data test is designed</span></a>
+  <a href="#s8">8 · <span class="zh">测试金字塔：mock vs live</span><span class="en">Test pyramid: mock vs live</span></a>
+  <a href="#s9">9 · <span class="zh">关键工程决策与权衡</span><span class="en">Key engineering decisions and trade-offs</span></a>
+  <a href="#s10">10 · <span class="zh">PR 当前状态</span><span class="en">Current PR status</span></a>
+  <a href="#s11">11 · <span class="zh">未决 / 后续可选项</span><span class="en">Open items / optional follow-ups</span></a>
+  <a href="#s12">12 · <span class="zh">参考链接</span><span class="en">Reference links</span></a>
 </div>
 
 <div class="tldr" id="s1">
-  <strong>TL;DR：</strong>Pineapple 是个 Rust 命令行图像分析工具，同时策展了一批标准化的生物影像数据集 + 预训练权重，托管在公开 Google Drive 上，<b>但没有 REST/JSON API</b>。这个 PR 给 gget 加了一个 <code>pineapple</code> 模块，把这批数据的<b>目录列举</b>和<b>按名下载</b>封装进来——用户无需安装 Rust 就能用；<b>只做数据下载，不碰 Pineapple 的图像处理功能</b>。本次还补了一套 <b>live data 测试</b>（抽样打真实 Google Drive、只读 header）保证数据长期可访问，以及 en/es 双语文档。
+  <strong>TL;DR：</strong>
+  <span class="zh">Pineapple 是个 Rust 命令行图像分析工具，同时策展了一批标准化的生物影像数据集 + 预训练权重，托管在公开 Google Drive 上，<b>但没有 REST/JSON API</b>。这个 PR 给 gget 加了一个 <code>pineapple</code> 模块，把这批数据的<b>目录列举</b>和<b>按名下载</b>封装进来——用户无需安装 Rust 就能用；<b>只做数据下载，不碰 Pineapple 的图像处理功能</b>。本次还补了一套 <b>live data 测试</b>（抽样打真实 Google Drive、只读 header）保证数据长期可访问，以及 en/es 双语文档。</span>
+  <span class="en">Pineapple is a Rust command-line image-analysis tool that also curates a set of standardized bio-imaging datasets + pretrained weights, hosted on public Google Drive, <b>but with no REST/JSON API</b>. This PR adds a <code>pineapple</code> module to gget that wraps <b>listing the catalog</b> and <b>downloading by name</b> for that data — usable without installing Rust; <b>it only does data download and does not touch Pineapple's image-processing features</b>. It also adds a set of <b>live-data tests</b> (sampling real Google Drive, reading headers only) to guarantee the data stays accessible over time, plus bilingual en/es documentation.</span>
 </div>
 
-<h2 id="s2"><span class="n">2</span>这个 PR 解决什么问题</h2>
-<p>需求来自 <a href="https://github.com/pachterlab/gget/issues/161">issue #161</a>，标题就是 <em>"Pineapple module to <b>download bio-imaging data</b>"</em>，由 gget 维护者 <b>Laura Luebbert</b> 提出，并注明 <em>"suggested by Prof. Anne Carpenter"</em>（Carpenter 是 image-based profiling / CellProfiler 领域的奠基人物）。所以需求从第一天起就<b>钉死在"下载生物影像数据"</b>，不是图像处理。</p>
-<p>核心洞察（也写进了 PR 描述）：</p>
-<div class="note">Pineapple 是个 Rust CLI，<b>不暴露 REST/JSON API</b>。它通过 <code>pineapple download</code> 提供的，是一份<b>策展、标准化的数据集 + 预训练权重目录，托管在 Google Drive</b>——每个资源在 <code>pineapple-data</code> crate 里对应一个<b>硬编码的 Google Drive 文件 ID</b>。gget 这个模块镜像了这份目录，直接从同一个 Google Drive 源下载，让用户<b>不装 Rust 二进制</b>就能拿到数据。</p></div>
+<h2 id="s2"><span class="n">2</span><span class="zh">这个 PR 解决什么问题</span><span class="en">What problem this PR solves</span></h2>
+<p><span class="zh">需求来自 <a href="https://github.com/pachterlab/gget/issues/161">issue #161</a>，标题就是 <em>"Pineapple module to <b>download bio-imaging data</b>"</em>，由 gget 维护者 <b>Laura Luebbert</b> 提出，并注明 <em>"suggested by Prof. Anne Carpenter"</em>（Carpenter 是 image-based profiling / CellProfiler 领域的奠基人物）。所以需求从第一天起就<b>钉死在"下载生物影像数据"</b>，不是图像处理。</span><span class="en">The request comes from <a href="https://github.com/pachterlab/gget/issues/161">issue #161</a>, whose title is literally <em>"Pineapple module to <b>download bio-imaging data</b>"</em>, filed by gget maintainer <b>Laura Luebbert</b> and noting <em>"suggested by Prof. Anne Carpenter"</em> (Carpenter is a founding figure in image-based profiling / CellProfiler). So from day one the requirement was <b>nailed to "download bio-imaging data,"</b> not image processing.</span></p>
+<p><span class="zh">核心洞察（也写进了 PR 描述）：</span><span class="en">The core insight (also written into the PR description):</span></p>
+<div class="note"><span class="zh">Pineapple 是个 Rust CLI，<b>不暴露 REST/JSON API</b>。它通过 <code>pineapple download</code> 提供的，是一份<b>策展、标准化的数据集 + 预训练权重目录，托管在 Google Drive</b>——每个资源在 <code>pineapple-data</code> crate 里对应一个<b>硬编码的 Google Drive 文件 ID</b>。gget 这个模块镜像了这份目录，直接从同一个 Google Drive 源下载，让用户<b>不装 Rust 二进制</b>就能拿到数据。</span><span class="en">Pineapple is a Rust CLI that <b>exposes no REST/JSON API</b>. What it offers through <code>pineapple download</code> is a <b>curated, standardized catalog of datasets + pretrained weights, hosted on Google Drive</b> — each resource corresponds to a <b>hard-coded Google Drive file ID</b> in the <code>pineapple-data</code> crate. This gget module mirrors that catalog and downloads straight from the same Google Drive source, letting users obtain the data <b>without installing the Rust binary</b>.</span></div>
 
-<h2 id="s3"><span class="n">3</span>上游 Pineapple 是什么</h2>
-<p><a href="https://github.com/tomouellette/pineapple">Pineapple</a>（作者 <b>Tom Ouellette</b>，BSD-3 许可）是用 Rust 写的<b>基于图像的细胞分析（image-based cell profiling）</b>命令行工具，能做：分割对象抽取、计算形态学描述子、生成细胞/细胞核的自监督 embedding 等。它是个<b>大得多</b>的工具，子命令包括：</p>
+<h2 id="s3"><span class="n">3</span><span class="zh">上游 Pineapple 是什么</span><span class="en">What upstream Pineapple is</span></h2>
+<p><span class="zh"><a href="https://github.com/tomouellette/pineapple">Pineapple</a>（作者 <b>Tom Ouellette</b>，BSD-3 许可）是用 Rust 写的<b>基于图像的细胞分析（image-based cell profiling）</b>命令行工具，能做：分割对象抽取、计算形态学描述子、生成细胞/细胞核的自监督 embedding 等。它是个<b>大得多</b>的工具，子命令包括：</span><span class="en"><a href="https://github.com/tomouellette/pineapple">Pineapple</a> (author <b>Tom Ouellette</b>, BSD-3 license) is a command-line <b>image-based cell profiling</b> tool written in Rust that can: extract segmented objects, compute morphological descriptors, generate self-supervised embeddings of cells/nuclei, and more. It is a <b>much larger</b> tool, with subcommands including:</span></p>
 <table>
-  <tr><th>子命令</th><th>作用</th><th>gget 是否封装</th></tr>
-  <tr><td><code>process</code></td><td>从图像+mask/polygon/box 抽取对象级数据</td><td class="no">否</td></tr>
-  <tr><td><code>profile</code></td><td>计算对象级形态学描述子</td><td class="no">否</td></tr>
-  <tr><td><code>neural</code></td><td>自监督 embedding（神经网络）</td><td class="no">否</td></tr>
-  <tr><td><code>measure</code> / <code>utils</code></td><td>度量 / 工具</td><td class="no">否</td></tr>
-  <tr><td><code>download</code></td><td><b>列目录 + 下载策展数据集/权重</b></td><td class="ok">✅ 就封装这一个</td></tr>
+  <tr><th><span class="zh">子命令</span><span class="en">Subcommand</span></th><th><span class="zh">作用</span><span class="en">Purpose</span></th><th><span class="zh">gget 是否封装</span><span class="en">Wrapped by gget?</span></th></tr>
+  <tr><td><code>process</code></td><td><span class="zh">从图像+mask/polygon/box 抽取对象级数据</span><span class="en">Extract object-level data from image + mask/polygon/box</span></td><td class="no"><span class="zh">否</span><span class="en">No</span></td></tr>
+  <tr><td><code>profile</code></td><td><span class="zh">计算对象级形态学描述子</span><span class="en">Compute object-level morphological descriptors</span></td><td class="no"><span class="zh">否</span><span class="en">No</span></td></tr>
+  <tr><td><code>neural</code></td><td><span class="zh">自监督 embedding（神经网络）</span><span class="en">Self-supervised embeddings (neural networks)</span></td><td class="no"><span class="zh">否</span><span class="en">No</span></td></tr>
+  <tr><td><code>measure</code> / <code>utils</code></td><td><span class="zh">度量 / 工具</span><span class="en">Measurement / utilities</span></td><td class="no"><span class="zh">否</span><span class="en">No</span></td></tr>
+  <tr><td><code>download</code></td><td><span class="zh"><b>列目录 + 下载策展数据集/权重</b></span><span class="en"><b>List catalog + download curated datasets/weights</b></span></td><td class="ok"><span class="zh">✅ 就封装这一个</span><span class="en">✅ This is the only one wrapped</span></td></tr>
 </table>
-<p class="muted">注：仓库里<b>没有论文/preprint</b>（无 DOI），引用即 GitHub repo 本身。gget 的定位是<b>数据访问</b>而非图像分析，所以只镜像 <code>download</code> 是正确的 scoping。</p>
+<p class="muted"><span class="zh">注：仓库里<b>没有论文/preprint</b>（无 DOI），引用即 GitHub repo 本身。gget 的定位是<b>数据访问</b>而非图像分析，所以只镜像 <code>download</code> 是正确的 scoping。</span><span class="en">Note: the repo has <b>no paper/preprint</b> (no DOI), so the citation is the GitHub repo itself. gget is positioned for <b>data access</b> rather than image analysis, so mirroring only <code>download</code> is the correct scoping.</span></p>
 
-<h2 id="s4"><span class="n">4</span>数据托管在哪 / 为何硬编码</h2>
-<p>所有资源都是 Google Drive 上的<b>公开文件</b>，每个对应一个文件 ID。下载 URL 形如：</p>
+<h2 id="s4"><span class="n">4</span><span class="zh">数据托管在哪 / 为何硬编码</span><span class="en">Where the data lives / why hard-coded</span></h2>
+<p><span class="zh">所有资源都是 Google Drive 上的<b>公开文件</b>，每个对应一个文件 ID。下载 URL 形如：</span><span class="en">All resources are <b>public files</b> on Google Drive, each mapped to a file ID. The download URL looks like:</span></p>
 <pre><code>https://drive.google.com/uc?export=download&id=&lt;FILE_ID&gt;</code></pre>
-<p>无鉴权、无 OAuth。但有一个关键行为——<b>病毒扫描确认页</b>：当文件大到 Google 无法扫描（约 &gt;100MB）时，它<b>不直接返回文件</b>，而是先返回一个 HTML 页面（"Google Drive can't scan this file for viruses"），带一个需要提交的表单（含 <code>confirm</code> token）。客户端必须解析并再次提交，才能拿到真正字节。<b>gget 必须处理这一步，否则大文件会把 HTML 警告页存成损坏的 .tar.gz。</b></p>
-<p><b>为何硬编码这 30 个 ID？</b> 上游自己就是在 Rust 源码里逐个硬编码的，作者在注释里也承认"不是好做法、以后可能挪出去"。因为<b>没有可编程 API、也没有目录式 manifest</b>，gget 只能<b>镜像</b>成一份时间点快照。决策：v1 硬编码 + live 测试兜底 + 维护者 note 说明。<span class="muted">（session 中还写过一个"运行时解析上游 .rs 拿 ID 表"的原型，作为将来防腐烂的可选路径，见 §9/§11。）</span></p>
+<p><span class="zh">无鉴权、无 OAuth。但有一个关键行为——<b>病毒扫描确认页</b>：当文件大到 Google 无法扫描（约 &gt;100MB）时，它<b>不直接返回文件</b>，而是先返回一个 HTML 页面（"Google Drive can't scan this file for viruses"），带一个需要提交的表单（含 <code>confirm</code> token）。客户端必须解析并再次提交，才能拿到真正字节。<b>gget 必须处理这一步，否则大文件会把 HTML 警告页存成损坏的 .tar.gz。</b></span><span class="en">No authentication, no OAuth. But there is one key behavior — the <b>virus-scan confirmation page</b>: when a file is too large for Google to scan (roughly &gt;100MB), it <b>does not return the file directly</b>, but first returns an HTML page ("Google Drive can't scan this file for viruses") with a form that must be submitted (containing a <code>confirm</code> token). The client must parse and re-submit it before getting the real bytes. <b>gget must handle this step, otherwise large files will save the HTML warning page as a corrupt .tar.gz.</b></span></p>
+<p><span class="zh"><b>为何硬编码这 30 个 ID？</b> 上游自己就是在 Rust 源码里逐个硬编码的，作者在注释里也承认"不是好做法、以后可能挪出去"。因为<b>没有可编程 API、也没有目录式 manifest</b>，gget 只能<b>镜像</b>成一份时间点快照。决策：v1 硬编码 + live 测试兜底 + 维护者 note 说明。<span class="muted">（session 中还写过一个"运行时解析上游 .rs 拿 ID 表"的原型，作为将来防腐烂的可选路径，见 §9/§11。）</span></span><span class="en"><b>Why hard-code these 30 IDs?</b> Upstream itself hard-codes them one by one in the Rust source, and the author even admits in a comment that it's "not a good practice, may be moved out later." Because there is <b>no programmatic API and no manifest-style directory</b>, gget can only <b>mirror</b> a point-in-time snapshot. Decision: v1 hard-code + live test as a safety net + a maintainer note explaining it. <span class="muted">(During the session a prototype that "parses the upstream .rs at runtime to obtain the ID table" was also written, as an optional future anti-rot path — see §9/§11.)</span></span></p>
 
-<h2 id="s5"><span class="n">5</span>接入 gget 后如何使用</h2>
-<p><b>关键认知：</b><code>pineapple()</code> 的<b>返回值永远是"元数据表"</b>（DataFrame / json）；压缩包只是 <code>download=True</code> 时写到磁盘的<b>副作用</b>，不通过返回值传。用户场景是两段式的：<b>先看菜单 → 再下单个</b>。</p>
-<h3>三种输入 → 输出</h3>
+<h2 id="s5"><span class="n">5</span><span class="zh">接入 gget 后如何使用</span><span class="en">How to use it once in gget</span></h2>
+<p><span class="zh"><b>关键认知：</b><code>pineapple()</code> 的<b>返回值永远是"元数据表"</b>（DataFrame / json）；压缩包只是 <code>download=True</code> 时写到磁盘的<b>副作用</b>，不通过返回值传。用户场景是两段式的：<b>先看菜单 → 再下单个</b>。</span><span class="en"><b>Key mental model:</b> the <b>return value of <code>pineapple()</code> is always a "metadata table"</b> (DataFrame / json); the archive is merely a <b>side effect</b> written to disk when <code>download=True</code>, never passed through the return value. The user flow is two-stage: <b>look at the menu first → then download a single item</b>.</span></p>
+<h3><span class="zh">三种输入 → 输出</span><span class="en">Three inputs → outputs</span></h3>
 <table>
-  <tr><th>输入</th><th>返回值</th><th>副作用</th></tr>
-  <tr><td><code>gget.pineapple(category="segmentation")</code><br><span class="muted">不给 name</span></td><td>整张目录表（该类全部资源的元数据）</td><td>无</td></tr>
-  <tr><td><code>gget.pineapple("vicar_2021")</code><br><span class="muted">给 name、不下载</span></td><td>单行元数据表</td><td>无</td></tr>
-  <tr><td><code>gget.pineapple("vicar_2021", download=True, out_dir="./d")</code></td><td>仍是那行元数据表</td><td>把 <code>vicar-2021.tar.gz</code> 存到 <code>./d/</code></td></tr>
+  <tr><th><span class="zh">输入</span><span class="en">Input</span></th><th><span class="zh">返回值</span><span class="en">Return value</span></th><th><span class="zh">副作用</span><span class="en">Side effect</span></th></tr>
+  <tr><td><code>gget.pineapple(category="segmentation")</code><br><span class="muted"><span class="zh">不给 name</span><span class="en">no name given</span></span></td><td><span class="zh">整张目录表（该类全部资源的元数据）</span><span class="en">The whole catalog table (metadata for all resources in that category)</span></td><td><span class="zh">无</span><span class="en">None</span></td></tr>
+  <tr><td><code>gget.pineapple("vicar_2021")</code><br><span class="muted"><span class="zh">给 name、不下载</span><span class="en">name given, no download</span></span></td><td><span class="zh">单行元数据表</span><span class="en">Single-row metadata table</span></td><td><span class="zh">无</span><span class="en">None</span></td></tr>
+  <tr><td><code>gget.pineapple("vicar_2021", download=True, out_dir="./d")</code></td><td><span class="zh">仍是那行元数据表</span><span class="en">Still that same metadata row</span></td><td><span class="zh">把 <code>vicar-2021.tar.gz</code> 存到 <code>./d/</code></span><span class="en">Saves <code>vicar-2021.tar.gz</code> to <code>./d/</code></span></td></tr>
 </table>
-<h3>命令行 & Python 对照</h3>
+<h3><span class="zh">命令行 &amp; Python 对照</span><span class="en">CLI &amp; Python side by side</span></h3>
 <pre><code># CLI —— 列目录
 gget pineapple --category segmentation
 # CLI —— 按名下载
@@ -123,84 +136,84 @@ gget pineapple --category weights</code></pre>
 gget.pineapple(category="segmentation")                 # 列目录 -> DataFrame
 gget.pineapple("vicar_2021", json=True)                 # 单个元数据 -> list[dict]
 gget.pineapple("vicar_2021", download=True, out_dir="./pineapple_data")  # 下载 + 返回元数据</code></pre>
-<h3>目录（catalog）字段</h3>
+<h3><span class="zh">目录（catalog）字段</span><span class="en">Catalog fields</span></h3>
 <table>
-  <tr><th>列</th><th>含义</th><th>备注</th></tr>
-  <tr><td><code>name</code></td><td>资源名，如 <code>vicar_2021</code> / <code>dino_vit_small</code></td><td>下载时用它</td></tr>
-  <tr><td><code>category</code></td><td><code>segmentation</code>(12) / <code>benchmark</code>(13) / <code>weights</code>(5)</td><td>共 30</td></tr>
-  <tr><td><code>data_authors</code></td><td>原始数据作者</td><td class="no">无法对真值校验（信任镜像）</td></tr>
-  <tr><td><code>size_gb</code></td><td>大小(GB)</td><td class="no">近似/不可靠（livecell 标 3.26 实 1.81）</td></tr>
-  <tr><td><code>license</code></td><td>许可（部分仅非商用）</td><td class="no">无法对真值校验（信任镜像）</td></tr>
-  <tr><td><code>filename</code></td><td>下载文件名</td><td class="ok">派生逻辑，且能对 Drive 真值校验</td></tr>
-  <tr><td><code>google_drive_id</code></td><td>Google Drive 文件 ID</td><td>下载入口</td></tr>
+  <tr><th><span class="zh">列</span><span class="en">Column</span></th><th><span class="zh">含义</span><span class="en">Meaning</span></th><th><span class="zh">备注</span><span class="en">Note</span></th></tr>
+  <tr><td><code>name</code></td><td><span class="zh">资源名，如 <code>vicar_2021</code> / <code>dino_vit_small</code></span><span class="en">Resource name, e.g. <code>vicar_2021</code> / <code>dino_vit_small</code></span></td><td><span class="zh">下载时用它</span><span class="en">Used when downloading</span></td></tr>
+  <tr><td><code>category</code></td><td><code>segmentation</code>(12) / <code>benchmark</code>(13) / <code>weights</code>(5)</td><td><span class="zh">共 30</span><span class="en">30 total</span></td></tr>
+  <tr><td><code>data_authors</code></td><td><span class="zh">原始数据作者</span><span class="en">Authors of the original data</span></td><td class="no"><span class="zh">无法对真值校验（信任镜像）</span><span class="en">Cannot be verified against ground truth (trust the mirror)</span></td></tr>
+  <tr><td><code>size_gb</code></td><td><span class="zh">大小(GB)</span><span class="en">Size (GB)</span></td><td class="no"><span class="zh">近似/不可靠（livecell 标 3.26 实 1.81）</span><span class="en">Approximate/unreliable (livecell labeled 3.26, actually 1.81)</span></td></tr>
+  <tr><td><code>license</code></td><td><span class="zh">许可（部分仅非商用）</span><span class="en">License (some non-commercial only)</span></td><td class="no"><span class="zh">无法对真值校验（信任镜像）</span><span class="en">Cannot be verified against ground truth (trust the mirror)</span></td></tr>
+  <tr><td><code>filename</code></td><td><span class="zh">下载文件名</span><span class="en">Download filename</span></td><td class="ok"><span class="zh">派生逻辑，且能对 Drive 真值校验</span><span class="en">Derived by logic, and verifiable against Drive ground truth</span></td></tr>
+  <tr><td><code>google_drive_id</code></td><td><span class="zh">Google Drive 文件 ID</span><span class="en">Google Drive file ID</span></td><td><span class="zh">下载入口</span><span class="en">Download entry point</span></td></tr>
 </table>
-<p class="muted">文件名两套派生规则：数据集 = <code>name.replace("_","-") + ".tar.gz"</code>；权重 = 独立的显式 <code>.safetensors</code> 文件名。</p>
+<p class="muted"><span class="zh">文件名两套派生规则：数据集 = <code>name.replace("_","-") + ".tar.gz"</code>；权重 = 独立的显式 <code>.safetensors</code> 文件名。</span><span class="en">Two filename-derivation rules: datasets = <code>name.replace("_","-") + ".tar.gz"</code>; weights = a separate, explicit <code>.safetensors</code> filename.</span></p>
 
-<h2 id="s6"><span class="n">6</span>Scope：只做下载</h2>
-<p>模块<b>刻意只封装 Pineapple 的数据分发层</b>（<code>pineapple download</code>）：列目录 + 按名从 Google Drive 下载。<b>不</b>复制 <code>process/profile/neural/measure</code> 这些图像处理能力——那是 Pineapple 工具本体的核心，超出 gget（数据<em>访问</em>而非图像<em>分析</em>）的范围。想处理图像的用户应直接用 Pineapple。这与 issue #161 的原始诉求（"download bio-imaging data"）一致，并已写进代码/文档/PR 描述。</p>
+<h2 id="s6"><span class="n">6</span><span class="zh">Scope：只做下载</span><span class="en">Scope: download only</span></h2>
+<p><span class="zh">模块<b>刻意只封装 Pineapple 的数据分发层</b>（<code>pineapple download</code>）：列目录 + 按名从 Google Drive 下载。<b>不</b>复制 <code>process/profile/neural/measure</code> 这些图像处理能力——那是 Pineapple 工具本体的核心，超出 gget（数据<em>访问</em>而非图像<em>分析</em>）的范围。想处理图像的用户应直接用 Pineapple。这与 issue #161 的原始诉求（"download bio-imaging data"）一致，并已写进代码/文档/PR 描述。</span><span class="en">The module <b>deliberately wraps only Pineapple's data-distribution layer</b> (<code>pineapple download</code>): list the catalog + download by name from Google Drive. It does <b>not</b> replicate the <code>process/profile/neural/measure</code> image-processing capabilities — those are the core of the Pineapple tool itself and fall outside gget's scope (data <em>access</em>, not image <em>analysis</em>). Users who want to process images should use Pineapple directly. This is consistent with issue #161's original ask ("download bio-imaging data") and is written into the code/docs/PR description.</span></p>
 
-<h2 id="s7"><span class="n">7</span>Live data 测试如何设计</h2>
-<p><b>难点</b>：archs4/opentargets 的 live 测试是"真调用→比对返回值"。但 pineapple 的返回值只是本地目录表，真正的"数据"是 GB 级 Google Drive 大文件——<b>CI 不能真下载</b>。所以"live"体现在：<b>对已知资源真实请求 Google Drive，验证它仍解析得到可下载文件，但只读 header、不取 body。</b></p>
+<h2 id="s7"><span class="n">7</span><span class="zh">Live data 测试如何设计</span><span class="en">How the live-data test is designed</span></h2>
+<p><span class="zh"><b>难点</b>：archs4/opentargets 的 live 测试是"真调用→比对返回值"。但 pineapple 的返回值只是本地目录表，真正的"数据"是 GB 级 Google Drive 大文件——<b>CI 不能真下载</b>。所以"live"体现在：<b>对已知资源真实请求 Google Drive，验证它仍解析得到可下载文件，但只读 header、不取 body。</b></span><span class="en"><b>The challenge</b>: the archs4/opentargets live tests are "make a real call → compare the return value." But pineapple's return value is just a local catalog table, and the real "data" is GB-scale Google Drive files — <b>CI cannot actually download them</b>. So "live" here means: <b>make a real request to Google Drive for a known resource and verify it still resolves to a downloadable file, but read only the header, not the body.</b></span></p>
 
-<h3>关键实测发现（先探针、再写断言）</h3>
-<p>对真实 ID 探 header 发现两个断言级信息，以及一个救命的反例：</p>
+<h3><span class="zh">关键实测发现（先探针、再写断言）</span><span class="en">Key empirical findings (probe first, then write assertions)</span></h3>
+<p><span class="zh">对真实 ID 探 header 发现两个断言级信息，以及一个救命的反例：</span><span class="en">Probing headers on real IDs surfaced two assertion-grade pieces of information, plus one life-saving counterexample:</span></p>
 <ul>
-  <li><span class="ok">Content-Disposition</span> 带<b>真实文件名</b> → Google Drive 亲口告诉你这个 ID 现在服务的是哪个文件，是最精确的<b>身份锚</b>。</li>
-  <li><span class="ok">Content-Length</span> = 精确字节数；<code>Content-Type: application/octet-stream</code> 证明是二进制、非报错 HTML。</li>
-  <li><span class="no">反例</span>：livecell 目录标 <code>3.26GB</code>，实际 Content-Length 只有 <b>1.81GB</b> → 说明 <code>size_gb</code> 不可靠，<b>size 断言必须放宽</b>，不能紧绑目录值。</li>
-  <li><span class="no">license / author</span> 不在任何 header 里 → <b>无法对真值校验</b>，只能信任上游镜像。</li>
+  <li><span class="ok">Content-Disposition</span> <span class="zh">带<b>真实文件名</b> → Google Drive 亲口告诉你这个 ID 现在服务的是哪个文件，是最精确的<b>身份锚</b>。</span><span class="en">carries the <b>real filename</b> → Google Drive tells you directly which file this ID currently serves, the most precise <b>identity anchor</b>.</span></li>
+  <li><span class="ok">Content-Length</span> <span class="zh">= 精确字节数；<code>Content-Type: application/octet-stream</code> 证明是二进制、非报错 HTML。</span><span class="en">= exact byte count; <code>Content-Type: application/octet-stream</code> proves it is binary, not error HTML.</span></li>
+  <li><span class="no"><span class="zh">反例</span><span class="en">Counterexample</span></span><span class="zh">：livecell 目录标 <code>3.26GB</code>，实际 Content-Length 只有 <b>1.81GB</b> → 说明 <code>size_gb</code> 不可靠，<b>size 断言必须放宽</b>，不能紧绑目录值。</span><span class="en">: the livecell catalog says <code>3.26GB</code>, but the actual Content-Length is only <b>1.81GB</b> → showing <code>size_gb</code> is unreliable, so <b>size assertions must be loosened</b> and not tied tightly to the catalog value.</span></li>
+  <li><span class="no">license / author</span> <span class="zh">不在任何 header 里 → <b>无法对真值校验</b>，只能信任上游镜像。</span><span class="en">are not in any header → <b>cannot be verified against ground truth</b>, so we can only trust the upstream mirror.</span></li>
 </ul>
 
-<h3>最终断言（每个抽样资源）</h3>
+<h3><span class="zh">最终断言（每个抽样资源）</span><span class="en">Final assertions (per sampled resource)</span></h3>
 <table>
-  <tr><th>断言</th><th>守护的回归</th></tr>
-  <tr><td>HTTP 200</td><td>ID 还在、文件没被删</td></tr>
-  <tr><td>Content-Type 含 <code>octet-stream</code>（非 html）</td><td>没退化成配额/报错页</td></tr>
-  <tr><td>Content-Disposition 文件名 == 目录 <code>filename</code>（精确）</td><td>ID 没被改指到别的文件</td></tr>
-  <tr><td>Content-Length &gt; 1MB（宽松，不绑 size_gb）</td><td>ID 没被换成占位小文件</td></tr>
+  <tr><th><span class="zh">断言</span><span class="en">Assertion</span></th><th><span class="zh">守护的回归</span><span class="en">Regression it guards against</span></th></tr>
+  <tr><td>HTTP 200</td><td><span class="zh">ID 还在、文件没被删</span><span class="en">The ID still exists and the file has not been deleted</span></td></tr>
+  <tr><td><span class="zh">Content-Type 含 <code>octet-stream</code>（非 html）</span><span class="en">Content-Type contains <code>octet-stream</code> (not html)</span></td><td><span class="zh">没退化成配额/报错页</span><span class="en">Has not degraded into a quota/error page</span></td></tr>
+  <tr><td><span class="zh">Content-Disposition 文件名 == 目录 <code>filename</code>（精确）</span><span class="en">Content-Disposition filename == catalog <code>filename</code> (exact)</span></td><td><span class="zh">ID 没被改指到别的文件</span><span class="en">The ID has not been repointed to a different file</span></td></tr>
+  <tr><td><span class="zh">Content-Length &gt; 1MB（宽松，不绑 size_gb）</span><span class="en">Content-Length &gt; 1MB (loose, not bound to size_gb)</span></td><td><span class="zh">ID 没被换成占位小文件</span><span class="en">The ID has not been swapped for a tiny placeholder file</span></td></tr>
 </table>
 
-<h3>抽样：代表性 4 个（非全部 30）</h3>
+<h3><span class="zh">抽样：代表性 4 个（非全部 30）</span><span class="en">Sampling: 4 representative resources (not all 30)</span></h3>
 <table>
-  <tr><th>资源</th><th>覆盖点</th></tr>
-  <tr><td><code>arvidsson_2022</code> (seg, ~28MB)</td><td>.tar.gz + 直连下载路径</td></tr>
-  <tr><td><code>kromp_2023</code> (benchmark, ~25MB)</td><td>benchmark 类</td></tr>
-  <tr><td><code>dino_vit_small</code> (weights, ~88MB)</td><td>显式 .safetensors 文件名规则</td></tr>
-  <tr><td><code>hpa_2022</code> (seg, ~1.6GB)</td><td><b>触发病毒扫描确认页</b>分支（header-only，不下 body）</td></tr>
+  <tr><th><span class="zh">资源</span><span class="en">Resource</span></th><th><span class="zh">覆盖点</span><span class="en">What it covers</span></th></tr>
+  <tr><td><code>arvidsson_2022</code> (seg, ~28MB)</td><td><span class="zh">.tar.gz + 直连下载路径</span><span class="en">.tar.gz + direct download path</span></td></tr>
+  <tr><td><code>kromp_2023</code> (benchmark, ~25MB)</td><td><span class="zh">benchmark 类</span><span class="en">benchmark category</span></td></tr>
+  <tr><td><code>dino_vit_small</code> (weights, ~88MB)</td><td><span class="zh">显式 .safetensors 文件名规则</span><span class="en">Explicit .safetensors filename rule</span></td></tr>
+  <tr><td><code>hpa_2022</code> (seg, ~1.6GB)</td><td><span class="zh"><b>触发病毒扫描确认页</b>分支（header-only，不下 body）</span><span class="en"><b>Triggers the virus-scan confirmation page</b> branch (header-only, no body download)</span></td></tr>
 </table>
 
-<h3>抗 flaky：限流 → skip</h3>
-<p>Google Drive 短时间被请求太多会返回"配额超限"的 HTML 页（<b>临时限流</b>）。测试<b>区分两种"拿不到"</b>：数据真没了（404/410 或文件名对不上）→ <b>硬失败（CI 红）</b>；Google 临时限流（返回 html）→ <b>skip（CI 绿）</b>。即"if Google Drive temporarily rate-limits the request, that resource is skipped rather than failing the build"。</p>
+<h3><span class="zh">抗 flaky：限流 → skip</span><span class="en">Anti-flaky: rate-limit → skip</span></h3>
+<p><span class="zh">Google Drive 短时间被请求太多会返回"配额超限"的 HTML 页（<b>临时限流</b>）。测试<b>区分两种"拿不到"</b>：数据真没了（404/410 或文件名对不上）→ <b>硬失败（CI 红）</b>；Google 临时限流（返回 html）→ <b>skip（CI 绿）</b>。即"if Google Drive temporarily rate-limits the request, that resource is skipped rather than failing the build"。</span><span class="en">When Google Drive is hit too often in a short window, it returns a "quota exceeded" HTML page (<b>temporary rate-limiting</b>). The test <b>distinguishes two kinds of "can't get it"</b>: the data is truly gone (404/410 or filename mismatch) → <b>hard failure (CI red)</b>; Google temporarily rate-limits (returns html) → <b>skip (CI green)</b>. That is, "if Google Drive temporarily rate-limits the request, that resource is skipped rather than failing the build."</span></p>
 
-<h3>复用生产代码路径 + 负向验证</h3>
+<h3><span class="zh">复用生产代码路径 + 负向验证</span><span class="en">Reusing the production code path + negative verification</span></h3>
 <ul>
-  <li>把下载里"GET→判 html→解析病毒扫描 form→确认"的解析流程抽成 <code>_resolve_gdrive_response()</code>，下载与测试<b>共用</b> → live 测试走的是和真实下载<b>完全相同</b>的生产路径。</li>
-  <li>做过<b>负向验证</b>：故意喂错误的预期文件名 → 断言确实 fail，证明测试能真正抓到"ID 被改指/改名"，不是空测。</li>
-  <li>耗时：抽样 4 个约 <b>17s</b>；曾试过全量 30 个约 <b>96s</b>，为 CI 速度与稳定性最终选 4 个（全量可作 env-gate，见 §11）。</li>
+  <li><span class="zh">把下载里"GET→判 html→解析病毒扫描 form→确认"的解析流程抽成 <code>_resolve_gdrive_response()</code>，下载与测试<b>共用</b> → live 测试走的是和真实下载<b>完全相同</b>的生产路径。</span><span class="en">The "GET → detect html → parse the virus-scan form → confirm" resolution flow in the downloader is extracted into <code>_resolve_gdrive_response()</code>, <b>shared</b> by download and test → the live test exercises the <b>exact same</b> production path as a real download.</span></li>
+  <li><span class="zh">做过<b>负向验证</b>：故意喂错误的预期文件名 → 断言确实 fail，证明测试能真正抓到"ID 被改指/改名"，不是空测。</span><span class="en">A <b>negative verification</b> was done: deliberately feed a wrong expected filename → the assertion does fail, proving the test really catches "ID repointed/renamed" and is not a no-op test.</span></li>
+  <li><span class="zh">耗时：抽样 4 个约 <b>17s</b>；曾试过全量 30 个约 <b>96s</b>，为 CI 速度与稳定性最终选 4 个（全量可作 env-gate，见 §11）。</span><span class="en">Timing: the 4-sample run takes about <b>17s</b>; a full 30-resource run was tried at about <b>96s</b>, and for CI speed and stability the 4-sample was chosen (the full sweep can be env-gated, see §11).</span></li>
 </ul>
 
-<h2 id="s8"><span class="n">8</span>测试金字塔：mock vs live</h2>
-<p>两条正交的测试线，缺一不可：</p>
+<h2 id="s8"><span class="n">8</span><span class="zh">测试金字塔：mock vs live</span><span class="en">Test pyramid: mock vs live</span></h2>
+<p><span class="zh">两条正交的测试线，缺一不可：</span><span class="en">Two orthogonal test lines, both indispensable:</span></p>
 <table>
-  <tr><th></th><th>network-free 单元测试</th><th>live data 测试</th></tr>
-  <tr><td>测什么</td><td><b>本地代码正确性</b></td><td><b>远端数据可访问性</b></td></tr>
-  <tr><td>具体</td><td>目录装配、列名/类型、<b>文件名派生</b>、病毒扫描 form 解析、下载路由、json 输出、bad name/category 报错</td><td>ID 还在、解析得到二进制、文件名匹配</td></tr>
-  <tr><td>何时能跑</td><td>离线/CI 无网都能跑，确定性</td><td>依赖网络，Google 限流会 skip</td></tr>
+  <tr><th></th><th><span class="zh">network-free 单元测试</span><span class="en">Network-free unit tests</span></th><th><span class="zh">live data 测试</span><span class="en">Live-data tests</span></th></tr>
+  <tr><td><span class="zh">测什么</span><span class="en">What they test</span></td><td><span class="zh"><b>本地代码正确性</b></span><span class="en"><b>Local code correctness</b></span></td><td><span class="zh"><b>远端数据可访问性</b></span><span class="en"><b>Remote data accessibility</b></span></td></tr>
+  <tr><td><span class="zh">具体</span><span class="en">Specifics</span></td><td><span class="zh">目录装配、列名/类型、<b>文件名派生</b>、病毒扫描 form 解析、下载路由、json 输出、bad name/category 报错</span><span class="en">Catalog assembly, column names/types, <b>filename derivation</b>, virus-scan form parsing, download routing, json output, bad name/category error handling</span></td><td><span class="zh">ID 还在、解析得到二进制、文件名匹配</span><span class="en">ID still exists, resolves to binary, filename matches</span></td></tr>
+  <tr><td><span class="zh">何时能跑</span><span class="en">When they can run</span></td><td><span class="zh">离线/CI 无网都能跑，确定性</span><span class="en">Run offline / in networkless CI, deterministic</span></td><td><span class="zh">依赖网络，Google 限流会 skip</span><span class="en">Depend on the network; skipped when Google rate-limits</span></td></tr>
 </table>
-<p class="muted">注：期间还精简掉了 mock 里几条"循环自证"断言（如把 DataFrame 里的 <code>google_drive_id</code>/<code>license</code> 跟同一个 dict 的硬编码值对一遍——dict 写啥就是啥，测了个寂寞），保留了<b>派生 filename</b> 这类真有逻辑的断言。</p>
+<p class="muted"><span class="zh">注：期间还精简掉了 mock 里几条"循环自证"断言（如把 DataFrame 里的 <code>google_drive_id</code>/<code>license</code> 跟同一个 dict 的硬编码值对一遍——dict 写啥就是啥，测了个寂寞），保留了<b>派生 filename</b> 这类真有逻辑的断言。</span><span class="en">Note: several "circular self-proving" assertions in the mocks were also trimmed (e.g. comparing the DataFrame's <code>google_drive_id</code>/<code>license</code> against the hard-coded values in the same dict — whatever the dict says is what you get, a pointless test), while assertions with real logic like <b>derived filename</b> were kept.</span></p>
 
-<h2 id="s9"><span class="n">9</span>关键工程决策与权衡</h2>
-<h3>① 硬编码镜像 vs 运行时解析</h3>
-<p>v1 选<b>硬编码</b>（上游无 API/manifest，且上游自己也硬编码）。防腐烂手段：live 测试兜底 + 维护者 note。原型 <code>parse_pineapple_registry.py</code> 验证过"运行时解析上游 .rs 拿 ID 表"可行（在线跑通、30 项数量与 live 校验全对），作为将来可选升级——好处是上游一改自动跟上、不再腐烂，且不引入 Rust 二进制。</p>
-<h3>② <code>category</code> 用 Literal，不用 enum</h3>
-<p>gget 全库公共 API 无 enum、且是双接口（CLI 只认字符串）。最终给 <code>category</code> 加 <code>Literal["segmentation","benchmark","weights"]</code>（gget 本身惯用法）→ 拿到编辑器/类型检查的静态容错，又不破坏一致性、不影响 CLI。<code>name</code>（30 个、会变的镜像）保持带友好报错的自由字符串。</p>
-<h3>③ 为什么不"一键装 Rust CLI"</h3>
-<p>会破坏 gget 纯 Python/pip 的架构、抬高门槛（cargo 需编译）、跨平台二进制负担、且自相矛盾（PR 卖点就是"免装 Rust"）。数据本就在公开 Google Drive，gget 直接当 HTTP 客户端取即可。</p>
-<h3>④ 可复现性 —— agent 时代库的价值</h3>
-<p>讨论过"有 agent 后 gget 还有什么用"。结论：薄封装（如 pineapple）的边际价值确实被侵蚀；但<b>可复现性</b>（固定版本、确定输出、可引用/可写进论文方法）、<b>规模化/流水线</b>、<b>沉淀+测试过的领域知识</b>是 agent 短期替代不了的。最佳形态是 <b>agent 调用可信的库</b>——库不消失，重新定位为 agent 依赖的确定性原语。</p>
+<h2 id="s9"><span class="n">9</span><span class="zh">关键工程决策与权衡</span><span class="en">Key engineering decisions and trade-offs</span></h2>
+<h3><span class="zh">① 硬编码镜像 vs 运行时解析</span><span class="en">① Hard-coded mirror vs runtime parsing</span></h3>
+<p><span class="zh">v1 选<b>硬编码</b>（上游无 API/manifest，且上游自己也硬编码）。防腐烂手段：live 测试兜底 + 维护者 note。原型 <code>parse_pineapple_registry.py</code> 验证过"运行时解析上游 .rs 拿 ID 表"可行（在线跑通、30 项数量与 live 校验全对），作为将来可选升级——好处是上游一改自动跟上、不再腐烂，且不引入 Rust 二进制。</span><span class="en">v1 chose <b>hard-coding</b> (upstream has no API/manifest, and upstream itself hard-codes). Anti-rot measures: live test as a safety net + a maintainer note. The prototype <code>parse_pineapple_registry.py</code> verified that "parsing the upstream .rs at runtime to obtain the ID table" is feasible (ran online, the 30-item count and live checks all matched), as an optional future upgrade — the benefit being that it automatically follows upstream changes, no longer rots, and introduces no Rust binary.</span></p>
+<h3><span class="zh">② <code>category</code> 用 Literal，不用 enum</span><span class="en">② <code>category</code> uses Literal, not enum</span></h3>
+<p><span class="zh">gget 全库公共 API 无 enum、且是双接口（CLI 只认字符串）。最终给 <code>category</code> 加 <code>Literal["segmentation","benchmark","weights"]</code>（gget 本身惯用法）→ 拿到编辑器/类型检查的静态容错，又不破坏一致性、不影响 CLI。<code>name</code>（30 个、会变的镜像）保持带友好报错的自由字符串。</span><span class="en">Across gget's public API there is no enum, and it is a dual interface (the CLI only accepts strings). In the end <code>category</code> was given <code>Literal["segmentation","benchmark","weights"]</code> (gget's own idiom) → gaining editor/type-checker static safety without breaking consistency or affecting the CLI. <code>name</code> (30 items, a changing mirror) stays a free string with friendly error messages.</span></p>
+<h3><span class="zh">③ 为什么不"一键装 Rust CLI"</span><span class="en">③ Why not "one-click install the Rust CLI"</span></h3>
+<p><span class="zh">会破坏 gget 纯 Python/pip 的架构、抬高门槛（cargo 需编译）、跨平台二进制负担、且自相矛盾（PR 卖点就是"免装 Rust"）。数据本就在公开 Google Drive，gget 直接当 HTTP 客户端取即可。</span><span class="en">It would break gget's pure-Python/pip architecture, raise the barrier to entry (cargo requires compilation), impose cross-platform binary burdens, and be self-contradictory (the PR's selling point is "no Rust install needed"). The data is already on public Google Drive, so gget can just act as an HTTP client and fetch it.</span></p>
+<h3><span class="zh">④ 可复现性 —— agent 时代库的价值</span><span class="en">④ Reproducibility — the value of libraries in the agent era</span></h3>
+<p><span class="zh">讨论过"有 agent 后 gget 还有什么用"。结论：薄封装（如 pineapple）的边际价值确实被侵蚀；但<b>可复现性</b>（固定版本、确定输出、可引用/可写进论文方法）、<b>规模化/流水线</b>、<b>沉淀+测试过的领域知识</b>是 agent 短期替代不了的。最佳形态是 <b>agent 调用可信的库</b>——库不消失，重新定位为 agent 依赖的确定性原语。</span><span class="en">We discussed "what use is gget once agents exist." Conclusion: the marginal value of thin wrappers (like pineapple) is indeed eroded; but <b>reproducibility</b> (pinned versions, deterministic output, citable / writable into a paper's methods), <b>scaling/pipelines</b>, and <b>codified + tested domain knowledge</b> are things agents cannot replace in the short term. The best shape is <b>an agent calling a trusted library</b> — the library does not disappear but is repositioned as a deterministic primitive the agent relies on.</span></p>
 
-<h2 id="s10"><span class="n">10</span>PR 当前状态</h2>
-<p>分支已 rebase 到最新 <code>dev</code>，commit 栈（新→旧）：</p>
+<h2 id="s10"><span class="n">10</span><span class="zh">PR 当前状态</span><span class="en">Current PR status</span></h2>
+<p><span class="zh">分支已 rebase 到最新 <code>dev</code>，commit 栈（新→旧）：</span><span class="en">The branch is rebased onto the latest <code>dev</code>; the commit stack (newest → oldest):</span></p>
 <pre><code>ccc6383f docs: add Spanish (es) translation + register in SUMMARY
 d62a20b9 docs: credit upstream author Tom Ouellette in updates entry
 8363577e docs: cite upstream Pineapple before gget in References
@@ -212,35 +225,44 @@ a36a9a07 test: add live Google Drive accessibility tests; refactor resolve
 5d9db775 [pre-commit.ci] auto fixes
 cf4525d6 feat: add gget pineapple module (#161)</code></pre>
 <ul>
-  <li><b>代码</b>：<code>gget/gget_pineapple.py</code>（目录 + 下载 + <code>_resolve_gdrive_response</code>），<code>gget/main.py</code>（CLI），<code>gget/__init__.py</code>、<code>constants.py</code>。</li>
-  <li><b>测试</b>：<code>tests/test_pineapple.py</code>（mock 单元测试 + <code>TestPineappleLiveAccess</code> 抽样 live）。</li>
-  <li><b>文档</b>：<code>docs/src/en/pineapple.md</code> + <code>docs/src/es/pineapple.md</code>（AI 译，待西语母语者审）+ 两处 SUMMARY 登记 + updates.md 条目。References 上游 Pineapple 在前、gget 在后。</li>
-  <li><b>mypy</b>：修掉了让 pre-commit.ci 变红的 3 个 <code>_parse_gdrive_form</code> union-attr 错（<code>isinstance(Tag)</code> 收窄）；本地 mypy 已 clean。</li>
+  <li><span class="zh"><b>代码</b>：<code>gget/gget_pineapple.py</code>（目录 + 下载 + <code>_resolve_gdrive_response</code>），<code>gget/main.py</code>（CLI），<code>gget/__init__.py</code>、<code>constants.py</code>。</span><span class="en"><b>Code</b>: <code>gget/gget_pineapple.py</code> (catalog + download + <code>_resolve_gdrive_response</code>), <code>gget/main.py</code> (CLI), <code>gget/__init__.py</code>, <code>constants.py</code>.</span></li>
+  <li><span class="zh"><b>测试</b>：<code>tests/test_pineapple.py</code>（mock 单元测试 + <code>TestPineappleLiveAccess</code> 抽样 live）。</span><span class="en"><b>Tests</b>: <code>tests/test_pineapple.py</code> (mock unit tests + <code>TestPineappleLiveAccess</code> sampled live).</span></li>
+  <li><span class="zh"><b>文档</b>：<code>docs/src/en/pineapple.md</code> + <code>docs/src/es/pineapple.md</code>（AI 译，待西语母语者审）+ 两处 SUMMARY 登记 + updates.md 条目。References 上游 Pineapple 在前、gget 在后。</span><span class="en"><b>Docs</b>: <code>docs/src/en/pineapple.md</code> + <code>docs/src/es/pineapple.md</code> (AI-translated, pending review by a native Spanish speaker) + two SUMMARY registrations + an updates.md entry. In References, upstream Pineapple comes before gget.</span></li>
+  <li><span class="zh"><b>mypy</b>：修掉了让 pre-commit.ci 变红的 3 个 <code>_parse_gdrive_form</code> union-attr 错（<code>isinstance(Tag)</code> 收窄）；本地 mypy 已 clean。</span><span class="en"><b>mypy</b>: fixed the 3 <code>_parse_gdrive_form</code> union-attr errors that turned pre-commit.ci red (narrowed with <code>isinstance(Tag)</code>); local mypy is now clean.</span></li>
 </ul>
 
-<h2 id="s11"><span class="n">11</span>未决 / 后续可选项</h2>
+<h2 id="s11"><span class="n">11</span><span class="zh">未决 / 后续可选项</span><span class="en">Open items / optional follow-ups</span></h2>
 <ul>
-  <li><b>pre-commit.ci 转绿确认</b>：mypy 修复后，下一轮 CI 那个红叉应转绿，merge 前扫一眼 checks。</li>
-  <li><b>西语审校</b>：es 文档是 AI 译，建议母语者过一遍术语。</li>
-  <li><b>全量 30 live sweep（可选）</b>：如维护者希望覆盖全部 ID，可把全 30 扫描做成 env-gate（本地/nightly 触发），CI 默认仍跑抽样 4 个。</li>
-  <li><b>size 软校验（可选）</b>：live 已拿到真实 Content-Length，可加"声明 size_gb 与真实字节偏差超容差就 warning（不 fail）"，主动暴露 livecell 这类目录填错。</li>
-  <li><b>运行时解析（远期）</b>：若维护者担心硬编码腐烂，可切到 §9① 的原型方案。</li>
-  <li><b><code>--all</code>（可选）</b>：Rust CLI 有"下载某类全部"，gget 暂无对应；如需可加。</li>
+  <li><span class="zh"><b>pre-commit.ci 转绿确认</b>：mypy 修复后，下一轮 CI 那个红叉应转绿，merge 前扫一眼 checks。</span><span class="en"><b>Confirm pre-commit.ci turns green</b>: after the mypy fix, that red X should go green on the next CI run; glance at the checks before merging.</span></li>
+  <li><span class="zh"><b>西语审校</b>：es 文档是 AI 译，建议母语者过一遍术语。</span><span class="en"><b>Spanish review</b>: the es docs are AI-translated; a native speaker should review the terminology.</span></li>
+  <li><span class="zh"><b>全量 30 live sweep（可选）</b>：如维护者希望覆盖全部 ID，可把全 30 扫描做成 env-gate（本地/nightly 触发），CI 默认仍跑抽样 4 个。</span><span class="en"><b>Full 30 live sweep (optional)</b>: if the maintainer wants coverage of all IDs, the full-30 scan can be env-gated (local/nightly triggered), while CI still runs the 4-sample by default.</span></li>
+  <li><span class="zh"><b>size 软校验（可选）</b>：live 已拿到真实 Content-Length，可加"声明 size_gb 与真实字节偏差超容差就 warning（不 fail）"，主动暴露 livecell 这类目录填错。</span><span class="en"><b>Soft size check (optional)</b>: the live test already gets the real Content-Length, so one could add "warn (not fail) when the declared size_gb deviates from actual bytes beyond a tolerance," proactively exposing miss-filled catalog entries like livecell.</span></li>
+  <li><span class="zh"><b>运行时解析（远期）</b>：若维护者担心硬编码腐烂，可切到 §9① 的原型方案。</span><span class="en"><b>Runtime parsing (long-term)</b>: if the maintainer worries about hard-coding rot, switch to the prototype approach in §9①.</span></li>
+  <li><span class="zh"><b><code>--all</code>（可选）</b>：Rust CLI 有"下载某类全部"，gget 暂无对应；如需可加。</span><span class="en"><b><code>--all</code> (optional)</b>: the Rust CLI has "download all of a category," which gget currently lacks; it can be added if needed.</span></li>
 </ul>
 
-<h2 id="s12"><span class="n">12</span>参考链接</h2>
+<h2 id="s12"><span class="n">12</span><span class="zh">参考链接</span><span class="en">Reference links</span></h2>
 <ul>
-  <li>PR：<a href="https://github.com/scverse/gget/pull/245">scverse/gget#245</a></li>
-  <li>Issue：<a href="https://github.com/pachterlab/gget/issues/161">pachterlab/gget#161</a>（原始需求）</li>
-  <li>上游 Pineapple：<a href="https://github.com/tomouellette/pineapple">github.com/tomouellette/pineapple</a>（作者 Tom Ouellette，BSD-3）</li>
-  <li>gget 论文：Luebbert &amp; Pachter (2023), <a href="https://doi.org/10.1093/bioinformatics/btac836">Bioinformatics, doi:10.1093/bioinformatics/btac836</a></li>
-  <li>本地原型脚本：<code>/Users/elar/cc_output/gget/py/parse_pineapple_registry.py</code>（运行时解析上游 .rs 拿 ID 表）</li>
+  <li><span class="zh">PR：</span><span class="en">PR: </span><a href="https://github.com/scverse/gget/pull/245">scverse/gget#245</a></li>
+  <li><span class="zh">Issue：<a href="https://github.com/pachterlab/gget/issues/161">pachterlab/gget#161</a>（原始需求）</span><span class="en">Issue: <a href="https://github.com/pachterlab/gget/issues/161">pachterlab/gget#161</a> (original request)</span></li>
+  <li><span class="zh">上游 Pineapple：<a href="https://github.com/tomouellette/pineapple">github.com/tomouellette/pineapple</a>（作者 Tom Ouellette，BSD-3）</span><span class="en">Upstream Pineapple: <a href="https://github.com/tomouellette/pineapple">github.com/tomouellette/pineapple</a> (author Tom Ouellette, BSD-3)</span></li>
+  <li><span class="zh">gget 论文：Luebbert &amp; Pachter (2023), <a href="https://doi.org/10.1093/bioinformatics/btac836">Bioinformatics, doi:10.1093/bioinformatics/btac836</a></span><span class="en">gget paper: Luebbert &amp; Pachter (2023), <a href="https://doi.org/10.1093/bioinformatics/btac836">Bioinformatics, doi:10.1093/bioinformatics/btac836</a></span></li>
+  <li><span class="zh">本地原型脚本：<code>/Users/elar/cc_output/gget/py/parse_pineapple_registry.py</code>（运行时解析上游 .rs 拿 ID 表）</span><span class="en">Local prototype script: <code>/Users/elar/cc_output/gget/py/parse_pineapple_registry.py</code> (parses the upstream .rs at runtime to obtain the ID table)</span></li>
 </ul>
 
 <footer>
-  本文档由 Claude 于 2026-07-01 20:24 SGT 整理，内容基于对 PR #245、issue #161 与上游 Pineapple 仓库的核查。数据参数（如 size_gb）为上游镜像、可能不精确；license/author 未经真值校验，使用前请以各数据集原始页面为准。
+  <span class="zh">本文档由 Claude 于 2026-07-01 20:24 SGT 整理，内容基于对 PR #245、issue #161 与上游 Pineapple 仓库的核查。数据参数（如 size_gb）为上游镜像、可能不精确；license/author 未经真值校验，使用前请以各数据集原始页面为准。</span><span class="en">This document was compiled by Claude on 2026-07-01 20:24 SGT, based on a review of PR #245, issue #161, and the upstream Pineapple repository. Data parameters (such as size_gb) mirror upstream and may be imprecise; license/author are not verified against ground truth, so please defer to each dataset's original page before use.</span>
 </footer>
 
 </div>
+
+<script>
+  function setLang(l){
+    document.body.className = 'lang-' + l;
+    document.querySelectorAll('.langtoggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.l === l);
+    });
+  }
+</script>
 </body>
 </html>
