@@ -129,18 +129,61 @@
   <tr><td><code>C MitoPathways</code></td><td>154 × 4</td><td>通路层级</td><td class="ok"><code>pathways</code></td></tr>
 </table>
 
-<h3>A / B sheet 的 48 列（按主题分组）</h3>
-<p>A（线粒体子集）与 B（全基因）<b>列头完全一致</b>，只是行范围不同。48 列可归为：</p>
+<h3>A / B sheet 的 48 列逐列释义（按信息类别分组）</h3>
+<p>A（线粒体子集）与 B（全基因）<b>列头完全一致</b>，只是行范围不同。下面把 48 列按"讲什么"分成 8 类，<b>并逐列给出生物学含义</b>（释义综合自文件自带的 <code>Description</code> sheet）。<span class="muted">类别名是为便于阅读所加，非原字段。</span></p>
 <table>
-  <tr><th>主题</th><th>列（表头，节选自真实文件）</th></tr>
-  <tr><td>身份 / 映射</td><td><code>HumanGeneID · MouseOrthologGeneID · Symbol · Synonyms · Description · EnsemblGeneID_… · UniProt · ProteinLength</code></td></tr>
-  <tr><td>MitoCarta3.0 注释</td><td><code>MitoCarta3.0_List · _Evidence · _SubMitoLocalization · _MitoPathways</code></td></tr>
-  <tr><td>MitoCarta2.0（历史）</td><td><code>TrainingDataset · MitoCarta2.0_Score · _FDR · _List · _Evidence</code></td></tr>
-  <tr><td>Maestro 子分数</td><td><code>TargetP_Score · MitoDomain_Score · CoexpressionGnfN50_Score · PGC_Induction_Score · YeastMitoHomolog_Score · RickettsiaHomolog_Score · MSMS_Score</code></td></tr>
-  <tr><td>基因组坐标 (hg19)</td><td><code>hg19_Chromosome · hg19_Start · hg19_Stop</code></td></tr>
-  <tr><td>MS/MS 蛋白质组</td><td><code>MSMS_NUM_TISSUES · _NUM_PEPTIDES_UNIQUE · _NUM_SPECTRA · _TOTAL_INTENSITY · _PERCENT_COVERAGE · Tissues</code></td></tr>
-  <tr><td>14 组织表达 (log10)</td><td><code>cerebrum · cerebellum · brainstem · spinalcord · kidney · liver · heart · skeletalmuscle · adipose · smallintestine · largeintestine · stomach · placenta · testis</code>（各带 <code>_total_peak_intensity_log10</code>）</td></tr>
-  <tr><td>定位</td><td><code>HPA_Main_Location_2020 (Reliability)</code></td></tr>
+  <tr><th>列名（表头）</th><th>生物学含义（大白话）</th></tr>
+
+  <tr><td colspan="2" style="background:#20252f;color:var(--acc2);font-weight:600">▸ 身份 / 映射 <span style="color:var(--muted);font-weight:400">— 这个基因是谁</span></td></tr>
+  <tr><td><code>HumanGeneID</code></td><td>NCBI Entrez 基因 ID（人类；数据库主键之一）</td></tr>
+  <tr><td><code>MouseOrthologGeneID</code></td><td>对应的小鼠同源基因 ID</td></tr>
+  <tr><td><code>Symbol</code></td><td>官方基因简称（如 <code>NDUFS1</code>）</td></tr>
+  <tr><td><code>Synonyms</code></td><td>别名 / 曾用名</td></tr>
+  <tr><td><code>Description</code></td><td>基因的文字描述</td></tr>
+  <tr><td><code>EnsemblGeneID_…</code></td><td>Ensembl 体系的基因 ID（另一套主流 ID）</td></tr>
+  <tr><td><code>UniProt</code></td><td>UniProt 蛋白 ID</td></tr>
+  <tr><td><code>ProteinLength</code></td><td>最长蛋白亚型的氨基酸数</td></tr>
+
+  <tr><td colspan="2" style="background:#20252f;color:var(--acc2);font-weight:600">▸ MitoCarta3.0 注释 <span style="color:var(--muted);font-weight:400">— 3.0 版对它的判定</span></td></tr>
+  <tr><td><code>MitoCarta3.0_List</code></td><td>是否入选：<code>MitoCarta3.0</code>（是）/ <code>mito-interacting</code>（与线粒体有互作但不在膜内）/ <code>0</code>（否）</td></tr>
+  <tr><td><code>MitoCarta3.0_Evidence</code></td><td>判定所依据的实验证据类型。官方证据码：<code>literature</code>(文献) · <code>manual</code>(人工) · <code>APEX_matrix/IMS</code>(APEX 定位到基质/膜间隙) · <code>GFP</code>(GFP 显微定位) · <code>targetP signal</code>(N 端靶向信号) · <code>yeast/Rickettsial homolog</code>(酵母/立克次体同源) · <code>mito protein domain</code>(线粒体专属结构域) · <code>induction</code>(生物合成时被诱导) · <code>coexpression</code>(与线粒体基因共表达) · <code>MS/MS</code>(质谱高置信检出)。<code>+</code>=强(LogOdds&gt;5)，<code>++</code>=很强(&gt;7)</td></tr>
+  <tr><td><code>MitoCarta3.0_SubMitoLocalization</code></td><td>在线粒体内的具体位置：基质 / 内膜(MIM) / 膜间隙(IMS) / 外膜(MOM) / 膜 / 未知</td></tr>
+  <tr><td><code>MitoCarta3.0_MitoPathways</code></td><td>人工策展的所属通路（即前面讲的 <code>&gt;</code>/<code>|</code> 层级路径）</td></tr>
+
+  <tr><td colspan="2" style="background:#20252f;color:var(--acc2);font-weight:600">▸ MitoCarta2.0（历史） <span style="color:var(--muted);font-weight:400">— 上一版的旧判定 / 旧分</span></td></tr>
+  <tr><td><code>TrainingDataset</code></td><td>2.0 建模的训练集标签：<code>Tmito</code>（确定线粒体）/ <code>Tnot_mito</code>（确定不是）/ <code>T_possible_mito</code>（可能）</td></tr>
+  <tr><td><code>MitoCarta2.0_Score</code></td><td>2.0 的打分（下面 7 个证据的对数似然比之和，越高越像线粒体蛋白）</td></tr>
+  <tr><td><code>MitoCarta2.0_FDR</code></td><td>该分数对应的假发现率（越低越可信）</td></tr>
+  <tr><td><code>MitoCarta2.0_List</code></td><td>是否在 2.0 最终清单（1=是）</td></tr>
+  <tr><td><code>MitoCarta2.0_Evidence</code></td><td>2.0 判定的实验证据类型</td></tr>
+
+  <tr><td colspan="2" style="background:#20252f;color:var(--acc2);font-weight:600">▸ Maestro 子分数 <span style="color:var(--muted);font-weight:400">— 判"是不是线粒体蛋白"的 7 个独立证据</span></td></tr>
+  <tr><td><code>TargetP_Score</code></td><td>预测的"线粒体靶向信号"强度（1–5，1 最强；0=无预测）</td></tr>
+  <tr><td><code>MitoDomain_Score</code></td><td>蛋白结构域是否线粒体专属（专属 / 共享 / 非线粒体 / 未知）</td></tr>
+  <tr><td><code>CoexpressionGnfN50_Score</code></td><td>与已知线粒体基因"共表达"的紧密度（50 个最近邻里有几个是已知线粒体基因）</td></tr>
+  <tr><td><code>PGC_Induction_Score</code></td><td>激活线粒体新生开关(PGC1α)后，该基因转录上调的倍数</td></tr>
+  <tr><td><code>YeastMitoHomolog_Score</code></td><td>酵母里的同源基因是否被注释为线粒体（高 / 低置信 / 无）</td></tr>
+  <tr><td><code>RickettsiaHomolog_Score</code></td><td>是否与立克次体（线粒体的进化近亲细菌）同源</td></tr>
+  <tr><td><code>MSMS_Score</code></td><td>质谱丰度 + 在"纯化线粒体"里的富集类别</td></tr>
+
+  <tr><td colspan="2" style="background:#20252f;color:var(--acc2);font-weight:600">▸ 基因组坐标 (hg19) <span style="color:var(--muted);font-weight:400">— 它在基因组上的位置</span></td></tr>
+  <tr><td><code>hg19_Chromosome</code></td><td>所在染色体（人类 hg19 版本）</td></tr>
+  <tr><td><code>hg19_Start</code></td><td>起始坐标</td></tr>
+  <tr><td><code>hg19_Stop</code></td><td>终止坐标</td></tr>
+
+  <tr><td colspan="2" style="background:#20252f;color:var(--acc2);font-weight:600">▸ MS/MS 蛋白质组 <span style="color:var(--muted);font-weight:400">— 质谱实验测到它的情况（14 组织合并）</span></td></tr>
+  <tr><td><code>MSMS_NUM_TISSUES</code></td><td>14 种组织里有几种用质谱测到（0–14）</td></tr>
+  <tr><td><code>MSMS_NUM_PEPTIDES_UNIQUE</code></td><td>唯一肽段数</td></tr>
+  <tr><td><code>MSMS_NUM_SPECTRA</code></td><td>谱图数</td></tr>
+  <tr><td><code>MSMS_TOTAL_INTENSITY</code></td><td>总峰强度（丰度代理）</td></tr>
+  <tr><td><code>MSMS_PERCENT_COVERAGE</code></td><td>覆盖度（被质谱测到的氨基酸占比）</td></tr>
+  <tr><td><code>Tissues</code></td><td>有蛋白证据的组织清单</td></tr>
+
+  <tr><td colspan="2" style="background:#20252f;color:var(--acc2);font-weight:600">▸ 14 组织表达 (log10) <span style="color:var(--muted);font-weight:400">— 各组织的蛋白含量（含义相同，仅组织不同）</span></td></tr>
+  <tr><td><code>&lt;组织&gt;_total_peak_intensity_log10</code>（×14）</td><td>该组织里的总峰强度（log10）。14 组织：cerebrum 大脑 · cerebellum 小脑 · brainstem 脑干 · spinalcord 脊髓 · kidney 肾 · liver 肝 · heart 心 · skeletalmuscle 骨骼肌 · adipose 脂肪 · smallintestine 小肠 · largeintestine 大肠 · stomach 胃 · placenta 胎盘 · testis 睾丸</td></tr>
+
+  <tr><td colspan="2" style="background:#20252f;color:var(--acc2);font-weight:600">▸ 定位</td></tr>
+  <tr><td><code>HPA_Main_Location_2020 (Reliability)</code></td><td>人类蛋白图谱(HPA)用抗体显微镜给出的主要亚细胞定位 + 可靠度</td></tr>
 </table>
 
 <h3>C MitoPathways 的列 + 一个数据质量 quirk</h3>
@@ -166,6 +209,15 @@
 <p>两者用的是<b>同一棵 3 层通路树</b>（A/B 的 <code>&gt;</code> 路径 ≡ C 的 <code>MitoPathways Hierarchy</code>）。所以 <code>pathways</code> 表<b>不是冗余</b>——它补上了"通路→基因"这个反向查询方向。</p>
 
 <div class="note"><b>对接口设计的启示：</b>① A/B 共 48 列且列头一致 → 可共用一套列定义；② 暴露 <code>mitocarta / all_genes / pathways</code> 三表、跳过 <code>Description</code> 合理；③ 48 列里有大量 MS/MS 与逐组织表达细列，若嫌表太宽，可考虑默认返回核心子集、加参数开全集；④ <code>pathways</code> 与 <code>mitocarta/all_genes</code> 覆盖"通路→基因"与"基因→通路"两个查询方向，都值得留；C 的 <code>Genes</code> 是逗号分隔长串，接口可 <code>split</code> 成列表更好用。</div>
+
+<div class="note" style="border-left-color:var(--green)"><b>✅ 接口设计定调：只做 L2「干净 tidy 表」，不做 L3 矩阵。</b> 具体到 mitocarta，L2 = 每个 <code>(species, which)</code> 返回一张规范 DataFrame：
+<ul>
+  <li>读对 sheet、<b>修好 C 表的错位表头</b>（别让首列变成 <code>"2"</code>）；</li>
+  <li>类型规范：分数 → float、坐标 → int、列表字段 → list；</li>
+  <li><b>把分隔串拆成列表</b>：<code>MitoCarta3.0_MitoPathways</code>（<code>|</code> 分隔）、pathways 表的 <code>Genes</code>（逗号分隔），必要时 <code>Synonyms</code>/<code>Tissues</code>；</li>
+  <li>基因名以字符串读入（避免 Excel 式日期损坏在下游重现）；跳过 <code>Description</code> sheet。</li>
+</ul>
+L3（基因×组织 / 基因×通路 矩阵）<b>不在模块里做</b>——用户一行 <code>pivot</code>/<code>get_dummies</code> 即可，文档给个示例、等有 request 再加。理由：接口薄而稳、测试面小，符合 gget 调性。</div>
 
 <!-- ===== 5 如何使用 ===== -->
 <h2 id="s5"><span class="n">5</span>如何使用</h2>
