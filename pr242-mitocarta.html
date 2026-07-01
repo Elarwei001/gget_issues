@@ -147,7 +147,25 @@
 <p>有用列：<code>MitoPathway</code>、<code>MitoPathways Hierarchy</code>、<code>Genes</code>（149 条通路）。</p>
 <div class="warn">⚠️ <b>quirk</b>：pandas 直接读这张 sheet 时首列名被解析成 <code>"2"</code>（疑似标题/说明行导致表头错位）。做 <code>pathways</code> 表时要<b>显式处理表头行</b>，别照搬默认 header。</div>
 
-<div class="note"><b>对接口设计的启示：</b>① A/B 共 48 列且列头一致 → 可共用一套列定义；② 暴露 <code>mitocarta / all_genes / pathways</code> 三表、跳过 <code>Description</code> 合理；③ 48 列里有大量 MS/MS 与逐组织表达细列，若嫌表太宽，可考虑默认返回核心子集、加参数开全集。</div>
+<h3>什么是「通路」？A/B 与 C 又是什么关系</h3>
+<div class="primer">
+  <strong>📖 通路（pathway）= 细胞里的一条"流水线"</strong>：一组蛋白/基因分工协作完成某个任务。例如 <b>OXPHOS（氧化磷酸化）</b>是线粒体"发电厂"的发电机组，由 <code>Complex I~V</code> 几台大机器组成，每台机器又由许多"零件（subunit 亚基）"拼成——每个零件就是一个基因。
+</div>
+<p><b>A/B 里的通路记法怎么读</b>（<code>MitoCarta3.0_MitoPathways</code> 列），以 NDUFS1 为例：</p>
+<pre><code>NDUFS1 → OXPHOS &gt; Complex I &gt; CI subunits | Metabolism &gt; Metals and cofactors &gt; Fe-S-containing proteins | OXPHOS &gt; OXPHOS subunits</code></pre>
+<ul>
+  <li><code>&gt;</code> = "隶属"，像文件夹路径从大类到具体：<code>OXPHOS &gt; Complex I &gt; CI subunits</code> = 发电机 OXPHOS ▸ Complex I 这台机器 ▸ 它的一个零件。</li>
+  <li><code>|</code> = "还兼任"，分隔一个基因的多个角色。上面 NDUFS1 <b>身兼三职</b>（Complex I 零件 / 含铁硫簇的蛋白 / OXPHOS 亚基）。CYC1 则是 <code>Complex III</code> 的零件、兼管 Heme（血红素）代谢。</li>
+</ul>
+<p><b>A/B 与 C 是同一份「基因↔通路」映射的两个转置视图</b>（信息等价、可互相重建），只是查询方向相反：</p>
+<table>
+  <tr><th>表</th><th>视角</th><th>回答的问题</th></tr>
+  <tr><td>A/B 的 <code>MitoCarta3.0_MitoPathways</code> 列</td><td>基因 → 它的通路</td><td>"基因 X 在哪些通路里？"</td></tr>
+  <tr><td>C 的 <code>Genes</code> 列</td><td>通路 → 它的基因</td><td>"通路 Y 含哪些基因？"</td></tr>
+</table>
+<p>两者用的是<b>同一棵 3 层通路树</b>（A/B 的 <code>&gt;</code> 路径 ≡ C 的 <code>MitoPathways Hierarchy</code>）。所以 <code>pathways</code> 表<b>不是冗余</b>——它补上了"通路→基因"这个反向查询方向。</p>
+
+<div class="note"><b>对接口设计的启示：</b>① A/B 共 48 列且列头一致 → 可共用一套列定义；② 暴露 <code>mitocarta / all_genes / pathways</code> 三表、跳过 <code>Description</code> 合理；③ 48 列里有大量 MS/MS 与逐组织表达细列，若嫌表太宽，可考虑默认返回核心子集、加参数开全集；④ <code>pathways</code> 与 <code>mitocarta/all_genes</code> 覆盖"通路→基因"与"基因→通路"两个查询方向，都值得留；C 的 <code>Genes</code> 是逗号分隔长串，接口可 <code>split</code> 成列表更好用。</div>
 
 <!-- ===== 5 如何使用 ===== -->
 <h2 id="s5"><span class="n">5</span>如何使用</h2>
