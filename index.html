@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>gget issue / PR 分析留档</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--panel2:#1d212b;--ink:#e6e9ef;--muted:#9aa4b2;--acc:#f5a623;--acc2:#5aa9e6;--green:#4cc38a;--line:#2a2f3a;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:860px;margin:0 auto;padding:40px 24px 80px}
+  h1{font-size:28px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:15px;margin-bottom:6px}
+  .lead{color:var(--muted);font-size:14px;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:24px}
+  a{color:var(--acc2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .card{display:block;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:16px 20px;margin:14px 0;color:var(--ink)}
+  .card:hover{border-left-color:var(--acc2);background:var(--panel2);text-decoration:none}
+  .card .t{font-size:18px;font-weight:600;color:#fff}
+  .card .pr{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13px;color:var(--green);margin-left:8px}
+  .card .d{color:var(--muted);font-size:14px;margin-top:6px}
+  code{background:#0b0d11;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13px;color:#ffd9a0}
+  footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🧬 gget issue / PR 分析留档</h1>
+  <div class="sub">Analysis reports for <a href="https://github.com/scverse/gget">scverse/gget</a> issues &amp; PRs</div>
+  <div class="lead">
+    每份报告用 <a href="https://github.com/Elarwei001/personal-skills/tree/master/gget-issue-analysis"><code>gget-issue-analysis</code></a> skill 生成：自包含 HTML、开头有面向非生物背景读者的背景科普，随后覆盖「解决什么问题 / 价值 / 数据结构详解 / 如何解决 / 是否契合 gget 平台角色（四 lens 评估）/ live data test 设计 / 当前状态」。较新报告默认双语（中/EN，右上角切换）。
+  </div>
+
+  <a class="card" href="./pr245-pineapple.html">
+    <div class="t">gget pineapple<span class="pr">PR #245</span></div>
+    <div class="d">接入 Pineapple 策展的生物影像数据集与预训练权重（仅下载，不做图像处理）。</div>
+  </a>
+
+  <a class="card" href="./pr242-mitocarta.html">
+    <div class="t">gget mitocarta<span class="pr">PR #242</span></div>
+    <div class="d">取 Broad MitoCarta3.0 的两个 <code>.xls</code> 线粒体蛋白/通路数据库（含各 sheet 表头的数据结构详解）。</div>
+  </a>
+
+  <footer>
+    源码 &amp; 归档：<a href="https://github.com/Elarwei001/gget_issues">github.com/Elarwei001/gget_issues</a> · 新报告命名 <code>pr&lt;N&gt;-&lt;模块&gt;.html</code> 并在此登记。
+  </footer>
+</div>
+</body>
+</html>
