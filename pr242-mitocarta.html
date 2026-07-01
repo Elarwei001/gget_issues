@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>gget mitocarta (PR #242) — 概览</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --ink:#e6e9ef; --muted:#9aa4b2;
+    --acc:#f5a623; --acc2:#5aa9e6; --green:#4cc38a; --red:#e5648a; --line:#2a2f3a; --code:#0b0d11;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 24px 80px}
+  header.top{position:relative;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:28px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:15px}
+  .stamp{position:absolute;top:0;right:0;font-size:12px;color:var(--muted);text-align:right}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--muted);margin:2px 4px 2px 0}
+  h2{font-size:21px;margin:38px 0 12px;padding-top:8px;border-top:1px solid var(--line);color:#fff}
+  h2 .n{color:var(--acc);font-variant-numeric:tabular-nums;margin-right:8px}
+  h3{font-size:17px;margin:22px 0 8px;color:var(--acc2)}
+  p{margin:10px 0}
+  a{color:var(--acc2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;color:#ffd9a0}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:13px;line-height:1.55}
+  pre code{background:none;border:none;padding:0;color:#d6deeb}
+  .tldr{background:linear-gradient(135deg,#1b2330,#171a21);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:16px 18px;margin:16px 0}
+  .primer{background:#132018;border:1px solid #26402f;border-left:4px solid var(--green);border-radius:10px;padding:14px 18px;margin:16px 0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#fff}
+  tr:nth-child(even) td{background:var(--panel)}
+  .ok{color:var(--green);font-weight:600}
+  .no{color:var(--red);font-weight:600}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc2);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .warn{background:#251c1c;border:1px solid #4a2b2b;border-left:4px solid var(--red);border-radius:8px;padding:12px 16px;margin:14px 0}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:5px 0}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:18px 0;columns:2;font-size:14px}
+  .toc a{display:block;padding:2px 0;color:var(--ink)}
+  .toc a:hover{color:var(--acc2)}
+  .muted{color:var(--muted)}
+  footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ===== 页头 ===== -->
+<header class="top">
+  <div class="stamp">Generated: 2026-07-01 20:39 SGT<br>by Claude (subagent)</div>
+  <h1>🫀 gget mitocarta — 抓取 MitoCarta3.0 线粒体蛋白/通路清单</h1>
+  <div class="sub">PR #242 分析：一个从 Broad Institute 取 MitoCarta3.0 的两个 <code>.xls</code> 数据库并 gget 化为 DataFrame 的新模块</div>
+  <div style="margin-top:10px">
+    <span class="pill">PR: scverse/gget#242 (OPEN)</span>
+    <span class="pill">Issue: #118</span>
+    <span class="pill">base: dev</span>
+    <span class="pill">上游: Broad Institute · MitoCarta3.0</span>
+    <span class="pill">scope: 数据访问 / 取 blob</span>
+    <span class="pill">+365 / −2</span>
+  </div>
+</header>
+
+<div class="primer">
+  <strong>📖 背景科普 · MitoCarta3.0（线粒体蛋白清单）</strong><br>
+  线粒体是细胞的"发电站"，负责能量代谢；线粒体功能异常与线粒体病、神经退行、代谢病等密切相关。但"到底哪些蛋白质真正定位在线粒体里"长期没有一份权威完整的清单。<b>MitoCarta3.0</b> 就是 Broad Institute（Mootha 实验室）用多种实验证据<b>人工策展</b>出的这份清单——约 <b>1136 个人类线粒体蛋白</b>（另有小鼠版），并标注它们在线粒体内的<b>亚定位</b>和所属<b>通路（MitoPathways）</b>。它是线粒体研究领域的<b>标准参考数据集</b>，本身不含算法，就是一张"权威名录"。
+  <div class="muted" style="margin-top:6px">🔗 <a href="https://www.broadinstitute.org/mitocarta">broadinstitute.org/mitocarta</a> · 论文 Rath et al., <i>Nucleic Acids Research</i> 2021</div>
+</div>
+
+<!-- ===== 目录 ===== -->
+<div class="toc">
+  <a href="#s1">1 · TL;DR</a>
+  <a href="#s2">2 · 背景 / 问题（issue #118）</a>
+  <a href="#s3">3 · 上游 / 数据源（MitoCarta3.0）</a>
+  <a href="#s4">4 · 如何使用</a>
+  <a href="#s5">5 · Scope / 边界</a>
+  <a href="#s6">6 · 设计决策与权衡</a>
+  <a href="#s7">7 · 平台契合度评估（四 lens）</a>
+  <a href="#s8">8 · 测试：mock vs live</a>
+  <a href="#s9">9 · 当前状态</a>
+  <a href="#s10">10 · 未决 / 后续</a>
+  <a href="#s11">11 · 参考链接</a>
+</div>
+
+<!-- ===== TL;DR ===== -->
+<div class="tldr" id="s1">
+  <strong>TL;DR：</strong>PR #242 新增 <code>gget mitocarta</code> 模块，把 Broad Institute 的 <b>MitoCarta3.0</b>（哺乳动物线粒体蛋白与通路的<b>人工策展清单</b>）从上游托管的<b>两个 <code>.xls</code> Excel 数据库</b>（人/鼠；这只是官网整批发布文件中的一个子集，另有 <code>.gmx/.bed/.fasta</code>/图像等）下载下来，解析成 <b>pandas DataFrame / JSON</b>，支持 human/mouse 与每个 <code>.xls</code> 内的三张表（<code>mitocarta</code> 清单 / <code>all_genes</code> 全基因 Maestro 评分 / <code>pathways</code> 通路层级）。这是<b>纯数据访问</b>（取一张已发布的表并 gget 化），<b>没有</b>越界重算线粒体定位——平台契合度良好，落在 gget 的「取 blob」薄封装一端（类 <code>ref</code>/<code>pineapple</code>）。主要风险是<b>可维护性</b>：URL 硬编码到 <code>personal.broadinstitute.org/scalvo/</code> 一个<b>个人目录</b>（无 API/无 DOI，易腐烂），且现有测试直接打真实 URL 却<b>硬断言精确行数 1136、无限流/网络异常 → skip</b>，一旦上游抖动就会误红。<b>结论：方案科学、契合、可复现（版本固定），但需要一个按 live-data 规范重写的兜底测试 + 把 <code>xlrd</code> 依赖考虑成可选 extra。</b>
+</div>
+
+<!-- ===== 2 背景 ===== -->
+<h2 id="s2"><span class="n">2</span>背景 / 问题（issue #118）</h2>
+<p>Issue <a href="https://github.com/scverse/gget/issues/118">#118</a> 由 gget 核心作者 <b>Laura Luebbert（lauraluebbert）</b>提出，类型 “New module”，正文极简，只给了一个链接：MitoCarta3.0 的 Broad 官网页。</p>
+<div class="note">
+  <b>字面要求：</b>“Module to download MitoCarta3 database”。<br>
+  <b>底层需求：</b>让 gget 用户能用<b>一致的一行接口</b>、可复现地拿到 MitoCarta3.0 这张<b>已发表的线粒体基因清单</b>（含亚线粒体定位、MitoPathways、证据与评分），省去手动去官网翻 <code>.xls</code>、认 sheet、手工转表的麻烦。<b>不含</b>任何“重新预测线粒体定位”或重算 Maestro 分数的诉求——那是上游论文的核心计算，不属于 gget。
+</div>
+
+<!-- ===== 3 上游 ===== -->
+<h2 id="s3"><span class="n">3</span>上游 / 数据源（MitoCarta3.0）</h2>
+<p>MitoCarta3.0（Rath et al., <i>NAR</i> 2021）是 Broad Institute Mootha 实验室维护的<b>人工策展</b>线粒体蛋白质组清单。关键：它<b>没有可编程 API</b>，而是以<b>一整批不同格式的静态文件</b>发布在一个个人 web 目录下（见下），<b>不是单个文件</b>。</p>
+<div class="note">
+  <b>官网发布的文件清单</b>（<a href="https://www.broadinstitute.org/mitocarta/mitocarta30-inventory-mammalian-mitochondrial-proteins-and-pathways">Broad 下载页</a>）：
+  <code>Human.MitoCarta3.0.xls</code>、<code>Mouse.MitoCarta3.0.xls</code>（两个 Excel 数据库，含 1136/1140 线粒体基因 + 亚定位 + 通路 + ~20,000 基因的整合评分）、<code>MitoPathways3.0.gmx</code>（149 通路，供 GSEA）、Human/Mouse <code>.bed</code>（UCSC 轨道）、Human/Mouse <code>.fasta</code>（RefSeq 蛋白序列）、GFP 定位图像、<code>Mouse.MSMS.peptides.xlsx</code> 等。<br>
+  <b>本 PR 只 wrap 其中两个 <code>.xls</code></b>（人/鼠 Excel 数据库），<span class="no">不含</span> <code>.gmx / .bed / .fasta /</code> 图像等。这个子集选择是合理的：<code>.xls</code> 是**规范清单本体**，而序列（gget 已有 <code>seq</code>）、<code>.bed/.gmx</code> 属特定工具窄用途。<span class="muted">（可作为一条"未来可选扩展"记入 §未决。）</span>
+</div>
+<p>下面对 PR 实际下载的 <code>Human.MitoCarta3.0.xls</code> 做了一次 HEAD 核查（2026-07-01 20:39 SGT）：</p>
+<table>
+  <tr><th>属性</th><th>实测值（Human.MitoCarta3.0.xls）</th><th>含义</th></tr>
+  <tr><td>HTTP 状态</td><td><span class="ok">200</span></td><td>可访问</td></tr>
+  <tr><td>Content-Type</td><td><code>application/vnd.ms-excel</code></td><td>旧式 <code>.xls</code> → 需 <code>xlrd&gt;=2</code></td></tr>
+  <tr><td>Content-Length</td><td>10,179,584 B（≈9.7 MiB）</td><td>体量小，CI 全量下载可接受（非 GB 级）</td></tr>
+  <tr><td>Last-Modified</td><td>Tue, 21 Mar 2023</td><td>版本固定（3.0 快照）→ 输出确定、可写方法/引用</td></tr>
+  <tr><td>Accept-Ranges</td><td><code>bytes</code></td><td>支持 Range，可只读局部/HEAD 做轻量探活</td></tr>
+  <tr><td>Host</td><td><code>personal.broadinstitute.org/scalvo/…</code></td><td class="no">个人目录、无 DOI/无 API → 腐烂风险高</td></tr>
+</table>
+<p>每个 <code>.xls</code> 工作簿内含三张 sheet，命名以定位字母开头（物种词在人/鼠间不同）：<code>A &lt;Species&gt; MitoCarta3.0</code>（线粒体基因清单）、<code>B &lt;Species&gt; All Genes</code>（全基因 Maestro 评分）、<code>C MitoPathways</code>（通路层级）——PR 把这三张 sheet 暴露成 <code>mitocarta / all_genes / pathways</code> 三种表。这就是 gget 的<b>“取 blob”</b>类场景：按名取固定文件、再 gget 化。</p>
+
+<!-- ===== 4 如何使用 ===== -->
+<h2 id="s4"><span class="n">4</span>如何使用</h2>
+<p>输入：<code>species</code>（human/mouse）+ <code>which</code>（选哪张表）。返回：CLI 默认 JSON（<code>-csv</code> 转 CSV）；Python 默认 DataFrame（<code>json=True</code> 转 list[dict]）。副作用：<code>save</code>/<code>--out</code> 落盘。</p>
+<pre><code># CLI：抓取人类线粒体基因清单（CSV）
+gget mitocarta --species human --csv
+
+# CLI：抓取 MitoPathways 通路层级
+gget mitocarta --which pathways --csv</code></pre>
+<pre><code># Python
+import gget
+df = gget.mitocarta(species="human", which="mitocarta")   # ~1136 行 DataFrame
+paths = gget.mitocarta(which="pathways")                    # 通路层级表
+recs = gget.mitocarta(which="all_genes", json=True)         # list[dict]</code></pre>
+<table>
+  <tr><th>参数</th><th>取值</th><th>说明</th></tr>
+  <tr><td><code>species</code></td><td>human（默认）/ mouse<br><span class="muted">另接受 homo_sapiens / mus_musculus</span></td><td>选人或鼠工作簿</td></tr>
+  <tr><td><code>which</code></td><td>mitocarta（默认）/ all_genes / pathways</td><td>映射到 sheet 前缀 A / B / C</td></tr>
+  <tr><td><code>json</code></td><td>False（默认）</td><td>True → list[dict] 而非 DataFrame</td></tr>
+  <tr><td><code>save</code> / <code>--out</code></td><td>False / 路径</td><td>落盘 CSV 或 JSON</td></tr>
+  <tr><td><code>verbose</code> / <code>-q</code></td><td>True（默认）</td><td>进度日志开关</td></tr>
+</table>
+
+<!-- ===== 5 Scope ===== -->
+<h2 id="s5"><span class="n">5</span>Scope / 边界</h2>
+<table>
+  <tr><th>做什么 <span class="ok">✅</span></th><th>刻意不做什么 <span class="no">✋</span></th></tr>
+  <tr>
+    <td>
+      <span class="ok">下载</span>上游发布的 MitoCarta3.0 <code>.xls</code><br>
+      <span class="ok">解析</span>指定 sheet 为结构化表<br>
+      <span class="ok">gget 化</span>返回 DataFrame / JSON<br>
+      <span class="ok">统一</span>双接口（Python + CLI）+ 落盘
+    </td>
+    <td>
+      <span class="no">不</span>重新预测线粒体定位 / 重算 Maestro 评分<br>
+      <span class="no">不</span>对基因做任何富集/建模/分析<br>
+      <span class="no">不</span>合并/改写上游列语义（原样透出）<br>
+      <span class="no">不</span>缓存或镜像整份数据到 gget 侧
+    </td>
+  </tr>
+</table>
+<div class="note">判定话术：<b>gget mitocarta 只封装 MitoCarta 的「数据分发层」（取文件 + 选表 + 结构化），刻意不复制上游的定位预测/评分计算——那是 MitoCarta 论文本体的核心，超出 gget（数据<i>访问</i>而非<i>分析</i>）的范围。</b>要重算定位分数的用户应直接用上游方法。→ 契合度判定：<span class="ok">通过</span>。</div>
+
+<!-- ===== 6 设计决策 ===== -->
+<h2 id="s6"><span class="n">6</span>设计决策与权衡</h2>
+<h3>① 按 sheet 名首字母（A/B/C）解析，而非硬编码全名</h3>
+<p>选了用 <code>name.startswith("A "/"B "/"C ")</code> 定位 sheet，理由是人/鼠工作簿里物种词不同（<code>A Human MitoCarta3.0</code> vs <code>A Mouse MitoCarta3.0</code>）；放弃了硬编码整串 sheet 名。<span class="ok">优点</span>：一套代码兼容两物种。<span class="no">代价</span>：若上游改动首字母命名约定即失效——但有清晰报错（列出可用 sheet），可接受。</p>
+<h3>② 内存内下载 + <code>io.BytesIO</code> 解析，不落临时文件</h3>
+<p>≈9.7 MiB 全量拉进内存再交给 <code>pd.ExcelFile(..., engine="xlrd")</code>。文件小，<span class="ok">干净</span>；<span class="no">代价</span>：每次调用都<b>重新下载</b>（无缓存），重复调用略浪费。</p>
+<h3>③ 引入 <code>xlrd&gt;=2</code> 运行时依赖</h3>
+<p>上游是旧式 <code>.xls</code>，只有 <code>xlrd&gt;=2</code>（纯 Python、无二进制/编译）能读。<span class="ok">符合</span> gget「纯 Python、pip 可装」的架构底线（不像 Rust/编译工具那样违背架构）。<span class="no">权衡</span>：为单个模块给 <b>core</b> 加了一个运行时依赖；PR 作者已在描述里主动提议「可改成 optional extra」——建议采纳，与 <code>gget[cellxgene]</code> 的处理一致。</p>
+<h3>④ URL 硬编码到个人目录</h3>
+<p>直连 <code>personal.broadinstitute.org/scalvo/MitoCarta3.0/*.xls</code>。<span class="ok">优点</span>：版本固定 → 输出确定、可复现、可引用。<span class="no">最大风险</span>：个人 web 目录无 SLA/无 DOI/无 API，一旦作者迁移或清理即 404 → 这是<b>时间点快照式镜像</b>，必须靠 live test 兜底发现腐烂。</p>
+
+<!-- ===== 7 评估 ===== -->
+<h2 id="s7"><span class="n">7</span>平台契合度评估（四 lens）</h2>
+<table>
+  <tr><th>Lens</th><th>评分</th><th>依据</th></tr>
+  <tr>
+    <td><b>① Soundness</b><br>正确 / 健壮</td>
+    <td><span class="ok">良好</span></td>
+    <td>输入校验（species/which 均 <code>ValueError</code>）、状态码非 200 → <code>RuntimeError</code>、缺 <code>xlrd</code> → 友好报错、sheet 找不到时列出可选项。<code>json</code> 参数用 <code>json as json_package</code> 别名避免遮蔽 stdlib。小瑕疵：无缓存、无重试/超时以外的网络弹性。</td>
+  </tr>
+  <tr>
+    <td><b>② 平台契合度</b><br>访问 vs 分析</td>
+    <td><span class="ok">通过（核心结论）</span></td>
+    <td>纯<b>数据访问</b>：取一张已发布的表 → 结构化透出，<b>无</b>越界重算。返回值已 gget 化（DataFrame/JSON）、双接口齐备、无违背架构的二进制依赖。落在「取 blob」薄封装一端，类 <code>ref</code>/<code>pineapple</code>，合理。</td>
+  </tr>
+  <tr>
+    <td><b>③ 可复现性</b></td>
+    <td><span class="ok">良好</span></td>
+    <td>URL 指向<b>固定版本</b>（3.0，Last-Modified 2023-03）→ 确定输出，可写进论文方法、可被审稿人重跑、可引用（cite.md 已补 MitoCarta 引文）。这是「库」相对「临时 agent 调用」不可替代之处。</td>
+  </tr>
+  <tr>
+    <td><b>④ 维护成本</b></td>
+    <td><span class="no">需关注</span></td>
+    <td>会腐烂：硬编码个人目录 + 依赖 sheet 命名约定 + 硬断言精确行数。腐烂如何被发现？——<b>目前不足</b>：现有测试直接打真实 URL 但无「限流/网络错 → skip」，上游一抖动就误红；也无 nightly/env-gate 分层。→ 见第 8 节。</td>
+  </tr>
+</table>
+
+<!-- ===== 8 测试 ===== -->
+<h2 id="s8"><span class="n">8</span>测试：mock vs live</h2>
+<p>PR 现有 <code>tests/test_mitocarta.py</code> + fixture <code>tests/fixtures/test_mitocarta.json</code>，共 4 个用例。关键观察：其中两个「属性测试」<b>实际会真实下载</b>上游 <code>.xls</code>，因此它们<b>本质上是 live 测试</b>，但<b>没有按 live-data 规范设计</b>。</p>
+<table>
+  <tr><th>层</th><th>测什么</th><th>现状</th></tr>
+  <tr>
+    <td>network-free 单元测试</td>
+    <td>本地代码正确性（参数校验、报错）</td>
+    <td><span class="ok">有</span>：<code>bad_species</code>/<code>bad_which</code> 在下载前就 <code>ValueError</code>，离线可跑、确定性。</td>
+  </tr>
+  <tr>
+    <td>live data 测试<br>（远端可访问性）</td>
+    <td>MitoCarta 源还在、还对</td>
+    <td><span class="no">名为单元测试、实为 live</span>：<code>test_mitocarta_human</code> 真下载并断言 <code>len==1136</code>（精确）+ 列存在 + 含 <code>MT-CO1</code>；<code>pathways</code> 断言 <code>MitoPathway</code> 列 + <code>&gt;=100</code> 行。</td>
+  </tr>
+</table>
+<div class="warn">
+  <b>按 skill 的 live-data 规范，现有测试需要三处加固：</b>
+  <ol>
+    <li><b>限流/网络错 → skip 而非红</b>：现在上游 404/超时/返回 HTML 会让 CI 硬红（误报）。应捕获 <code>requests.RequestException</code> 与「返回非 Excel」时 <code>self.skipTest(...)</code>。</li>
+    <li><b>精确行数 1136 太脆</b>：应放宽为下限（如 <code>&gt;= 1000</code>），把「身份锚」留给<b>能对真值校验</b>的断言——<code>MT-CO1 ∈ Symbol</code>、期望列存在、Content-Type 是 Excel 而非 HTML。这些锚已部分具备，方向对。</li>
+    <li><b>轻量化 + 分层</b>：源支持 <code>Accept-Ranges: bytes</code>，可先用 HEAD 探 <code>Content-Type</code>/<code>Content-Length</code> 做廉价探活；全量解析放 env-gate/nightly，并明确 log「只测了 human 一物种」。</li>
+  </ol>
+  发布前应做一次<b>负向验证</b>（临时喂错文件名/错行数确认断言真的 fail），证明测试不是空测。
+</div>
+<p class="muted">注：≈9.7 MiB 的全量下载在 CI 里尚可接受（非 GB 级），所以「只读 header」在这里是优化项而非硬性要求；但「限流→skip + 松绑精确值」是必须的，否则维护成本 lens 不达标。</p>
+
+<!-- ===== 9 当前状态 ===== -->
+<h2 id="s9"><span class="n">9</span>当前状态</h2>
+<pre><code>PR scverse/gget#242  —  state: OPEN   base: dev   head: feature/mitocarta-118
+author: Elarwei001        +365 / −2 (12 files)
+CI: Codecov 补丁覆盖率 72.34%（gget_mitocarta.py 13 行未覆盖，主要是 save/落盘分支）
+
+新增 / 改动文件：
+  gget/gget_mitocarta.py        (+120)  核心模块
+  gget/main.py                  (+84)   CLI subparser + return 分支
+  gget/constants.py             (+6)    MITOCARTA_URLS（human/mouse）
+  gget/__init__.py              (+1)    导出 mitocarta
+  pyproject.toml                (+1)    xlrd>=2 依赖
+  tests/test_mitocarta.py       (+31)   4 用例（2 live / 2 error）
+  tests/fixtures/test_mitocarta.json (+41)
+  docs/… (SUMMARY / introduction / mitocarta.md / cite.md / updates.md)</code></pre>
+
+<!-- ===== 10 未决 ===== -->
+<h2 id="s10"><span class="n">10</span>未决 / 后续可选项</h2>
+<ul>
+  <li><b>[高] live test 加固</b>：限流/网络错 → skip；精确行数 1136 → 松绑为下限；保留 <code>MT-CO1</code>/列/Content-Type 身份锚；补一次负向验证。</li>
+  <li><b>[中] <code>xlrd</code> 依赖</b>：按作者自述改为 optional extra（<code>gget[mitocarta]</code>），避免为单模块给 core 加运行时依赖。</li>
+  <li><b>[中] 托管脆弱性</b>：<code>personal.broadinstitute.org/scalvo/</code> 无 SLA。可在 docstring/维护者 note 里标明「若 404，去官网核对新链接」；理想是将来能运行时解析官网页拿最新链接。</li>
+  <li><b>[低] 缓存</b>：可选加本地缓存，避免重复调用重复下载 ≈9.7 MiB。</li>
+  <li><b>[低] 覆盖率</b>：save/JSON 落盘分支未被测试覆盖（13 行）。</li>
+</ul>
+
+<!-- ===== 11 参考 ===== -->
+<h2 id="s11"><span class="n">11</span>参考链接</h2>
+<ul>
+  <li>PR：<a href="https://github.com/scverse/gget/pull/242">scverse/gget#242</a></li>
+  <li>Issue：<a href="https://github.com/scverse/gget/issues/118">#118（lauraluebbert）</a></li>
+  <li>上游：<a href="https://www.broadinstitute.org/mitocarta/">MitoCarta3.0 (Broad Institute)</a></li>
+  <li>数据文件：<code>https://personal.broadinstitute.org/scalvo/MitoCarta3.0/Human.MitoCarta3.0.xls</code></li>
+  <li>论文：Rath et al., MitoCarta3.0, <i>Nucleic Acids Res.</i> 2021; 49(D1):D1541–D1547. <a href="https://doi.org/10.1093/nar/gkaa1011">doi:10.1093/nar/gkaa1011</a></li>
+</ul>
+
+<!-- ===== footer ===== -->
+<footer>
+  本文档由 Claude (subagent) 于 2026-07-01 20:39 SGT 整理，基于对 PR #242 diff、issue #118、以及对 MitoCarta 源的一次实时 HEAD 核查。<b>诚实标注：</b>上游文件的 Content-Length（≈9.7 MiB）与 Last-Modified 为核查当刻实测值，可能随上游更新而变；行数 1136、sheet 命名约定等取自 PR 断言/注释，未逐一独立复算；<code>personal.broadinstitute.org</code> 为个人托管目录，无稳定性保证。评估结论（契合度/可复现性/维护成本）为基于 skill 四 lens 的判断，非上游官方背书。使用前请以 MitoCarta 官网与 gget 仓库为准。
+</footer>
+
+</div>
+</body>
+</html>
