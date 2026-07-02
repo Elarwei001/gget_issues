@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生物学基础 · 通路 (Pathway)</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--panel2:#1d212b;--ink:#e6e9ef;--muted:#9aa4b2;--acc:#f5a623;--acc2:#5aa9e6;--green:#4cc38a;--red:#e5648a;--line:#2a2f3a;--code:#0b0d11;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:900px;margin:0 auto;padding:32px 24px 80px}
+  header.top{position:relative;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:28px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:15px}
+  .stamp{position:absolute;top:0;right:0;font-size:12px;color:var(--muted);text-align:right}
+  .back{font-size:13px;color:var(--acc2)}
+  h2{font-size:21px;margin:34px 0 12px;padding-top:8px;border-top:1px solid var(--line);color:#fff}
+  h2 .n{color:var(--acc);margin-right:8px}
+  p{margin:10px 0}
+  a{color:var(--acc2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;color:#ffd9a0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#fff}
+  tr:nth-child(even) td{background:var(--panel)}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:5px 0}
+  .tldr{background:linear-gradient(135deg,#1b2330,#171a21);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:16px 18px;margin:16px 0}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc2);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .muted{color:var(--muted)}
+  .langtoggle{margin-bottom:6px}
+  .langtoggle button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;margin-left:4px}
+  .langtoggle button.active{background:var(--acc2);color:#08121c;border-color:var(--acc2);font-weight:600}
+  body.lang-zh .en{display:none}
+  body.lang-en .zh{display:none}
+  footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body class="lang-zh">
+<div class="wrap">
+
+<header class="top">
+  <div class="stamp">
+    <div class="langtoggle">
+      <button data-l="zh" class="active" onclick="setLang('zh')">中文</button><button data-l="en" onclick="setLang('en')">EN</button>
+    </div>
+    Generated: 2026-07-02 20:44 SGT<br>by Claude Opus 4.8 (1M)
+  </div>
+  <h1>🧬 <span class="zh">生物学基础 · 通路 (Pathway)</span><span class="en">Biology basics · Pathway</span></h1>
+  <div class="sub"><span class="zh">给非生物背景读者的入门：通路是什么、有什么用、出问题会怎样、怎么区分、一共有多少</span><span class="en">A primer for non-biologists: what a pathway is, what it does, what happens when it breaks, how to tell them apart, and how many there are</span></div>
+  <div style="margin-top:10px"><a class="back" href="../index.html">← <span class="zh">返回索引</span><span class="en">back to index</span></a></div>
+</header>
+
+<div class="tldr">
+  <strong>TL;DR：</strong>
+  <span class="zh"><b>通路 = 细胞里一条分工协作、可调控的"分子流水线"</b>：一组蛋白/基因一步接一步完成某个任务。细胞靠它办事（造能量、传信号、合成分子）；缺了会失能，失调会致病（癌症、代谢病等）。区分通路主要看"它由哪组基因组成"——而 MitoCarta、MSigDB 这些数据库正是这些基因组成的权威名录。</span>
+  <span class="en"><b>A pathway is a coordinated, regulated "molecular assembly line" inside the cell</b>: a group of proteins/genes that complete a task step by step. Cells use pathways to get things done (make energy, relay signals, build molecules); losing one causes loss of function, and mis-regulating one causes disease (cancer, metabolic disorders). Pathways are told apart mainly by which genes make them up — and databases like MitoCarta and MSigDB are the authoritative catalogs of those gene memberships.</span>
+</div>
+
+<h2><span class="n">1</span><span class="zh">通路是什么</span><span class="en">What a pathway is</span></h2>
+<p><span class="zh"><b>通路 = 细胞里一条"流水线"</b>：一组分工协作的分子（主要是蛋白质/酶，由基因编码），<b>一步接一步</b>地完成某个特定任务。不是单个分子单打独斗，而是<b>接力</b>——第一步的产物是第二步的原料，像工厂里"零件 → 工位1加工 → 工位2组装 → 成品"。每个"工位"通常是一个蛋白质/酶，对应一个基因。</span>
+<span class="en"><b>A pathway is an "assembly line" in the cell</b>: a group of cooperating molecules (mostly proteins/enzymes encoded by genes) that complete a specific task <b>step by step</b>. It's a <b>relay</b>, not a solo act — the product of step 1 is the input to step 2, like a factory "part → station 1 → station 2 → finished product." Each "station" is usually one protein/enzyme, encoded by one gene.</span></p>
+
+<h2><span class="n">2</span><span class="zh">作用：细胞靠通路"办事"</span><span class="en">Function: cells get things done via pathways</span></h2>
+<p><span class="zh">细胞要干的活很多，每类活基本都由某条通路负责。大致两类：</span><span class="en">Cells have many jobs, and each kind of job is handled by some pathway. Broadly two types:</span></p>
+<table>
+  <tr><th><span class="zh">类型</span><span class="en">Type</span></th><th><span class="zh">干什么</span><span class="en">What it does</span></th><th><span class="zh">类比</span><span class="en">Analogy</span></th><th><span class="zh">例子</span><span class="en">Examples</span></th></tr>
+  <tr><td><span class="zh">代谢通路</span><span class="en">Metabolic</span></td><td><span class="zh">化学加工：分解/合成分子、造能量</span><span class="en">Chemical processing: break down/build molecules, make energy</span></td><td><span class="zh">加工车间</span><span class="en">Processing floor</span></td><td><span class="zh">糖酵解、<b>OXPHOS</b>（造 ATP=细胞的"电"）、TCA 循环</span><span class="en">Glycolysis, <b>OXPHOS</b> (makes ATP = the cell's "electricity"), TCA cycle</span></td></tr>
+  <tr><td><span class="zh">信号通路</span><span class="en">Signaling</span></td><td><span class="zh">传递信息：把细胞外信号一层层传到细胞内，改变细胞行为</span><span class="en">Relaying information: pass an outside signal inward through a chain to change cell behavior</span></td><td><span class="zh">传声筒/电话接力</span><span class="en">Bucket brigade / phone tree</span></td><td><span class="zh">MAPK、PI3K/AKT、Wnt（决定要不要生长、分裂）</span><span class="en">MAPK, PI3K/AKT, Wnt (decide whether to grow or divide)</span></td></tr>
+</table>
+<p><span class="zh">所以通路 = 细胞把事情<b>有组织、可调控地</b>做完的方式。</span><span class="en">So a pathway is how the cell gets things done in an <b>organized, regulated</b> way.</span></p>
+
+<h2><span class="n">3</span><span class="zh">没有会怎么样</span><span class="en">What happens without it</span></h2>
+<p><span class="zh">某条通路缺失/断了 → 细胞<b>做不了那件事</b>：</span><span class="en">If a pathway is missing/broken, the cell <b>can't do that job</b>:</span></p>
+<ul>
+  <li><span class="zh">断的是<b>能量通路</b>（如 OXPHOS）→ 细胞"断电"，最耗能的器官（脑、心、肌肉）先出问题——这正是<b>线粒体病</b>。</span><span class="en">If it's an <b>energy pathway</b> (e.g. OXPHOS) → the cell loses "power," and the most energy-hungry organs (brain, heart, muscle) fail first — this is <b>mitochondrial disease</b>.</span></li>
+  <li><span class="zh">断的是<b>发育信号通路</b> → 胚胎发育不出来（常常致死）。</span><span class="en">If it's a <b>developmental signaling pathway</b> → the embryo fails to develop (often lethal).</span></li>
+  <li><span class="zh">一句话：通路是"必需工序"，少了对应功能就瘫痪，轻则细胞失能，重则致病/致死。</span><span class="en">In short: a pathway is a "required step"; without it the function collapses — mild cases lose function, severe cases cause disease or death.</span></li>
+</ul>
+
+<h2><span class="n">4</span><span class="zh">出问题会怎么样（更常见、更要命）</span><span class="en">What happens when it goes wrong (more common, more serious)</span></h2>
+<p><span class="zh">通路平时是<b>被严格调控的</b>（该开时开、该关时关）。出问题往往不是"没了"，而是<b>卡在开或卡在关</b>：</span><span class="en">Pathways are normally <b>tightly regulated</b> (on when needed, off otherwise). The problem is usually not "gone" but <b>stuck on or stuck off</b>:</span></p>
+<ul>
+  <li><span class="zh"><b>代谢通路某步的酶坏了</b> → 原料堆积、产物缺失 → <b>代谢病</b>（如 PKU：缺一个酶，苯丙氨酸堆积毒害大脑）。</span><span class="en"><b>An enzyme in a metabolic step breaks</b> → inputs pile up, products go missing → <b>metabolic disease</b> (e.g. PKU: a missing enzyme lets phenylalanine build up and harm the brain).</span></li>
+  <li><span class="zh"><b>生长信号通路卡在"开"</b>（本该收到信号才生长，却永远在喊"生长"）→ 细胞<b>无限增殖 → 癌症</b>。很多癌症本质就是某条信号通路突变、关不掉。</span><span class="en"><b>A growth-signaling pathway stuck "on"</b> (it should only grow when signaled, but keeps shouting "grow") → cells <b>divide without limit → cancer</b>. Many cancers are, at heart, a signaling pathway mutated so it can't turn off.</span></li>
+  <li><span class="zh"><b>细胞凋亡("该死就死")通路坏了</b> → 本该自杀的坏细胞不死 → 也致癌；反过来死太多 → 神经退行病。</span><span class="en"><b>The apoptosis ("die on command") pathway breaks</b> → bad cells that should self-destruct don't → also cancer; conversely too much death → neurodegeneration.</span></li>
+</ul>
+<div class="note"><span class="zh"><b>核心：</b>疾病常常不是"某个基因坏了"这么简单，而是"<b>某条通路失调了</b>"——这也是研究者极其关心通路的原因。</span><span class="en"><b>Key insight:</b> disease is often not simply "one gene broke" but "<b>a whole pathway is dysregulated</b>" — which is exactly why researchers care so much about pathways.</span></div>
+
+<h2><span class="n">5</span><span class="zh">如何区分不同的通路</span><span class="en">How to tell pathways apart</span></h2>
+<ol>
+  <li><span class="zh"><b>干什么活</b>：造能量 vs 传信号 vs 合成物质。</span><span class="en"><b>What job it does</b>: make energy vs relay signals vs synthesize molecules.</span></li>
+  <li><span class="zh"><b>由哪些基因/蛋白组成</b>——每条通路有一组<b>特征成员基因</b>。⭐ 这就是 <b>MitoPathways、MSigDB 合集</b>在编目的东西：一条通路 = 一个"有名字的基因集合"。</span><span class="en"><b>Which genes/proteins make it up</b> — each pathway has a characteristic <b>set of member genes</b>. ⭐ This is exactly what <b>MitoPathways and MSigDB collections</b> catalog: a pathway = a "named set of genes."</span></li>
+  <li><span class="zh"><b>在哪发生</b>：线粒体 / 细胞质 / 细胞核。</span><span class="en"><b>Where it happens</b>: mitochondria / cytoplasm / nucleus.</span></li>
+  <li><span class="zh"><b>层级归属</b>：大类 → 子通路 → 具体步骤，如 <code>OXPHOS &gt; Complex I &gt; CI subunits</code>（能量总线 ▸ Complex I 机器 ▸ 它的零件）。</span><span class="en"><b>Hierarchy</b>: big category → sub-pathway → specific step, e.g. <code>OXPHOS &gt; Complex I &gt; CI subunits</code> (energy line ▸ the Complex I machine ▸ its parts).</span></li>
+</ol>
+
+<h2><span class="n">6</span><span class="zh">一共有多少条通路？在哪看全集</span><span class="en">How many pathways are there? Where to see the full set</span></h2>
+<p><span class="zh"><b>没有唯一答案</b>——不同数据库按不同粒度收录，数量差很大（都随版本变）：</span><span class="en"><b>There is no single answer</b> — different databases catalog pathways at different granularities, so counts vary widely (and change with versions):</span></p>
+<table>
+  <tr><th><span class="zh">数据库</span><span class="en">Database</span></th><th><span class="zh">大约条数</span><span class="en">Approx. count</span></th><th><span class="zh">看全集</span><span class="en">Browse the full set</span></th></tr>
+  <tr><td>KEGG PATHWAY</td><td><span class="zh">~570 条参考通路</span><span class="en">~570 reference pathways</span></td><td><a href="https://www.genome.jp/kegg/pathway.html">genome.jp/kegg/pathway</a></td></tr>
+  <tr><td>Reactome</td><td><span class="zh">~2,700 条人类通路</span><span class="en">~2,700 human pathways</span></td><td><a href="https://reactome.org/PathwayBrowser/">reactome.org/PathwayBrowser</a></td></tr>
+  <tr><td>WikiPathways</td><td><span class="zh">~1,400 条</span><span class="en">~1,400</span></td><td><a href="https://www.wikipathways.org/">wikipathways.org</a></td></tr>
+  <tr><td>MSigDB</td><td><span class="zh">规范通路 ~3,000+；整库基因集<b>数万</b></span><span class="en">~3,000+ canonical pathways; tens of thousands of gene sets overall</span></td><td><a href="https://www.gsea-msigdb.org/gsea/msigdb/">gsea-msigdb.org/msigdb</a></td></tr>
+  <tr><td><span class="zh">GO 生物过程</span><span class="en">GO Biological Process</span></td><td><span class="zh">~2.8 万条术语（比通路更宽）</span><span class="en">~28,000 terms (broader than pathways)</span></td><td><a href="http://geneontology.org/">geneontology.org</a></td></tr>
+  <tr><td><span class="zh">MitoCarta MitoPathways</span><span class="en">MitoCarta MitoPathways</span></td><td><span class="zh"><b>149 条</b>（仅线粒体）</span><span class="en"><b>149</b> (mitochondria only)</span></td><td><a href="https://www.broadinstitute.org/mitocarta/">broadinstitute.org/mitocarta</a></td></tr>
+</table>
+<p><span class="zh">小到"线粒体 149 条"，大到"MSigDB 数万个基因集"——<b>取决于范围和粒度</b>。最通用的入口是 <b>Reactome</b>（免费、可视化）和 <b>MSigDB</b>（做富集分析的事实标准）。</span><span class="en">From "149 for mitochondria" to "tens of thousands of MSigDB gene sets" — it <b>depends on scope and granularity</b>. The most common entry points are <b>Reactome</b> (free, visual) and <b>MSigDB</b> (the de-facto standard for enrichment analysis).</span></p>
+
+<h2><span class="n">7</span><span class="zh">这就是 gget mitocarta / enrichr 存在的意义</span><span class="en">Why gget mitocarta / enrichr exist</span></h2>
+<p><span class="zh">研究者天天问：<b>"我实验测出一堆异常基因，它们是不是集中在某条已知通路上？"</b>（<b>通路富集分析</b>）。要回答它，就得有"哪些基因属于哪条通路"的权威名录——<b>MitoPathways</b>（线粒体）和 <b>MSigDB 合集</b>（通用）正是这些名录。所以 <code>gget mitocarta --which pathways</code> 和 <code>gget enrichr --get_library</code> 本质就是<b>帮研究者把"某条通路里有哪些基因"这份名录拉下来</b>，好去做富集分析。</span>
+<span class="en">Researchers constantly ask: <b>"my experiment flagged a bunch of abnormal genes — are they concentrated in a known pathway?"</b> (<b>pathway enrichment analysis</b>). Answering it needs an authoritative catalog of "which genes belong to which pathway" — and <b>MitoPathways</b> (mitochondria) and <b>MSigDB collections</b> (general) are exactly those catalogs. So <code>gget mitocarta --which pathways</code> and <code>gget enrichr --get_library</code> essentially <b>pull down the roster of "which genes are in a pathway"</b> so you can run enrichment analysis.</span></p>
+
+<footer>
+  <span class="zh">科普性质、面向非专业读者，为求好懂做了简化；数字为大致量级、随数据库版本变化，以官方为准。整理于 2026-07-02 SGT。</span>
+  <span class="en">A simplified primer for non-specialists; numbers are rough orders of magnitude that vary by database version — defer to the official sources. Compiled 2026-07-02 SGT.</span>
+</footer>
+
+</div>
+<script>
+  function setLang(l){
+    document.body.className = 'lang-' + l;
+    document.querySelectorAll('.langtoggle button').forEach(function(b){ b.classList.toggle('active', b.dataset.l === l); });
+  }
+</script>
+</body>
+</html>
