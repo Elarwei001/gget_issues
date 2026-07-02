@@ -134,6 +134,17 @@
 <p><span class="zh">最后一行是这个源的关键 quirk：<b>坏文库名不返回 4xx 状态码</b>，而是 200 + 一个 HTML 404 页。天真的 <code>response.ok</code> 检查会漏掉——PR 正确地额外判断了"正文以 <code>&lt;</code> 开头"或"含 <code>HTTP Status 404</code>"。这正是技能里 Google Drive 病毒扫描页那类"必须处理的 quirk"的同类。</span>
 <span class="en">That last row is the source's key quirk: a <b>bad library name returns no 4xx status</b> — it returns 200 + an HTML 404 page. A naive <code>response.ok</code> check would miss it; the PR correctly also tests "body starts with <code>&lt;</code>" or "contains <code>HTTP Status 404</code>". This is the same class of "must-handle quirk" as the Google-Drive virus-scan page in the skill.</span></p>
 
+<div class="note">
+  <span class="zh"><b>📍 设计澄清：issue 要 MSigDB，为什么数据源写的是 Enrichr？</b><br>
+  <b>MSigDB</b>（<a href="https://www.gsea-msigdb.org/gsea/msigdb/">gsea-msigdb.org</a>，Broad Institute）是这些基因集的<b>原始策展方</b>；<b>Enrichr</b>（maayanlab.cloud，Ma'ayan 实验室）把 MSigDB 的很多合集<b>转托管（re-host）</b>成自己的 library，并提供简单的 HTTP API。上面探针里 <code>libraryName=MSigDB_Hallmark_2020</code> 从 Enrichr 拿到 50 个 Hallmark 集——<b>说明你确实拿到的是 MSigDB 的内容，只是取货点在 Enrichr</b>。<br>
+  <b>为什么选 Enrichr 而非直连 MSigDB 官网</b>：① Enrichr 有干净的可编程 API，MSigDB 官网下载要注册 + 接受 license；② 复用 gget 已有的 enrichr 模块，零新依赖；③ 顺带还能取一大堆非 MSigDB 的 library（KEGG/GO/WikiPathways…）。<br>
+  <b>⚠️ 代价（诚实标注）</b>：拿到的是 <b>Enrichr 快照版的 MSigDB</b>——可能<b>滞后</b>官方最新版（<code>_2020</code> 后缀就是个时间快照），且只覆盖 <b>Enrichr 选择转托管的那部分</b>合集，不一定是 MSigDB 全集。</span>
+  <span class="en"><b>📍 Design note: the issue asked for MSigDB — why does the data source say Enrichr?</b><br>
+  <b>MSigDB</b> (<a href="https://www.gsea-msigdb.org/gsea/msigdb/">gsea-msigdb.org</a>, Broad Institute) is the <b>original curator</b> of these gene sets; <b>Enrichr</b> (maayanlab.cloud, Ma'ayan Lab) <b>re-hosts</b> many MSigDB collections as its own libraries with a simple HTTP API. In the probe above, <code>libraryName=MSigDB_Hallmark_2020</code> returns 50 Hallmark sets <b>from Enrichr</b> — so you really are getting MSigDB content, just fetched via Enrichr.<br>
+  <b>Why Enrichr rather than MSigDB directly</b>: (1) Enrichr has a clean programmatic API, whereas MSigDB downloads require registration + license acceptance; (2) it reuses gget's existing enrichr module with zero new deps; (3) it also unlocks many non-MSigDB libraries (KEGG/GO/WikiPathways…).<br>
+  <b>⚠️ The trade-off (stated honestly)</b>: you get <b>Enrichr's snapshot of MSigDB</b> — it may <b>lag</b> the official latest (the <code>_2020</code> suffix is a point-in-time snapshot) and only covers the <b>subset Enrichr chose to re-host</b>, not necessarily all of MSigDB.</span>
+</div>
+
 <!-- ===== 4 · 返回数据结构 ===== -->
 <h2 id="s4"><span class="n">4</span><span class="zh">返回数据结构（供接口理解）</span><span class="en">Return data structure</span></h2>
 <p><span class="zh">这是"增强现有模块"而非"新 blob 下载器"，所以这一节描述的是<b>返回值的形状</b>，而非某个文件的表结构。上游文本的每一行是一个基因集：</span>
