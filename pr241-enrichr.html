@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>gget enrichr · MSigDB gene sets (PR #241) — 概览</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --ink:#e6e9ef; --muted:#9aa4b2;
+    --acc:#f5a623; --acc2:#5aa9e6; --green:#4cc38a; --red:#e5648a; --line:#2a2f3a; --code:#0b0d11;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 24px 80px}
+  header.top{position:relative;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:28px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:15px}
+  .stamp{position:absolute;top:0;right:0;font-size:12px;color:var(--muted);text-align:right}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--muted);margin:2px 4px 2px 0}
+  h2{font-size:21px;margin:38px 0 12px;padding-top:8px;border-top:1px solid var(--line);color:#fff}
+  h2 .n{color:var(--acc);font-variant-numeric:tabular-nums;margin-right:8px}
+  h3{font-size:17px;margin:22px 0 8px;color:var(--acc2)}
+  p{margin:10px 0}
+  a{color:var(--acc2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;color:#ffd9a0}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:13px;line-height:1.55}
+  pre code{background:none;border:none;padding:0;color:#d6deeb}
+  .tldr{background:linear-gradient(135deg,#1b2330,#171a21);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:16px 18px;margin:16px 0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#fff}
+  tr:nth-child(even) td{background:var(--panel)}
+  .ok{color:var(--green);font-weight:600}
+  .no{color:var(--red);font-weight:600}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc2);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .warn{background:#251c1c;border:1px solid #4a2b2b;border-left:4px solid var(--red);border-radius:8px;padding:12px 16px;margin:14px 0}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:5px 0}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:18px 0;columns:2;font-size:14px}
+  .toc a{display:block;padding:2px 0;color:var(--ink)}
+  .toc a:hover{color:var(--acc2)}
+  .muted{color:var(--muted)}
+  .primer{background:#132018;border:1px solid #26402f;border-left:4px solid var(--green);border-radius:10px;padding:14px 18px;margin:16px 0}
+  body.lang-zh .en{display:none}
+  body.lang-en .zh{display:none}
+  .langtoggle{margin-bottom:6px}
+  .langtoggle button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;margin-left:4px}
+  .langtoggle button.active{background:var(--acc2);color:#08121c;border-color:var(--acc2);font-weight:600}
+  footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body class="lang-zh">
+<div class="wrap">
+
+<!-- ===== 页头 ===== -->
+<header class="top">
+  <div class="stamp">
+    <div class="langtoggle">
+      <button data-l="zh" class="active" onclick="setLang('zh')">中文</button><button data-l="en" onclick="setLang('en')">EN</button>
+    </div>
+    Generated: 2026-07-02 20:23 SGT<br>by Claude (subagent)
+  </div>
+  <h1>🧬 <span class="zh">gget enrichr：取回基因集（含 MSigDB 合集）</span><span class="en">gget enrichr: retrieve gene sets (incl. MSigDB collections)</span></h1>
+  <div class="sub"><span class="zh">给现有 <code>gget enrichr</code> 模块加一条新能力：不做富集分析，而是把某个 Enrichr 基因集文库的成员基因直接拉下来</span><span class="en">Extends the existing <code>gget enrichr</code> module: instead of running enrichment, fetch the member genes of any Enrichr gene-set library</span></div>
+  <div style="margin-top:10px">
+    <span class="pill">PR: scverse/gget#241</span>
+    <span class="pill">Issue: #139</span>
+    <span class="pill">+329 / −6</span>
+    <span class="pill"><span class="zh">类型：现有模块增强</span><span class="en">Type: module enhancement</span></span>
+    <span class="pill"><span class="zh">数据源：Enrichr / MSigDB</span><span class="en">Source: Enrichr / MSigDB</span></span>
+  </div>
+</header>
+
+<!-- ===== 背景科普 ===== -->
+<div class="primer">
+  <strong>📖 <span class="zh">背景科普</span><span class="en">Primer</span> · Enrichr / MSigDB / <span class="zh">基因集（gene set）</span><span class="en">gene sets</span></strong><br>
+  <span class="zh"><b>基因（gene）</b>是 DNA 上的一段"配方"，指导细胞造出某种蛋白质。一个<b>基因集（gene set）</b>就是一组被科学家因为某个共同点归到一起的基因——比如"都参与细胞对缺氧的反应"或"都在某条信号通路里"。<b>通路 / signature（特征基因集）</b>说白了就是"一件事需要哪些基因一起干活"的清单。
+  <b>MSigDB</b>（Molecular Signatures Database，分子特征数据库，Broad Institute 维护）是最权威的基因集大百科，把几万个这样的清单整理归档；其中<b>Hallmark（标志性）</b>合集是 50 个经过精挑、代表 50 种明确生物学状态的"招牌"基因集。<b>Enrichr</b>（Ma'ayan 实验室，Icahn School of Medicine at Mount Sinai）是一个在线工具，它把 MSigDB 等上百个来源的基因集文库<b>镜像并统一成同一种下载格式</b>，还提供一个简单的 HTTP 接口。本 PR 就是让 gget 通过 Enrichr 这个统一接口，一行命令把某个文库（如 MSigDB Hallmark）的所有基因集及其成员基因直接取回成表格。</span>
+  <span class="en">A <b>gene</b> is a stretch of DNA that tells a cell how to build a protein. A <b>gene set</b> is a group of genes scientists bundle together because they share something — e.g. "all respond to low oxygen" or "all act in one signaling pathway". A <b>pathway / signature</b> is essentially a checklist of "which genes work together to do one job".
+  <b>MSigDB</b> (Molecular Signatures Database, maintained by the Broad Institute) is the authoritative encyclopedia of such gene sets, cataloguing tens of thousands of them; its <b>Hallmark</b> collection is 50 carefully curated "flagship" sets each representing a well-defined biological state. <b>Enrichr</b> (Ma'ayan Lab, Icahn School of Medicine at Mount Sinai) is an online tool that <b>mirrors hundreds of gene-set libraries — including MSigDB — into one common download format</b> behind a simple HTTP endpoint. This PR lets gget use that unified Enrichr endpoint to pull every gene set of a library (e.g. MSigDB Hallmark) and its member genes into a table with one command.</span>
+  <div class="muted" style="margin-top:6px">🔗 MSigDB: <a href="https://www.gsea-msigdb.org/gsea/msigdb/">gsea-msigdb.org/gsea/msigdb</a> · Enrichr: <a href="https://maayanlab.cloud/Enrichr/">maayanlab.cloud/Enrichr</a> · <a href="https://maayanlab.cloud/Enrichr/#libraries">library list</a></div>
+</div>
+
+<!-- ===== 目录 ===== -->
+<div class="toc">
+  <a href="#s1">1 · TL;DR</a>
+  <a href="#s2"><span class="zh">2 · 背景 / 问题</span><span class="en">2 · Background / problem</span></a>
+  <a href="#s3"><span class="zh">3 · 上游 / 数据源</span><span class="en">3 · Upstream / data source</span></a>
+  <a href="#s4"><span class="zh">4 · 返回数据结构</span><span class="en">4 · Return data structure</span></a>
+  <a href="#s5"><span class="zh">5 · 如何使用</span><span class="en">5 · How to use</span></a>
+  <a href="#s6"><span class="zh">6 · Scope / 边界</span><span class="en">6 · Scope / boundary</span></a>
+  <a href="#s7"><span class="zh">7 · 评估（四 lens）</span><span class="en">7 · Evaluation (4 lenses)</span></a>
+  <a href="#s8"><span class="zh">8 · 设计决策与权衡</span><span class="en">8 · Design decisions</span></a>
+  <a href="#s9"><span class="zh">9 · 测试 / live data test</span><span class="en">9 · Tests / live data</span></a>
+  <a href="#s10"><span class="zh">10 · 当前状态</span><span class="en">10 · Current status</span></a>
+  <a href="#s11"><span class="zh">11 · 未决 / 后续</span><span class="en">11 · Open items</span></a>
+  <a href="#s12"><span class="zh">12 · 参考链接</span><span class="en">12 · References</span></a>
+</div>
+
+<!-- ===== TL;DR ===== -->
+<div class="tldr" id="s1">
+  <strong>TL;DR：</strong>
+  <span class="zh">PR #241 给已有的 <code>gget enrichr</code> 加了一个<b>新函数 <code>enrichr_library()</code></b>（CLI：<code>gget enrichr --get_library/-gl</code>）。它不再做富集分析，而是命中 Enrichr 的 <code>geneSetLibrary</code> 端点，把某个基因集文库（尤其是 <b>MSigDB</b> 合集，如 <code>MSigDB_Hallmark_2020</code>）里所有基因集及其成员基因取回，返回一个 <b>长格式两列 DataFrame</b>（<code>gene_set</code>、<code>gene</code>）或 <code>{gene_set: [genes]}</code> 字典。这是<b>教科书式契合 gget 定位</b>的贡献：纯数据<b>访问</b>、返回值 gget 化、复用现成的稳定接口、零新依赖。唯一硬伤在测试面：新增的 7 个离线 mock 测试很扎实，但另有 4 个"看起来是单元测试、实际会真打 maayanlab.cloud"的测试用<b>精确断言且无限流/断网 skip</b>——属技能文档点名的"伪装成单元测试的 live 测试"，建议按 live 规范加固。</span>
+  <span class="en">PR #241 adds a <b>new function <code>enrichr_library()</code></b> (CLI: <code>gget enrichr --get_library/-gl</code>) to the existing <code>gget enrichr</code> module. Instead of enrichment, it hits Enrichr's <code>geneSetLibrary</code> endpoint and pulls every gene set and its member genes from a library — notably the <b>MSigDB</b> collections (e.g. <code>MSigDB_Hallmark_2020</code>) — returning a <b>long-format two-column DataFrame</b> (<code>gene_set</code>, <code>gene</code>) or a <code>{gene_set: [genes]}</code> dict. This is a <b>textbook-fit gget contribution</b>: pure data <b>access</b>, gget-ified return value, reuses an existing stable endpoint, zero new dependencies. The one weak spot is testing: the 7 new offline mock tests are solid, but 4 further tests that "look like unit tests" actually hit maayanlab.cloud with <b>exact assertions and no rate-limit/offline skip</b> — the exact "de-facto live but undesigned" anti-pattern the skill flags; they should be hardened per the live-test playbook.</span>
+</div>
+
+<!-- ===== 2 · 背景 / 问题 ===== -->
+<h2 id="s2"><span class="n">2</span><span class="zh">背景 / 问题</span><span class="en">Background / problem</span></h2>
+<p><span class="zh">Issue <a href="https://github.com/scverse/gget/issues/139">#139</a> 由 <b>cakeinspace（Anurag Ranjak）</b>提出，请求类型标为"现有模块的扩展（Extension of existing module）"，正文很短：</span>
+<span class="en">Issue <a href="https://github.com/scverse/gget/issues/139">#139</a>, filed by <b>cakeinspace (Anurag Ranjak)</b>, is tagged "Extension of existing module" with a short body:</span></p>
+<div class="note"><span class="zh">"感谢这个好用的包。能不能加上对 <a href="https://www.gsea-msigdb.org/gsea/msigdb/">MSigDB</a> 的支持——<b>尤其是取回基因集</b>。"</span><span class="en">"Thanks for the wonderful package. Can you please add support for <a href="https://www.gsea-msigdb.org/gsea/msigdb/">MSigDB</a> — <b>especially for getting gene sets</b>."</span></div>
+<p><span class="zh"><b>字面诉求</b>："接入 MSigDB"。<b>底层需求</b>：科学家想要一种<b>可复现、脚本化</b>的方式，把某个 MSigDB 合集（如 Hallmark 的 50 个 signature）的成员基因拿到手，用于下游分析——而不是手动去网站点下载。区分很关键：他们要的是<b>取数据</b>，不是让 gget 帮他们跑 GSEA 富集分析（那是 MSigDB / GSEA 本体的核心计算，不属于 gget）。</span>
+<span class="en"><b>Literal ask</b>: "add MSigDB". <b>Underlying need</b>: a <b>reproducible, scriptable</b> way to obtain the member genes of an MSigDB collection (e.g. the 50 Hallmark signatures) for downstream work — instead of clicking through the website. The distinction matters: they want <b>data retrieval</b>, not for gget to run GSEA enrichment (that computation is the core of MSigDB/GSEA itself and out of scope for gget).</span></p>
+<p><span class="zh">PR 作者选了一条聪明的路：<b>不直接对接 MSigDB 官网</b>，而是复用 gget 里<b>已经存在</b>的 <code>enrichr</code> 模块所依赖的 Enrichr 服务——因为 Enrichr 早已把 MSigDB 各合集镜像成统一文库并提供下载端点。于是这条 issue 从"新数据源模块"降级成了"给现有模块加一个函数"。</span>
+<span class="en">The author took a clever route: rather than wiring up the MSigDB site directly, they reuse the Enrichr service that gget's <b>existing</b> <code>enrichr</code> module already depends on — because Enrichr already mirrors the MSigDB collections as unified libraries behind a download endpoint. That turns "new data-source module" into "add one function to an existing module".</span></p>
+
+<!-- ===== 3 · 上游 / 数据源 ===== -->
+<h2 id="s3"><span class="n">3</span><span class="zh">上游 / 数据源</span><span class="en">Upstream / data source</span></h2>
+<p><span class="zh">数据来自 <b>Enrichr</b>（Ma'ayan 实验室）的 <code>geneSetLibrary</code> 端点。这是一个成熟的<b>可编程 HTTP API</b>（GET + query 参数），不是需要抓确认页的文件托管。PR 在 <code>constants.py</code> 里为各物种变体建了一张 URL 表：</span>
+<span class="en">Data comes from <b>Enrichr</b>'s (Ma'ayan Lab) <code>geneSetLibrary</code> endpoint — a mature <b>programmatic HTTP API</b> (GET + query params), not a file host needing a confirmation page. The PR adds a per-species URL table in <code>constants.py</code>:</span></p>
+<pre><code>GENESETLIBRARY_ENRICHR_URLS["human"] = "https://maayanlab.cloud/Enrichr/geneSetLibrary"
+# fly / yeast / worm / fish → https://maayanlab.cloud/{Type}Enrichr/geneSetLibrary
+# 调用：GET ...?mode=text&libraryName=MSigDB_Hallmark_2020</code></pre>
+<p><span class="zh">我做了一次真实探针（2026-07-02），确认接口行为与真值锚：</span>
+<span class="en">I ran a live probe (2026-07-02) confirming the endpoint behaviour and ground-truth anchors:</span></p>
+<table>
+  <tr><th><span class="zh">探针</span><span class="en">Probe</span></th><th><span class="zh">结果（真实）</span><span class="en">Result (real)</span></th></tr>
+  <tr><td><code>GET ...libraryName=MSigDB_Hallmark_2020</code></td><td><span class="zh">HTTP 200 · <code>Content-Type: text/plain;charset=UTF-8</code> · 制表符分隔文本</span><span class="en">HTTP 200 · <code>text/plain;charset=UTF-8</code> · tab-separated text</span></td></tr>
+  <tr><td><span class="zh">Hallmark 基因集数</span><span class="en">Hallmark gene-set count</span></td><td><b>50</b> <span class="muted">(= <code>expected_n_sets</code>)</span></td></tr>
+  <tr><td><span class="zh"><code>Hypoxia</code> 成员基因数</span><span class="en"><code>Hypoxia</code> member genes</span></td><td><b>200</b> <span class="muted">(= <code>expected_n_genes</code>)</span></td></tr>
+  <tr><td><span class="zh">无效文库名</span><span class="en">invalid library name</span></td><td><span class="warn" style="display:inline-block;margin:0;padding:2px 8px"><span class="zh">HTTP <b>200</b>（不是 404！）+ <code>text/html</code> + 正文含 <code>HTTP Status 404</code></span><span class="en">HTTP <b>200</b> (not 404!) + <code>text/html</code> + body contains <code>HTTP Status 404</code></span></span></td></tr>
+</table>
+<p><span class="zh">最后一行是这个源的关键 quirk：<b>坏文库名不返回 4xx 状态码</b>，而是 200 + 一个 HTML 404 页。天真的 <code>response.ok</code> 检查会漏掉——PR 正确地额外判断了"正文以 <code>&lt;</code> 开头"或"含 <code>HTTP Status 404</code>"。这正是技能里 Google Drive 病毒扫描页那类"必须处理的 quirk"的同类。</span>
+<span class="en">That last row is the source's key quirk: a <b>bad library name returns no 4xx status</b> — it returns 200 + an HTML 404 page. A naive <code>response.ok</code> check would miss it; the PR correctly also tests "body starts with <code>&lt;</code>" or "contains <code>HTTP Status 404</code>". This is the same class of "must-handle quirk" as the Google-Drive virus-scan page in the skill.</span></p>
+
+<!-- ===== 4 · 返回数据结构 ===== -->
+<h2 id="s4"><span class="n">4</span><span class="zh">返回数据结构（供接口理解）</span><span class="en">Return data structure</span></h2>
+<p><span class="zh">这是"增强现有模块"而非"新 blob 下载器"，所以这一节描述的是<b>返回值的形状</b>，而非某个文件的表结构。上游文本的每一行是一个基因集：</span>
+<span class="en">Since this enhances an existing module (not a new blob downloader), this section describes the <b>shape of the return value</b>, not a file's table schema. Each line of the upstream text is one gene set:</span>
+· 🔗 <a href="https://maayanlab.cloud/Enrichr/geneSetLibrary?mode=text&libraryName=MSigDB_Hallmark_2020"><span class="zh">原始文本</span><span class="en">raw text</span></a></p>
+<pre><code>&lt;gene set name&gt; \t &lt;description&gt; \t &lt;gene1&gt; \t &lt;gene2&gt; \t ...
+Hypoxia            \t (空/empty)   \t PGK1     \t PDK1     \t GBE1 ...</code></pre>
+<p><span class="zh">PR 把它解析成 <code>{set_name: [genes]}</code>（丢弃第 2 列 description，因 MSigDB 行的 description 基本为空），默认再<b>展开成长格式两列 DataFrame</b>。</span>
+<span class="en">The PR parses this into <code>{set_name: [genes]}</code> (dropping the 2nd description field, which is essentially empty for MSigDB rows), then by default <b>explodes it into a long-format two-column DataFrame</b>.</span></p>
+
+<h3><span class="zh">默认返回：长格式 DataFrame</span><span class="en">Default return: long-format DataFrame</span></h3>
+<table>
+  <tr><th><span class="zh">列名</span><span class="en">Column</span></th><th><span class="zh">含义（大白话）</span><span class="en">Meaning (plain language)</span></th></tr>
+  <tr><td><code>gene_set</code></td><td><span class="zh">基因集（signature）的名字，如 <code>Hypoxia</code>、<code>TNF-alpha Signaling via NF-kB</code>。一个名字对应很多行。</span><span class="en">Name of the gene set / signature, e.g. <code>Hypoxia</code>, <code>TNF-alpha Signaling via NF-kB</code>. One name spans many rows.</span></td></tr>
+  <tr><td><code>gene</code></td><td><span class="zh">该基因集里的一个成员基因（基因符号，如 <code>PGK1</code>）。每行一个基因。</span><span class="en">One member gene of that set (a gene symbol, e.g. <code>PGK1</code>). One gene per row.</span></td></tr>
+</table>
+<p class="muted"><span class="zh">"长格式（long format）"= 不是"一行一个基因集、后面跟一长串基因"，而是"一行一个 (基因集, 基因) 配对"。50 个 Hallmark 集 × 各 ~200 基因 ≈ 1 万行。这种形状对 <code>groupby</code> / 过滤 / 合并最友好，是 tidy-data 惯例。</span>
+<span class="en">"Long format" = not "one row per set with a long list of genes", but "one row per (set, gene) pair". 50 Hallmark sets × ~200 genes each ≈ 10k rows. This shape is friendliest for <code>groupby</code>/filter/merge — the tidy-data convention.</span></p>
+
+<h3><span class="zh">可选返回：字典（<code>json=True</code>）</span><span class="en">Alternative return: dict (<code>json=True</code>)</span></h3>
+<pre><code>{"Hypoxia": ["PGK1", "PDK1", "GBE1", ...],
+ "TNF-alpha Signaling via NF-kB": ["JUNB", "CXCL2", "ATF3", ...], ...}</code></pre>
+<p><span class="zh"><code>gene_set="Hypoxia"</code> 可只取单个基因集（200 行 / 1 个 key）。</span><span class="en"><code>gene_set="Hypoxia"</code> restricts to a single set (200 rows / 1 key).</span></p>
+
+<!-- ===== 5 · 如何使用 ===== -->
+<h2 id="s5"><span class="n">5</span><span class="zh">如何使用</span><span class="en">How to use</span></h2>
+<p><span class="zh"><b>输入</b>：文库名（必填）+ 可选 species / gene_set / json / save。<b>返回</b>：DataFrame 或 dict。<b>副作用</b>：<code>save=True</code> 时写 <code>gget_enrichr_library_{library}.csv/.json</code> 到当前目录。</span>
+<span class="en"><b>Input</b>: library name (required) + optional species / gene_set / json / save. <b>Returns</b>: DataFrame or dict. <b>Side effect</b>: with <code>save=True</code>, writes <code>gget_enrichr_library_{library}.csv/.json</code> to the cwd.</span></p>
+<pre><code># CLI —— 取 MSigDB Hallmark 全部 50 个基因集（--csv 输出 CSV 表格）
+gget enrichr --get_library MSigDB_Hallmark_2020 --csv
+# 只取一个基因集
+gget enrichr --get_library MSigDB_Hallmark_2020 --gene_set Hypoxia --csv</code></pre>
+<pre><code># Python
+import gget
+gget.enrichr_library("MSigDB_Hallmark_2020")                    # 长格式 DataFrame
+gget.enrichr_library("MSigDB_Hallmark_2020", gene_set="Hypoxia") # 单个集
+gget.enrichr_library("MSigDB_Hallmark_2020", json=True)          # dict</code></pre>
+<table>
+  <tr><th><span class="zh">参数</span><span class="en">Arg</span></th><th><span class="zh">作用</span><span class="en">Purpose</span></th></tr>
+  <tr><td><code>library</code></td><td><span class="zh">Enrichr 文库名（必填），如 <code>MSigDB_Hallmark_2020</code>、<code>MSigDB_Oncogenic_Signatures</code>、<code>MSigDB_Computational</code></span><span class="en">Enrichr library name (required), e.g. <code>MSigDB_Hallmark_2020</code>, <code>MSigDB_Oncogenic_Signatures</code>, <code>MSigDB_Computational</code></span></td></tr>
+  <tr><td><code>species</code></td><td><span class="zh"><code>human</code>（默认）/<code>mouse</code>（走 human 变体）/<code>fly</code>/<code>yeast</code>/<code>worm</code>/<code>fish</code>；其它值报 <code>ValueError</code></span><span class="en"><code>human</code> (default) / <code>mouse</code> (uses human variant) / <code>fly</code>/<code>yeast</code>/<code>worm</code>/<code>fish</code>; other values raise <code>ValueError</code></span></td></tr>
+  <tr><td><code>gene_set</code></td><td><span class="zh">只返回该单个基因集；不存在则报 <code>ValueError</code></span><span class="en">Return only this one set; raises <code>ValueError</code> if absent</span></td></tr>
+  <tr><td><code>json</code> / <code>save</code> / <code>verbose</code></td><td><span class="zh">dict 输出 / 落盘 / 日志开关</span><span class="en">dict output / write to disk / logging toggle</span></td></tr>
+</table>
+<div class="note"><span class="zh"><b>CLI 映射小知识：</b>gget 全局约定 <code>--csv</code> 是 <code>store_false</code>（默认 <code>True</code>=JSON 输出，加 <code>--csv</code> 变 CSV）。PR 写的 <code>json=args.csv</code> 因此是<b>正确</b>的：不加 <code>--csv</code> → JSON；加 <code>--csv</code> → DataFrame/CSV。乍看反直觉，实则契合全局惯例。</span>
+<span class="en"><b>CLI mapping note:</b> gget's global convention makes <code>--csv</code> a <code>store_false</code> flag (default <code>True</code> = JSON output; passing <code>--csv</code> switches to CSV). So the PR's <code>json=args.csv</code> is <b>correct</b>: no <code>--csv</code> → JSON; <code>--csv</code> → DataFrame/CSV. Counter-intuitive at a glance, but consistent with the rest of gget.</span></div>
+
+<!-- ===== 6 · Scope ===== -->
+<h2 id="s6"><span class="n">6</span><span class="zh">Scope / 边界</span><span class="en">Scope / boundary</span></h2>
+<table>
+  <tr><th><span class="zh">做什么</span><span class="en">Does</span></th><th><span class="zh">刻意不做</span><span class="en">Deliberately does not</span></th></tr>
+  <tr>
+    <td>
+      <span class="ok">✅</span> <span class="zh">列出 / 取回某文库的所有基因集 + 成员基因</span><span class="en">List/fetch all gene sets + member genes of a library</span><br>
+      <span class="ok">✅</span> <span class="zh">把原始文本 gget 化成 DataFrame / dict</span><span class="en">gget-ify raw text into DataFrame / dict</span><br>
+      <span class="ok">✅</span> <span class="zh">支持单集过滤、多物种变体</span><span class="en">Single-set filter, multi-species variants</span>
+    </td>
+    <td>
+      <span class="no">✗</span> <span class="zh">不做富集分析（GSEA）——那是 <code>enrichr()</code> 主功能 / MSigDB 本体的核心计算</span><span class="en">No enrichment (GSEA) — that's <code>enrichr()</code>'s main job / MSigDB's core computation</span><br>
+      <span class="no">✗</span> <span class="zh">不直连 MSigDB 官网、不解析 <code>.gmt/.gmx/.xml</code> 原始发行文件</span><span class="en">No direct MSigDB-site access, no parsing <code>.gmt/.gmx/.xml</code> release files</span><br>
+      <span class="no">✗</span> <span class="zh">不回填基因集的 description / 出处元数据</span><span class="en">No gene-set description / provenance metadata</span>
+    </td>
+  </tr>
+</table>
+<p><span class="zh"><b>契合判定：</b>这个函数只封装 Enrichr 的<b>数据分发层</b>（列文库 + 下成员），刻意不复制 GSEA 富集这类<b>数据分析</b>能力——那超出 gget"数据<i>访问</i>而非<i>分析</i>"的范围。想跑正统富集的用户应直接用 <code>gget enrichr</code> 主功能或 MSigDB/GSEA 本体。</span>
+<span class="en"><b>Fit verdict:</b> this function wraps only Enrichr's <b>data-distribution layer</b> (list libraries + fetch members) and deliberately does not replicate <b>analysis</b> capabilities like GSEA enrichment — which is outside gget's "data <i>access</i>, not <i>analysis</i>" remit. Users wanting real enrichment should use <code>gget enrichr</code>'s main mode or MSigDB/GSEA directly.</span></p>
+
+<!-- ===== 7 · 评估 ===== -->
+<h2 id="s7"><span class="n">7</span><span class="zh">评估（四 lens）</span><span class="en">Evaluation (4 lenses)</span></h2>
+<table>
+  <tr><th>Lens</th><th><span class="zh">判断</span><span class="en">Verdict</span></th><th><span class="zh">依据 / 备注</span><span class="en">Basis / notes</span></th></tr>
+  <tr>
+    <td><span class="zh">① Soundness（正确/健壮）</span><span class="en">① Soundness</span></td>
+    <td class="ok"><span class="zh">好</span><span class="en">Good</span></td>
+    <td><span class="zh">正确处理了源的关键 quirk（坏文库名返回 200+HTML 404）；对空文库、单集不存在、非法 species 都有明确报错；解析跳过空行、strip 空格。已实测真值（50 集 / Hypoxia 200 基因）与代码一致。</span><span class="en">Correctly handles the key source quirk (bad name → 200 + HTML 404); explicit errors for empty library, missing single set, invalid species; parser skips blank lines and strips whitespace. Verified against real ground truth (50 sets / Hypoxia 200 genes).</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">② 平台契合度</span><span class="en">② Platform fit</span></td>
+    <td class="ok">PASS</td>
+    <td><span class="zh">教科书式契合：纯数据<b>访问</b>（wrapping Enrichr 分发层，非 reimplement GSEA）；返回值 gget 化（DataFrame/json）；双接口（Python + CLI）；复用<b>已有</b>模块与依赖，<b>零新第三方依赖</b>、无二进制。</span><span class="en">Textbook fit: pure data <b>access</b> (wraps Enrichr's distribution layer, not reimplementing GSEA); gget-ified return (DataFrame/json); dual interface (Python + CLI); reuses an <b>existing</b> module and its deps — <b>zero new third-party deps</b>, no binaries.</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">③ 可复现性</span><span class="en">③ Reproducibility</span></td>
+    <td class="ok"><span class="zh">好（有小前提）</span><span class="en">Good (with caveat)</span></td>
+    <td><span class="zh">文库名内含版本（<code>_2020</code>），MSigDB 合集一经发布即冻结 → 同名文库输出稳定、可写进论文方法、可引用。前提：依赖 Enrichr 持续镜像该版本；Enrichr 端点本身无版本化 SLA。</span><span class="en">Library names carry a version (<code>_2020</code>) and MSigDB collections are frozen once released → stable output for a given name, citable in methods. Caveat: depends on Enrichr continuing to mirror that version; the endpoint itself carries no versioning SLA.</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">④ 维护成本</span><span class="en">④ Maintenance</span></td>
+    <td class="ok"><span class="zh">可控</span><span class="en">Manageable</span></td>
+    <td><span class="zh">代码薄（+102 行 <code>gget_enrichr.py</code>），无硬编码文库清单（文库名由用户传，天然抗腐烂）。风险点=Enrichr 端点/文本格式若变则失效——需 live 测试兜底，而当前 live 测试<b>设计不足</b>（见 §9）。</span><span class="en">Thin (+102 lines in <code>gget_enrichr.py</code>), no hard-coded library catalogue (name is user-supplied → naturally rot-resistant). Risk = the Enrichr endpoint/text format changing — which needs a live-test safety net, and the current live tests are <b>under-designed</b> (see §9).</span></td>
+  </tr>
+</table>
+<p><span class="zh"><b>一句话总评：</b>科学、契合、可复现、维护低——这是一个<b>高价值、低代价</b>的贡献，恰好卡在 gget 定位的甜点区。唯一需要打磨的是测试的健壮性，而非方案本身。</span>
+<span class="en"><b>One-line verdict:</b> sound, well-fitted, reproducible, low-maintenance — a <b>high-value, low-cost</b> contribution sitting squarely in gget's sweet spot. The only thing needing polish is test robustness, not the design.</span></p>
+
+<!-- ===== 8 · 设计决策 ===== -->
+<h2 id="s8"><span class="n">8</span><span class="zh">设计决策与权衡</span><span class="en">Design decisions & trade-offs</span></h2>
+<h3><span class="zh">① 走 Enrichr 而非 MSigDB 官网</span><span class="en">① Via Enrichr, not the MSigDB site</span></h3>
+<p><span class="zh">选：复用现成 Enrichr 端点。得：零新依赖、统一文本格式、覆盖上百文库（不止 MSigDB）、直接嵌进 <code>enrichr</code> 模块。弃：MSigDB 官方的版本元数据、systematic name、集描述、官方 <code>.gmt</code> 直发。<b>划算</b>——issue 只要"取基因集"，而不是完整 MSigDB 元数据门户。</span>
+<span class="en">Chosen: reuse the existing Enrichr endpoint. Gains: zero new deps, one uniform text format, hundreds of libraries (not just MSigDB), fits inside the <code>enrichr</code> module. Given up: MSigDB's official version metadata, systematic names, set descriptions, official <code>.gmt</code> feed. <b>Worth it</b> — the issue asked for "getting gene sets", not a full MSigDB metadata portal.</span></p>
+<h3><span class="zh">② 长格式 DataFrame 作默认返回</span><span class="en">② Long-format DataFrame as default</span></h3>
+<p><span class="zh">选：两列长表 <code>(gene_set, gene)</code>；<code>json=True</code> 给 dict。得：tidy、易 <code>groupby</code>/merge、与 gget 其它模块一致。弃：更紧凑但难处理的"一行一集+列表"宽格式。合理。</span>
+<span class="en">Chosen: two-column long table <code>(gene_set, gene)</code>; dict via <code>json=True</code>. Gains: tidy, easy <code>groupby</code>/merge, consistent with other gget modules. Given up: the more compact but harder-to-process "one row per set + list" wide format. Reasonable.</span></p>
+<h3><span class="zh">③ 向后兼容的 CLI 改造</span><span class="en">③ Backward-compatible CLI reshaping</span></h3>
+<p><span class="zh">把 <code>genes</code> 从 <code>nargs="+"</code> 放宽到 <code>nargs="*"</code>、<code>--database</code> 从 <code>required=True</code> 改为可选，再在运行时按 <code>--get_library</code> 是否存在决定"必须有 genes+database"还是"取文库"。既不破坏老用法，又让新旗标共存。细节到位。</span>
+<span class="en">Loosens <code>genes</code> from <code>nargs="+"</code> to <code>nargs="*"</code> and <code>--database</code> from <code>required=True</code> to optional, then decides at runtime — based on whether <code>--get_library</code> is present — whether "genes+database are required" or "fetch library". Preserves old usage while letting the new flag coexist. Well handled.</span></p>
+
+<!-- ===== 9 · 测试 ===== -->
+<h2 id="s9"><span class="n">9</span><span class="zh">测试 / live data test</span><span class="en">Tests / live data</span></h2>
+<p><span class="zh">PR 加了<b>两组</b>测试，正好对应技能里"两条正交线"，但只有一条做对了：</span>
+<span class="en">The PR adds <b>two</b> test groups matching the skill's "two orthogonal lines" — but only one is done right:</span></p>
+<table>
+  <tr><th></th><th><span class="zh">network-free 单元测试</span><span class="en">network-free unit tests</span></th><th><span class="zh">live data 测试</span><span class="en">live data tests</span></th></tr>
+  <tr>
+    <td><span class="zh">在本 PR 里</span><span class="en">In this PR</span></td>
+    <td class="ok"><code>TestEnrichrLibraryOffline</code><br><span class="zh">7 个，全 mock</span><span class="en">7 tests, fully mocked</span></td>
+    <td class="no"><span class="zh">4 个"伪装成单元测试"</span><span class="en">4 "disguised as unit tests"</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">测什么</span><span class="en">Tests what</span></td>
+    <td><span class="zh">解析、分支、报错路径（非法 species / HTML 404 / 空库 / 单集过滤 / 找不到 / json+save+csv 落盘）——用 <code>_FakeResponse</code> + <code>patch.object(requests,"get")</code>，确定性、离线可跑</span><span class="en">Parsing, branches, error paths (bad species / HTML 404 / empty lib / single-set filter / not-found / json+save+csv) via <code>_FakeResponse</code> + <code>patch.object(requests,"get")</code> — deterministic, offline</span></td>
+    <td><span class="zh">远端数据还在不在、对不对（真打 <code>maayanlab.cloud</code>）</span><span class="en">Whether the remote data is still there and correct (really hits <code>maayanlab.cloud</code>)</span></td>
+  </tr>
+</table>
+<div class="warn"><span class="zh"><b>点名："de-facto live but undesigned"。</b><code>TestEnrichr</code> 里的 <code>test_enrichr_library</code>、<code>_gene_set</code>、<code>_json</code>、<code>_bad</code> 这 4 个测试直接调用<b>真</b> <code>enrichr_library("MSigDB_Hallmark_2020")</code>——名字像单元测试，实际每次都<b>真联网</b>打 Enrichr，并断言<b>精确值</b>（<code>expected_n_sets==50</code>、<code>expected_n_genes==200</code>）。它们<b>没有</b> skip-on-network-error、<b>没有</b>限流→skip 处理。按技能规范，上游一抖或 CI 无网就会误红。</span>
+<span class="en"><b>Flagged: "de-facto live but undesigned".</b> In <code>TestEnrichr</code>, the tests <code>test_enrichr_library</code>, <code>_gene_set</code>, <code>_json</code>, <code>_bad</code> call the <b>real</b> <code>enrichr_library("MSigDB_Hallmark_2020")</code> — they look like unit tests but <b>actually go to the network</b> every run and assert <b>exact values</b> (<code>expected_n_sets==50</code>, <code>expected_n_genes==200</code>) with <b>no</b> skip-on-network-error and <b>no</b> rate-limit→skip. Per the skill, any upstream hiccup or offline CI turns them red.</span></div>
+<p><span class="zh"><b>缓解因素：</b>断言的值确实有<b>真值锚且相对稳定</b>——MSigDB Hallmark 2020 是已冻结版本（我实测确认 50/200）。所以"精确断言"这里比一般漂移数据脆弱度低。<b>建议加固</b>：① 包一层 <code>try/except requests.RequestException → self.skipTest</code>；② 对 Enrichr 限流返回的 HTML 页 → skip 而非 fail；③ 精确值保留（有真值锚），但可补一个"集数 ≥ 40"的下限断言作双保险；④ 复用生产路径（已做到——直接调 <code>enrichr_library</code>，未重抄解析逻辑，这点是对的）。</span>
+<span class="en"><b>Mitigating factors:</b> the asserted values do have a <b>stable ground-truth anchor</b> — MSigDB Hallmark 2020 is a frozen release (I verified 50/200). So "exact assertions" are less fragile here than for drifting data. <b>Suggested hardening:</b> (1) wrap in <code>try/except requests.RequestException → self.skipTest</code>; (2) skip (not fail) on Enrichr's rate-limit HTML page; (3) keep the exact values (real anchor) but add a "sets ≥ 40" lower-bound as a belt-and-braces check; (4) reuse the production path — already done, since it calls <code>enrichr_library</code> directly rather than re-copying parse logic. Good.</span></p>
+
+<!-- ===== 10 · 当前状态 ===== -->
+<h2 id="s10"><span class="n">10</span><span class="zh">当前状态</span><span class="en">Current status</span></h2>
+<pre><code>PR scverse/gget#241  "feat(enrichr): retrieve gene sets incl. MSigDB collections (#139)"
++329 / −6 across 8 files:
+  gget/gget_enrichr.py        +102      # new enrichr_library()
+  gget/main.py                +54 / −4  # --get_library / --gene_set CLI, backward-compat
+  gget/constants.py           +7        # GENESETLIBRARY_ENRICHR_URLS
+  gget/__init__.py            +1 / −1   # export enrichr_library
+  tests/test_enrichr.py       +103 / −1 # 4 (de-facto live) + 7 (offline mock)
+  tests/fixtures/test_enrichr.json +33  # fixtures incl. expected_n_sets/genes
+  docs/src/en/enrichr.md      +26       # flags + worked example
+  docs/src/en/updates.md      +3        # changelog (v ≥ 0.30.9)</code></pre>
+
+<!-- ===== 11 · 未决 ===== -->
+<h2 id="s11"><span class="n">11</span><span class="zh">未决 / 后续可选项</span><span class="en">Open / optional follow-ups</span></h2>
+<ul>
+  <li><span class="zh"><b>加固 live 测试</b>（本报告最实质的建议）：给 4 个真联网测试加 skip-on-network / 限流 skip，补下限断言。</span><span class="en"><b>Harden the live tests</b> (the most substantive suggestion here): add skip-on-network / rate-limit skip to the 4 networked tests, add lower-bound assertions.</span></li>
+  <li><span class="zh"><b>文库发现</b>：目前用户须自己知道文库名。可选增强——加一个"列出所有可用文库/MSigDB 合集"的辅助（Enrichr 有 <code>/datasetStatistics</code> 类端点）。</span><span class="en"><b>Library discovery</b>: users must already know the library name. Optional — a helper to list all available libraries/MSigDB collections (Enrichr has a <code>/datasetStatistics</code>-style endpoint).</span></li>
+  <li><span class="zh"><b>元数据缺失</b>：返回只含 <code>gene_set</code>/<code>gene</code>，丢了 description/版本/出处。如需可复现引用的完整溯源，未来可选择性保留 description 列。</span><span class="en"><b>Metadata gap</b>: return has only <code>gene_set</code>/<code>gene</code>, dropping description/version/provenance. For fully traceable citation, a future option could keep the description column.</span></li>
+  <li><span class="zh"><b>mouse 语义</b>："mouse" 静默走 human/Enrichr 变体，与 <code>gget.enrichr</code> 一致但对新用户可能意外——文档已注明，可保持。</span><span class="en"><b>mouse semantics</b>: "mouse" silently uses the human/Enrichr variant (consistent with <code>gget.enrichr</code> but potentially surprising) — documented; fine to keep.</span></li>
+</ul>
+
+<!-- ===== 12 · 参考 ===== -->
+<h2 id="s12"><span class="n">12</span><span class="zh">参考链接</span><span class="en">References</span></h2>
+<ul>
+  <li>PR: <a href="https://github.com/scverse/gget/pull/241">scverse/gget#241</a></li>
+  <li>Issue: <a href="https://github.com/scverse/gget/issues/139">scverse/gget#139</a> <span class="muted">(cakeinspace / Anurag Ranjak)</span></li>
+  <li>MSigDB: <a href="https://www.gsea-msigdb.org/gsea/msigdb/">gsea-msigdb.org/gsea/msigdb</a> · <span class="zh">Hallmark 论文</span><span class="en">Hallmark paper</span> Liberzon et al. 2015, <i>Cell Systems</i></li>
+  <li>Enrichr: <a href="https://maayanlab.cloud/Enrichr/">maayanlab.cloud/Enrichr</a> · <a href="https://maayanlab.cloud/Enrichr/#libraries"><span class="zh">文库列表</span><span class="en">library list</span></a> · <span class="zh">端点</span><span class="en">endpoint</span> <code>/Enrichr/geneSetLibrary?mode=text&libraryName=…</code></li>
+</ul>
+
+<!-- ===== footer ===== -->
+<footer>
+  <span class="zh">本文档由 Claude (subagent) 于 2026-07-02 20:23 SGT 整理，基于对 PR #241 完整 diff、issue #139、以及对 Enrichr <code>geneSetLibrary</code> 端点的一次实时探针（2026-07-02，确认 50 个 Hallmark 集 / Hypoxia 200 基因 / 坏文库名返回 200+HTML）。<b>诚实 caveat：</b>（1）文库版本冻结性依赖 Enrichr 持续镜像 MSigDB，非 gget 可保证；（2）"50/200"等值为 2026-07-02 实测快照，MSigDB 若发新版可能变化——以上游为准；（3）本报告为 AI 生成的第三方分析，非 gget 维护者官方意见；（4）测试健壮性建议为分析者判断，实际合入取决于维护者。使用前请以 PR 原文与上游数据源为准。</span>
+  <span class="en">Compiled by Claude (subagent) on 2026-07-02 20:23 SGT, based on PR #241's full diff, issue #139, and a live probe of Enrichr's <code>geneSetLibrary</code> endpoint (2026-07-02, confirming 50 Hallmark sets / Hypoxia 200 genes / bad-name → 200+HTML). <b>Honest caveats:</b> (1) frozen-version reproducibility depends on Enrichr continuing to mirror MSigDB — not guaranteed by gget; (2) values like "50/200" are a 2026-07-02 snapshot and may change if MSigDB releases a new version — defer to upstream; (3) this is an AI-generated third-party analysis, not the gget maintainers' official position; (4) the test-hardening suggestions are the analyst's judgement; actual merge is the maintainers' call. Defer to the PR text and upstream sources before relying on this.</span>
+</footer>
+
+</div>
+
+<script>
+  function setLang(l){
+    document.body.className = 'lang-' + l;
+    document.querySelectorAll('.langtoggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.l === l);
+    });
+  }
+</script>
+</body>
+</html>
