@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生物学基础 · 参考基因组学入门 (Reference genomics)</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--panel2:#1d212b;--ink:#e6e9ef;--muted:#9aa4b2;--acc:#f5a623;--acc2:#5aa9e6;--green:#4cc38a;--red:#e5648a;--line:#2a2f3a;--code:#0b0d11;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:900px;margin:0 auto;padding:32px 24px 80px}
+  header.top{position:relative;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:28px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:15px}
+  .stamp{position:absolute;top:0;right:0;font-size:12px;color:var(--muted);text-align:right}
+  .back{font-size:13px;color:var(--acc2)}
+  h2{font-size:21px;margin:34px 0 12px;padding-top:8px;border-top:1px solid var(--line);color:#fff}
+  h2 .n{color:var(--acc);margin-right:8px}
+  h3{font-size:16px;margin:18px 0 6px;color:var(--acc2)}
+  p{margin:10px 0}
+  a{color:var(--acc2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;color:#ffd9a0}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:13px;line-height:1.55}
+  pre code{background:none;border:none;padding:0;color:#d6deeb}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#fff}
+  tr:nth-child(even) td{background:var(--panel)}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:5px 0}
+  .tldr{background:linear-gradient(135deg,#1b2330,#171a21);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:16px 18px;margin:16px 0}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc2);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .analogy{background:#132018;border:1px solid #26402f;border-left:4px solid var(--green);border-radius:10px;padding:12px 16px;margin:14px 0}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:18px 0;font-size:14px}
+  .toc a{display:block;padding:2px 0;color:var(--ink)}
+  .toc a:hover{color:var(--acc2)}
+  .muted{color:var(--muted)}
+  .langtoggle{margin-bottom:6px}
+  .langtoggle button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;margin-left:4px}
+  .langtoggle button.active{background:var(--acc2);color:#08121c;border-color:var(--acc2);font-weight:600}
+  body.lang-zh .en{display:none}
+  body.lang-en .zh{display:none}
+  footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body class="lang-zh">
+<div class="wrap">
+
+<header class="top">
+  <div class="stamp">
+    <div class="langtoggle">
+      <button data-l="zh" class="active" onclick="setLang('zh')">中文</button><button data-l="en" onclick="setLang('en')">EN</button>
+    </div>
+    <span class="zh">生物学基础科普</span><span class="en">Biology basics</span>
+  </div>
+  <div class="back"><a href="../index.html">← <span class="zh">返回首页</span><span class="en">Back to index</span></a></div>
+  <h1>🧬 <span class="zh">参考基因组学入门</span><span class="en">Reference genomics 101</span></h1>
+  <div class="sub"><span class="zh">给非生物背景读者：转录本、RNA-seq、比对索引、GTF/FASTA，以及 Ensembl 与 GENCODE 的区别——都用大白话和一个"工厂"比喻串起来。</span><span class="en">For non-biologists: transcripts, RNA-seq, alignment indices, GTF/FASTA, and Ensembl vs GENCODE — all in plain language tied together by one "factory" analogy.</span></div>
+</header>
+
+<div class="tldr">
+  <strong>TL;DR：</strong>
+  <span class="zh">细胞像一间工厂：<b>基因(DNA)</b> 是锁在档案室的设计图原本，<b>转录本(RNA)</b> 是抄出来的工作副本，<b>蛋白质</b> 是照副本造出的零件。<b>RNA-seq</b> 是去车间清点"今天在用哪些副本、各印了几张"。要清点就得先把测序碎片"归位"到参考上，这靠 <b>kallisto/STAR 索引</b>（给参考建的目录）。参考由两个文件描述：<b>FASTA</b>（序列本身＝书里的文字）＋ <b>GTF</b>（坐标标注＝目录页码）。而 <b>Ensembl</b> 与 <b>GENCODE</b> 是两套（对人/鼠而言同源、但各有默认场景的）参考标准——所以 gget 让你两个都能取。</span>
+  <span class="en">A cell is like a factory: <b>a gene (DNA)</b> is the master blueprint locked in the archive, <b>a transcript (RNA)</b> is a working copy made from it, and <b>a protein</b> is the part built from that copy. <b>RNA-seq</b> is going to the floor to count "which copies are in use today, and how many of each". Counting requires first mapping the sequencing fragments back onto a reference — done via a <b>kallisto/STAR index</b> (a lookup table built for the reference). A reference is described by two files: <b>FASTA</b> (the sequences themselves = the book's text) + <b>GTF</b> (coordinate annotation = the table of contents). And <b>Ensembl</b> vs <b>GENCODE</b> are two reference standards (co-produced and largely overlapping for human/mouse, but each the default in different pipelines) — which is why gget lets you fetch either.</span>
+</div>
+
+<div class="analogy">
+  <strong>🏭 <span class="zh">贯穿全文的比喻：细胞 = 工厂</span><span class="en">The running analogy: a cell = a factory</span></strong><br>
+  <span class="zh"><b>基因/DNA</b> = 档案室里的设计图原本（不外借、怕损坏）· <b>转录本/RNA</b> = 抄出去车间用的工作副本 · <b>蛋白质</b> = 照副本造出来干活的零件/机器 · <b>转录</b> = "抄图"这个动作。</span>
+  <span class="en"><b>Gene / DNA</b> = the master blueprint in the archive (never lent out, must not be damaged) · <b>Transcript / RNA</b> = a working copy taken to the floor · <b>Protein</b> = the part/machine built from that copy · <b>Transcription</b> = the act of "copying the blueprint".</span>
+</div>
+
+<div class="toc">
+  <a href="#s1">1 · <span class="zh">转录本 (transcript)</span><span class="en">Transcript</span></a>
+  <a href="#s2">2 · RNA-seq</a>
+  <a href="#s3">3 · <span class="zh">比对 / kallisto·STAR 索引</span><span class="en">Alignment / kallisto·STAR index</span></a>
+  <a href="#s4">4 · <span class="zh">GTF 与 FASTA</span><span class="en">GTF &amp; FASTA</span></a>
+  <a href="#s5">5 · <span class="zh">Ensembl vs GENCODE：为什么要两个</span><span class="en">Ensembl vs GENCODE: why both</span></a>
+  <a href="#s6">6 · <span class="zh">串起来 & 与 gget 的关系</span><span class="en">Putting it together &amp; gget</span></a>
+</div>
+
+<h2 id="s1"><span class="n">1</span><span class="zh">转录本 (transcript) 是什么</span><span class="en">What is a transcript</span></h2>
+<p><span class="zh"><b>转录本 = 基因被"抄录"出来的那份 RNA 拷贝。</b>细胞不敢直接动用 DNA 原本，而是先抄一份 RNA 副本拿去用——这个"抄"的动作叫<b>转录 (transcription)</b>，抄出来的产物就是转录本。整条流水线是：</span><span class="en"><b>A transcript is the RNA copy made from a gene.</b> A cell won't use the DNA original directly; it first makes an RNA copy to work from — that copying act is <b>transcription</b>, and its product is the transcript. The full pipeline is:</span></p>
+<pre><code>DNA  --(转录 transcription)-->  转录本 RNA transcript  --(翻译 translation)-->  蛋白质 protein</code></pre>
+<h3><span class="zh">关键点：一个基因能抄出多个不同的转录本</span><span class="en">Key point: one gene can yield several different transcripts</span></h3>
+<p><span class="zh">抄图时可以<b>只抄某几段、跳过另几段</b>，拼出不同版本的副本——这叫<b>可变剪接 (alternative splicing)</b>。所以一个<b>基因</b>可能对应<b>多个转录本</b>，进而可能造出多种略有差异的蛋白。这也是人类约 2 万个基因却能产生远多于 2 万种蛋白的原因。</span><span class="en">When copying, the cell can <b>keep only certain segments and skip others</b>, producing different versions — this is <b>alternative splicing</b>. So one <b>gene</b> can map to <b>many transcripts</b>, and hence to several slightly different proteins. That's why ~20,000 human genes can produce far more than 20,000 proteins.</span></p>
+<div class="note"><span class="zh"><b>连回 gget：</b><code>gget ref -w cdna</code> 取的"transcript sequences（转录本序列）"就是这些 RNA 副本的序列集合；<code>-w ncrna</code> 取的是 <b>lncRNA 转录本</b>——一类抄出来<b>但不拿去造蛋白</b>、自身另有调控作用的特殊转录本（long non-coding RNA，长非编码 RNA）。</span><span class="en"><b>Back to gget:</b> <code>gget ref -w cdna</code> fetches "transcript sequences" — the sequences of these RNA copies; <code>-w ncrna</code> fetches <b>lncRNA transcripts</b> — a special class that is copied out <b>but not used to build protein</b>, instead playing regulatory roles (long non-coding RNA).</span></div>
+
+<h2 id="s2"><span class="n">2</span><span class="zh">RNA-seq 是什么</span><span class="en">What is RNA-seq</span></h2>
+<p><span class="zh"><b>一句话：测一测细胞此刻正在"抄录"哪些基因、各抄了多少份。</b></span><span class="en"><b>In one line: measure which genes a cell is currently transcribing, and how many copies of each.</b></span></p>
+<p><span class="zh">同一套设计图，<b>不同细胞、不同状态下抄的图和份数都不同</b>：肝细胞和神经元开的基因完全不一样；癌细胞会疯狂多抄某些图。<b>RNA-seq（RNA 测序）</b>就是把细胞里所有 RNA 副本捞出来 → 用测序仪逐条读出序列 → 统计每个基因/转录本被抄了多少份。得到的这张"各基因表达量"清单叫<b>基因表达谱</b>。</span><span class="en">The same blueprint set is <b>copied differently across cells and states</b>: liver cells and neurons switch on entirely different genes; cancer cells over-copy certain blueprints. <b>RNA-seq (RNA sequencing)</b> pulls out all the RNA copies in a cell → reads each one on a sequencer → counts how many copies of each gene/transcript there are. The resulting "expression per gene" list is the <b>gene expression profile</b>.</span></p>
+<div class="analogy"><span class="zh">🏭 不看固定的设计图库（DNA），而是去车间清点<b>今天实际在用哪些副本、各印了多少张</b>。用途：比较 病 vs 健康、用药前 vs 用药后、这种细胞 vs 那种细胞——看谁的基因开多了/关掉了。</span><span class="en">🏭 Don't look at the fixed blueprint archive (DNA); go to the floor and count <b>which copies are actually in use today and how many of each</b>. Uses: disease vs healthy, before vs after a drug, one cell type vs another — to see which genes went up or down.</span></div>
+
+<h2 id="s3"><span class="n">3</span><span class="zh">比对与索引：kallisto / STAR index 是什么</span><span class="en">Alignment &amp; index: what kallisto / STAR index means</span></h2>
+<p><span class="zh">测序仪读出来的是<b>几千万条几十~上百字母的短片段</b>（叫 <b>reads</b>），但它们不带标签——你不知道每条来自哪个基因。<b>必须先把每条 read"归位"到参考序列上，才能数数。</b></span><span class="en">A sequencer outputs <b>tens of millions of short fragments of tens-to-hundreds of letters</b> (called <b>reads</b>), unlabeled — you don't know which gene each came from. <b>You must first map each read back onto the reference before you can count.</b></span></p>
+<ul>
+  <li><span class="zh"><b>STAR、kallisto</b> 是做这件事的软件：STAR 做<b>比对 (alignment)</b>，kallisto 做更快的<b>伪比对 (pseudo-alignment)</b>。</span><span class="en"><b>STAR and kallisto</b> are the tools for this: STAR does <b>alignment</b>, kallisto does a faster <b>pseudo-alignment</b>.</span></li>
+  <li><span class="zh"><b>索引 (index)</b> = 这些工具为了<b>快速查找</b>，预先把参考序列建成的一张"字典/目录"。</span><span class="en">The <b>index</b> is a "dictionary/lookup table" these tools pre-build from the reference so lookups are fast.</span></li>
+</ul>
+<div class="analogy"><span class="zh">📖 就像给一本没有目录的大词典先编好索引：之后查任何词都能秒定位，而不必每次从头翻。建索引是"一次性预处理"，之后每条 read 归位都很快。</span><span class="en">📖 Like adding an index to a dictionary that had none: afterwards any word is found instantly, instead of scanning from page one every time. Building the index is a one-time preprocessing step that makes every subsequent read lookup fast.</span></div>
+<div class="note"><span class="zh"><b>连回 gget：</b>建索引的<b>输入</b>正是 <code>gget ref</code> 取的参考文件（转录本 FASTA + GTF）。所以链路是：<code>gget ref</code> 下载参考 → kallisto/STAR 建索引 → 拿 RNA-seq 的 reads 去数每个转录本多少条。gget 文档里的 <code>gget ref … | kb ref</code> 示例就是这个衔接。</span><span class="en"><b>Back to gget:</b> the <b>input</b> to building an index is exactly the reference files <code>gget ref</code> fetches (transcript FASTA + GTF). So the chain is: <code>gget ref</code> downloads the reference → kallisto/STAR builds the index → RNA-seq reads are counted against each transcript. The <code>gget ref … | kb ref</code> example in gget's docs is precisely this hand-off.</span></div>
+
+<h2 id="s4"><span class="n">4</span><span class="zh">GTF 与 FASTA：一对搭档</span><span class="en">GTF &amp; FASTA: a pair</span></h2>
+<p><span class="zh">描述一份参考需要两个文件，一个管<b>"是什么字母"</b>，一个管<b>"在哪"</b>：</span><span class="en">Describing a reference takes two files — one for <b>"what letters"</b>, one for <b>"where"</b>:</span></p>
+<table>
+  <tr><th></th><th><b>FASTA</b> <span class="zh">（序列文件）</span><span class="en">(sequence file)</span></th><th><b>GTF</b> <span class="zh">（注释文件）</span><span class="en">(annotation file)</span></th></tr>
+  <tr><td><span class="zh">装什么</span><span class="en">Contains</span></td><td><span class="zh"><b>实际碱基/氨基酸序列</b>（ACGT… 那串字母）</span><span class="en"><b>the actual base/amino-acid sequence</b> (the ACGT… letters)</span></td><td><span class="zh"><b>坐标标注</b>：每个基因/转录本/外显子<b>在染色体第几位到第几位</b></span><span class="en"><b>coordinate annotation</b>: which chromosome positions each gene/transcript/exon spans</span></td></tr>
+  <tr><td><span class="zh">类比</span><span class="en">Analogy</span></td><td><span class="zh">一整本书的<b>全部文字</b></span><span class="en">the <b>full text</b> of a book</span></td><td><span class="zh">这本书的<b>目录 + 页码批注</b></span><span class="en">the book's <b>table of contents + page markers</b></span></td></tr>
+  <tr><td><span class="zh">一行长啥样</span><span class="en">A line looks like</span></td><td><code>&gt;chr1</code><br><code>ACGTACGT…</code></td><td><code>chr1  gene  11869 14409 + … "DDX11L1"</code></td></tr>
+  <tr><td><span class="zh">回答的问题</span><span class="en">Answers</span></td><td><span class="zh">"这段 DNA 长啥样？"</span><span class="en">"What does this DNA read?"</span></td><td><span class="zh">"某基因坐落在哪、有哪些外显子？"</span><span class="en">"Where does a gene sit, and what exons does it have?"</span></td></tr>
+</table>
+<p><span class="zh">对应到 <code>gget ref</code> 的 <code>which</code>：</span><span class="en">Mapped to <code>gget ref</code>'s <code>which</code>:</span></p>
+<ul>
+  <li><code>-w dna</code> → <span class="zh"><b>genome FASTA</b>：整条染色体的字母串（几十亿个）。</span><span class="en"><b>genome FASTA</b>: the letter string of whole chromosomes (billions of them).</span></li>
+  <li><code>-w cdna</code> → <span class="zh"><b>transcript FASTA</b>：只把每个转录本拼出来的序列。</span><span class="en"><b>transcript FASTA</b>: just the assembled sequence of each transcript.</span></li>
+  <li><code>-w gtf</code> → <span class="zh"><b>GTF</b>：不含字母，只含"谁在哪儿"的坐标表。</span><span class="en"><b>GTF</b>: no letters, only the "who sits where" coordinate table.</span></li>
+</ul>
+<div class="note"><span class="zh"><b>为什么两个都要？</b>光有字母（FASTA）不知道哪段是基因；光有坐标（GTF）不知道具体序列。合起来才能"从整条染色体上、按 GTF 的坐标、切出某基因的序列"。</span><span class="en"><b>Why both?</b> With only letters (FASTA) you can't tell which stretch is a gene; with only coordinates (GTF) you don't have the actual sequence. Together they let you "cut out a gene's sequence from the whole chromosome, at the coordinates GTF specifies".</span></div>
+
+<h2 id="s5"><span class="n">5</span><span class="zh">Ensembl 和 GENCODE：既然都有转录本，为什么还要两个？</span><span class="en">Ensembl vs GENCODE: both have transcripts, so why both?</span></h2>
+<p><span class="zh"><b>核心答案：对人和小鼠，GENCODE 与 Ensembl 的注释其实"同源"——同一批人协同产出、内容高度重叠——但它们不是同一份文件，发布节奏、打包方式、ID 习惯、社区默认都不同，所以要能分别取。</b></span><span class="en"><b>Core answer: for human and mouse, GENCODE and Ensembl annotations are essentially co-produced by the same groups and overlap heavily — but they are not the same file. Release cadence, packaging, ID conventions, and community defaults all differ, so you need to fetch each.</b></span></p>
+<ol>
+  <li><span class="zh"><b>同源但不等同：</b>人/鼠的 GENCODE 与 Ensembl 注释由同一团队（EBI/Havana + Ensembl）协同产生，内容高度重叠；但 GENCODE 有自己的 release 节奏、会额外发布一些资源，版本号体系也不同（GENCODE v46 ≠ Ensembl 110）。</span><span class="en"><b>Co-produced, not identical:</b> human/mouse GENCODE and Ensembl annotations come from the same teams (EBI/Havana + Ensembl) and overlap heavily; but GENCODE has its own release cadence, publishes some extra resources, and uses a different version scheme (GENCODE v46 ≠ Ensembl 110).</span></li>
+  <li><span class="zh"><b>社区默认不同（最实际的原因）：</b>很多主流数据集和流程默认认 <b>GENCODE</b>——如 GTEx、TCGA、10x/Cell Ranger 的多数参考。你的分析若要和这些数据对齐，就<b>必须</b>用 GENCODE 那份，不能拿 Ensembl 替；反之另一些工具默认 Ensembl。<b>混用两套注释会导致基因 ID/坐标对不上。</b></span><span class="en"><b>Different community defaults (the most practical reason):</b> many mainstream datasets and pipelines default to <b>GENCODE</b> — e.g. GTEx, TCGA, and most 10x/Cell Ranger references. If your analysis must align with those, you <b>must</b> use the GENCODE one, not Ensembl; conversely other tools default to Ensembl. <b>Mixing the two annotations causes gene IDs/coordinates to mismatch.</b></span></li>
+  <li><span class="zh"><b>打包/命名习惯不同：</b>染色体命名（<code>chr1</code> vs <code>1</code>）、文件组织、ID 版本号写法等细节不同，下游工具往往挑食。</span><span class="en"><b>Different packaging/naming:</b> chromosome names (<code>chr1</code> vs <code>1</code>), file organization, ID-versioning style — details differ, and downstream tools are often picky.</span></li>
+  <li><span class="zh"><b>可复现性：</b>论文里写"用 GENCODE v46"是明确、可复跑的；换成 Ensembl 就是另一份输入了。</span><span class="en"><b>Reproducibility:</b> "used GENCODE v46" in a methods section is precise and re-runnable; swapping in Ensembl is a different input.</span></li>
+</ol>
+<div class="note"><span class="zh"><b>一句话：</b>不是"一样的东西取两遍"，而是"两套虽同源、但各有默认场景的标准，得都能取"。所以 gget 加 GENCODE 不是重复造轮子，而是补上另一套社区标准——<code>gget ref … --source ensembl|gencode</code> 让你精确取到需要的那一份。</span><span class="en"><b>In one line:</b> it's not "fetching the same thing twice", but "two co-produced standards, each the default in different settings — you must be able to fetch either". So adding GENCODE to gget isn't reinventing a wheel; it fills in the other community standard — <code>gget ref … --source ensembl|gencode</code> gets you exactly the one you need.</span></div>
+
+<h2 id="s6"><span class="n">6</span><span class="zh">串起来：一条典型链路</span><span class="en">Putting it together: a typical chain</span></h2>
+<pre><code>1. gget ref  --source gencode -w cdna,gtf human      # 取参考：转录本 FASTA + GTF
+2. kb ref  /  STAR --runMode genomeGenerate           # 建索引（给参考编"目录"）
+3. kallisto quant  /  STAR  (你的 RNA-seq reads)      # 把 reads 归位并计数
+   → 得到每个转录本/基因的表达量（表达谱）</code></pre>
+<p><span class="zh">这条链路里，本页每个概念各就各位：<b>转录本</b>是被数的对象，<b>FASTA/GTF</b>是参考的两半，<b>索引</b>让归位变快，<b>RNA-seq</b>提供待数的 reads，<b>Ensembl/GENCODE</b>决定用哪套参考标准。gget 负责的是链路第 1 步——把参考<b>可达、可复现</b>地取到手。</span><span class="en">Every concept on this page has its place in this chain: the <b>transcript</b> is what gets counted, <b>FASTA/GTF</b> are the two halves of the reference, the <b>index</b> makes mapping fast, <b>RNA-seq</b> supplies the reads to count, and <b>Ensembl/GENCODE</b> decides which reference standard is used. gget owns step 1 — making the reference <b>accessible and reproducible</b> to fetch.</span></p>
+
+<footer>
+  <span class="zh">本页由 Claude Opus 4.8 (1M context) 于 2026-07-03 SGT 整理，面向非生物背景读者的入门科普，配合对 <a href="https://github.com/scverse/gget/pull/238">gget PR #238</a>（gget ref 接入 GENCODE）的分析。为便于理解做了大量简化，术语的精确定义请以 <a href="https://www.gencodegenes.org/">GENCODE</a>、<a href="https://www.ensembl.org/">Ensembl</a> 等权威来源为准。AI 生成内容，供参考。</span>
+  <span class="en">Compiled by Claude Opus 4.8 (1M context) on 2026-07-03 SGT as an intro primer for non-biologists, accompanying the analysis of <a href="https://github.com/scverse/gget/pull/238">gget PR #238</a> (GENCODE support in gget ref). Heavily simplified for clarity; for precise definitions defer to authoritative sources such as <a href="https://www.gencodegenes.org/">GENCODE</a> and <a href="https://www.ensembl.org/">Ensembl</a>. AI-generated, for reference.</span>
+</footer>
+
+</div>
+<script>
+  function setLang(l){
+    document.body.className = 'lang-' + l;
+    document.querySelectorAll('.langtoggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.l === l);
+    });
+  }
+</script>
+</body>
+</html>
