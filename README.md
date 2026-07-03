@@ -10,6 +10,7 @@
 
 | PR | 模块 | 一句话 | 在线浏览 |
 |----|------|--------|----------|
+| [#238](https://github.com/scverse/gget/pull/238) | `gget ref` | 给 `ref` 加 GENCODE 数据源（人/鼠 GTF+FASTA），与 Ensembl 并列、复用同一返回结构 | [🌐 打开](https://elarwei001.github.io/gget_issues/pr238-ref-gencode.html) |
 | [#245](https://github.com/scverse/gget/pull/245) | `gget pineapple` | 接入 Pineapple 策展的生物影像数据集/权重（仅下载，不做图像处理） | [🌐 打开](https://elarwei001.github.io/gget_issues/pr245-pineapple.html) |
 | [#242](https://github.com/scverse/gget/pull/242) | `gget mitocarta` | 取 Broad MitoCarta3.0 的两个 `.xls` 线粒体蛋白/通路数据库 | [🌐 打开](https://elarwei001.github.io/gget_issues/pr242-mitocarta.html) |
 | [#241](https://github.com/scverse/gget/pull/241) | `gget enrichr` | 给 enrichr 加检索 gene sets（含 MSigDB 合集），复用 Enrichr 端点、返回 tidy 长表 | [🌐 打开](https://elarwei001.github.io/gget_issues/pr241-enrichr.html) |

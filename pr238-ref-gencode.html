@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>gget ref + GENCODE (PR #238) — 分析</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --ink:#e6e9ef; --muted:#9aa4b2;
+    --acc:#f5a623; --acc2:#5aa9e6; --green:#4cc38a; --red:#e5648a; --line:#2a2f3a; --code:#0b0d11;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 24px 80px}
+  header.top{position:relative;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:28px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:15px}
+  .stamp{position:absolute;top:0;right:0;font-size:12px;color:var(--muted);text-align:right}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--muted);margin:2px 4px 2px 0}
+  h2{font-size:21px;margin:38px 0 12px;padding-top:8px;border-top:1px solid var(--line);color:#fff}
+  h2 .n{color:var(--acc);font-variant-numeric:tabular-nums;margin-right:8px}
+  h3{font-size:17px;margin:22px 0 8px;color:var(--acc2)}
+  p{margin:10px 0}
+  a{color:var(--acc2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;color:#ffd9a0}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:13px;line-height:1.55}
+  pre code{background:none;border:none;padding:0;color:#d6deeb}
+  .tldr{background:linear-gradient(135deg,#1b2330,#171a21);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:16px 18px;margin:16px 0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#fff}
+  tr:nth-child(even) td{background:var(--panel)}
+  .ok{color:var(--green);font-weight:600}
+  .no{color:var(--red);font-weight:600}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc2);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .warn{background:#251c1c;border:1px solid #4a2b2b;border-left:4px solid var(--red);border-radius:8px;padding:12px 16px;margin:14px 0}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:5px 0}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:18px 0;columns:2;font-size:14px}
+  .toc a{display:block;padding:2px 0;color:var(--ink)}
+  .toc a:hover{color:var(--acc2)}
+  .muted{color:var(--muted)}
+  .primer{background:#132018;border:1px solid #26402f;border-left:4px solid var(--green);border-radius:10px;padding:14px 18px;margin:16px 0}
+  body.lang-zh .en{display:none}
+  body.lang-en .zh{display:none}
+  .langtoggle{margin-bottom:6px}
+  .langtoggle button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;margin-left:4px}
+  .langtoggle button.active{background:var(--acc2);color:#08121c;border-color:var(--acc2);font-weight:600}
+  footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body class="lang-zh">
+<div class="wrap">
+
+<header class="top">
+  <div class="stamp">
+    <div class="langtoggle">
+      <button data-l="zh" class="active" onclick="setLang('zh')">中文</button><button data-l="en" onclick="setLang('en')">EN</button>
+    </div>
+    Generated: 2026-07-03 21:34 SGT<br>by Claude Opus 4.8 (1M context)
+  </div>
+  <h1>📖 <span class="zh">gget ref 接入 GENCODE</span><span class="en">gget ref + GENCODE</span></h1>
+  <div class="sub"><span class="zh">给 <code>gget ref</code> 增加 GENCODE 数据源（人 / 鼠），与默认的 Ensembl 并列 — PR #238 分析</span><span class="en">Adding GENCODE as a reference source (human / mouse) to <code>gget ref</code>, alongside the default Ensembl — analysis of PR #238</span></div>
+  <div style="margin-top:10px">
+    <span class="pill">PR: scverse/gget#238</span>
+    <span class="pill">Issue: #73</span>
+    <span class="pill">上游 Upstream: GENCODE (EBI)</span>
+    <span class="pill"><span class="zh">类型</span><span class="en">Type</span>: B · <span class="zh">增强已有模块</span><span class="en">module enhancement</span></span>
+    <span class="pill"><span class="zh">状态</span><span class="en">Status</span>: Draft · CI <span class="ok">green</span></span>
+  </div>
+</header>
+
+<div class="primer">
+  <strong>📖 <span class="zh">背景科普</span><span class="en">Primer</span> · GENCODE</strong><br>
+  <span class="zh">要研究基因，先得有一张"基因组地图"——告诉你每个基因、每条转录本落在染色体的哪个位置。<b>GENCODE</b> 就是人和小鼠这张地图里最权威、最常用的一份（由 EBI 主导的联盟人工审编，是 ENCODE 计划的一部分）。做 RNA-seq、建 kallisto/STAR 索引时，大家几乎都会用到 GENCODE 或 Ensembl 的注释文件（GTF）和序列文件（FASTA）。gget 原本只能从 <b>Ensembl</b> 取这些参考文件；这个 PR 让它也能从 GENCODE 取——对做人/鼠基因组学的人来说是个高频需求。</span>
+  <span class="en">To study genes you first need a "genome map" — which tells you where each gene and transcript sits on a chromosome. <b>GENCODE</b> is the most authoritative, most widely used such map for human and mouse (hand-curated by an EBI-led consortium, part of the ENCODE project). Nearly everyone doing RNA-seq or building a kallisto/STAR index uses GENCODE or Ensembl annotation (GTF) and sequence (FASTA) files. gget could previously fetch these only from <b>Ensembl</b>; this PR lets it fetch from GENCODE too — a frequent need in human/mouse genomics.</span>
+  <div class="muted" style="margin-top:6px">🔗 <a href="https://www.gencodegenes.org/">gencodegenes.org</a> · <a href="https://ftp.ebi.ac.uk/pub/databases/gencode/">EBI GENCODE FTP</a></div>
+</div>
+
+<div class="toc">
+  <a href="#s1">1 · TL;DR</a>
+  <a href="#s2"><span class="zh">2 · 背景 / 问题</span><span class="en">2 · Background</span></a>
+  <a href="#s3"><span class="zh">3 · 上游 / 数据源</span><span class="en">3 · Upstream / data source</span></a>
+  <a href="#s4"><span class="zh">4 · 返回值形态详解</span><span class="en">4 · Return-value shape</span></a>
+  <a href="#s5"><span class="zh">5 · 如何使用</span><span class="en">5 · How to use</span></a>
+  <a href="#s6"><span class="zh">6 · Scope / 边界</span><span class="en">6 · Scope</span></a>
+  <a href="#s7"><span class="zh">7 · 评估（四 lens）</span><span class="en">7 · Evaluation</span></a>
+  <a href="#s8"><span class="zh">8 · 设计决策</span><span class="en">8 · Design decisions</span></a>
+  <a href="#s9"><span class="zh">9 · 测试 / live data test</span><span class="en">9 · Testing</span></a>
+  <a href="#s10"><span class="zh">10 · 当前状态</span><span class="en">10 · Status</span></a>
+  <a href="#s11"><span class="zh">11 · 未决 / 建议</span><span class="en">11 · Open items</span></a>
+  <a href="#s12"><span class="zh">12 · 参考链接</span><span class="en">12 · References</span></a>
+</div>
+
+<div class="tldr" id="s1">
+  <strong>TL;DR：</strong>
+  <span class="zh">PR #238 给 <code>gget ref</code> 加了一个 <code>source="gencode"</code> 参数，让用户能像取 Ensembl 参考文件一样取 <b>GENCODE 的 GTF / FASTA</b>（仅人和鼠）。平台契合度很好——纯数据<b>访问</b>、复用 Ensembl 那套返回结构、外层键完全一致、没有引入任何越界的分析/二进制。离线单元测试写得扎实（11 个，全 mock）。<b>主要待改进项在测试的另一半</b>：<code>test_ref.json</code> 里有两个 fixture 测试其实是"伪装成单元测试的 live 测试"——真打 GENCODE FTP、断言精确值、却<b>没有网络错误 skip / 限流兜底</b>（EBI 一抖 CI 就红）；而最容易腐烂的"最新 release HTML 抓取"路径<b>没有任何 live 测试</b>。结论：方案科学、契合 gget 角色、价值高；补齐 live 测试的健壮性后即可。</span>
+  <span class="en">PR #238 adds a <code>source="gencode"</code> parameter to <code>gget ref</code>, letting users fetch <b>GENCODE GTF / FASTA</b> files (human and mouse only) the same way they fetch Ensembl references. Platform fit is strong — pure data <b>access</b>, reuses the Ensembl return structure with identical outer keys, no out-of-scope analysis or binaries. The offline unit tests are solid (11, fully mocked). <b>The main gap is the other half of testing</b>: two fixtures in <code>test_ref.json</code> are de-facto live tests disguised as unit tests — they hit the real GENCODE FTP and assert exact values, but with <b>no skip-on-network-error / rate-limit handling</b> (a flaky EBI turns CI red); and the most rot-prone path — HTML-scraping the "latest release" — has <b>no live test at all</b>. Verdict: sound, on-mission, high value; just needs the live-test hardening.</span>
+</div>
+
+<h2 id="s2"><span class="n">2</span><span class="zh">背景 / 问题</span><span class="en">Background / problem</span></h2>
+<p><span class="zh">Issue <a href="https://github.com/scverse/gget/issues/73">#73</a>（由 <b>Yenaled</b> 提出，标注为"Extension of existing module"）诉求极简：<i>"Have gget fetch FASTAs and GTFs from GENCODE"</i>，没有给示例命令或返回值。</span><span class="en">Issue <a href="https://github.com/scverse/gget/issues/73">#73</a> (filed by <b>Yenaled</b>, tagged "Extension of existing module") is minimal: <i>"Have gget fetch FASTAs and GTFs from GENCODE"</i>, with no example command or return value.</span></p>
+<div class="note"><span class="zh"><b>底层需求（非字面）：</b>GENCODE 是人/鼠基因组学事实上的标准注释来源，很多流程（尤其单细胞 / RNA-seq 建索引）默认用 GENCODE 而非 Ensembl。gget 此前只封装了 Ensembl，缺了这一大块高频来源——这是"补齐一个主流数据源"，而不是新造能力。</span><span class="en"><b>Underlying need (beyond the literal ask):</b> GENCODE is the de-facto standard annotation for human/mouse genomics; many pipelines (especially single-cell / RNA-seq indexing) default to GENCODE over Ensembl. gget previously wrapped only Ensembl, missing this major, frequently-used source — so this fills in a mainstream data source rather than inventing a new capability.</span></div>
+
+<h2 id="s3"><span class="n">3</span><span class="zh">上游 / 数据源</span><span class="en">Upstream / data source</span></h2>
+<p><span class="zh">GENCODE 文件托管在 <b>EBI 的 FTP</b>（<code>https://ftp.ebi.ac.uk/pub/databases/gencode/</code>）——机构级 CDN，稳定，不是个人目录。没有可编程的 manifest / REST API，所以 PR 用<b>抓取 FTP 目录 HTML 列表</b>的方式来发现 release 和文件（与 gget 既有的 Ensembl <code>find_FTP_link</code> 完全同一套路）。</span><span class="en">GENCODE files are hosted on <b>EBI's FTP</b> (<code>https://ftp.ebi.ac.uk/pub/databases/gencode/</code>) — an institutional CDN, stable, not a personal directory. There is no programmatic manifest / REST API, so the PR discovers releases and files by <b>scraping the FTP directory HTML listing</b> (exactly the same pattern as gget's existing Ensembl <code>find_FTP_link</code>).</span></p>
+<table>
+  <tr><th><span class="zh">要素</span><span class="en">Aspect</span></th><th><span class="zh">情况</span><span class="en">Detail</span></th></tr>
+  <tr><td><span class="zh">目录结构</span><span class="en">Layout</span></td><td><code>Gencode_human/release_NN/</code> · <code>Gencode_mouse/release_MNN/</code>（<span class="zh">鼠带 <code>M</code> 前缀</span><span class="en">mouse carries an <code>M</code> prefix</span>）</td></tr>
+  <tr><td><span class="zh">Release 发现</span><span class="en">Release discovery</span></td><td><span class="zh">抓目录 HTML 里的 <code>release_*</code> 链接取最大号；无 API</span><span class="en">Parse <code>release_*</code> links from the directory HTML, take the max; no API</span></td></tr>
+  <tr><td><span class="zh">文件命名</span><span class="en">File naming</span></td><td><code>gencode.vNN.annotation.gtf.gz</code> <span class="zh">等；基因组 FASTA 是</span><span class="en">etc.; genome FASTA is</span> <code>{Assembly}.primary_assembly.genome.fa.gz</code>（<span class="zh">带装配版前缀，如 GRCh38 / GRCm39</span><span class="en">assembly-prefixed, e.g. GRCh38 / GRCm39</span>）</td></tr>
+  <tr><td><span class="zh">鉴权 / 限流</span><span class="en">Auth / limits</span></td><td><span class="zh">无鉴权；公共 FTP-over-HTTPS，无确认页 quirk</span><span class="en">No auth; public FTP-over-HTTPS, no confirmation-page quirk</span></td></tr>
+</table>
+<div class="note"><span class="zh"><b>探针核实（2026-07-03，SKILL 第 2 步）：</b>实探 EBI FTP 确认数据源现状与真值锚——最新 human release = <b>50</b>、mouse = <b>M39</b>（说明 HTML 抓取路径当前有效）；PR fixture 里锚定的 v46 human GTF 实测 <code>Content-Length=51006804</code> 字节（≈48.6 MiB，目录列表四舍五入显示 <b>49M</b> ✓）、<code>Last-Modified=2024-05-13 15:01 GMT</code>（= 服务器本地夏令时 <b>16:01</b>，目录 HTML 显示 <code>2024-05-13&nbsp;16:01</code> ✓）。v46 是<b>冻结 release</b>，这些值不会变。</span><span class="en"><b>Probe verification (2026-07-03, skill step 2):</b> Probed the EBI FTP to confirm current state and truth anchors — latest human release = <b>50</b>, mouse = <b>M39</b> (so the HTML-scraping path works today); the v46 human GTF anchored in the fixtures measures <code>Content-Length=51006804</code> bytes (≈48.6 MiB, the listing rounds to <b>49M</b> ✓) and <code>Last-Modified=2024-05-13 15:01 GMT</code> (= server-local BST <b>16:01</b>, the directory HTML shows <code>2024-05-13&nbsp;16:01</code> ✓). v46 is a <b>frozen release</b>, so these values won't change.</span></div>
+
+<h2 id="s4"><span class="n">4</span><span class="zh">返回值形态详解（供接口一致性判断）</span><span class="en">Return-value shape (for schema-consistency check)</span></h2>
+<p><span class="zh">B 类增强没有多文件/多表结构，关键是<b>返回的 dict 形态</b>。GENCODE 分支刻意<b>复用 Ensembl 的返回结构</b>：<code>{species: {out_key: {…metadata}}}</code>。外层 <code>out_key</code> 与 Ensembl <b>逐字一致</b>（已核对源码），只是不含 GENCODE 本就没有的 <code>coding_seq_cds</code>。</span><span class="en">A B-class enhancement has no multi-file/table structure; what matters is the <b>returned dict shape</b>. The GENCODE branch deliberately <b>reuses the Ensembl structure</b>: <code>{species: {out_key: {…metadata}}}</code>. The outer <code>out_key</code>s are <b>byte-for-byte identical</b> to Ensembl's (verified against source), minus the <code>coding_seq_cds</code> that GENCODE simply doesn't ship.</span></p>
+<table>
+  <tr><th><code>which</code></th><th><span class="zh">返回 dict 键 (out_key)</span><span class="en">out_key</span></th><th><span class="zh">GENCODE 文件</span><span class="en">GENCODE file</span></th><th>Ensembl</th></tr>
+  <tr><td><code>gtf</code></td><td><code>annotation_gtf</code></td><td><code>gencode.vNN.annotation.gtf.gz</code></td><td class="ok">✓ same key</td></tr>
+  <tr><td><code>dna</code></td><td><code>genome_dna</code></td><td><code>{Assembly}.primary_assembly.genome.fa.gz</code></td><td class="ok">✓ same key</td></tr>
+  <tr><td><code>cdna</code></td><td><code>transcriptome_cdna</code></td><td><code>gencode.vNN.transcripts.fa.gz</code></td><td class="ok">✓ same key</td></tr>
+  <tr><td><code>ncrna</code></td><td><code>non-coding_seq_ncRNA</code></td><td><code>gencode.vNN.lncRNA_transcripts.fa.gz</code></td><td class="ok">✓ same key</td></tr>
+  <tr><td><code>pep</code></td><td><code>protein_translation_pep</code></td><td><code>gencode.vNN.pc_translations.fa.gz</code></td><td class="ok">✓ same key</td></tr>
+  <tr><td><code>cds</code></td><td>—</td><td colspan="2"><span class="no">✗ <span class="zh">GENCODE 无此文件</span><span class="en">GENCODE ships no CDS file</span></span> → <span class="zh">给出带提示的报错</span><span class="en">raises a hinted error</span></td></tr>
+</table>
+<p><span class="zh">每个 <code>out_key</code> 下的 metadata 字段：<code>{ftp, gencode_release, release_date, release_time, bytes}</code>。与 Ensembl 唯一的差别是版本字段名 <code>gencode_release</code>（字符串，如 <code>"46"</code>/<code>"M35"</code>）对应 Ensembl 的 <code>ensembl_release</code>（整数）——合理的按源命名（GENCODE 鼠版号是 <code>M35</code> 这种非整数，用字符串是对的），但下游若要读版本号需注意键名随 source 而变。</span><span class="en">The metadata under each <code>out_key</code>: <code>{ftp, gencode_release, release_date, release_time, bytes}</code>. The only difference from Ensembl is the version field name — <code>gencode_release</code> (a string, e.g. <code>"46"</code>/<code>"M35"</code>) vs Ensembl's <code>ensembl_release</code> (an int). A sensible per-source name (GENCODE's mouse version <code>M35</code> is non-integer, so a string is correct), but downstream code reading the version must note the key changes with <code>source</code>.</span></p>
+
+<h2 id="s5"><span class="n">5</span><span class="zh">如何使用</span><span class="en">How to use</span></h2>
+<p><span class="zh">输入：species（仅 human/mouse）+ which + 可选 release（GENCODE 版本号，鼠的 <code>M</code> 前缀自动加）+ <code>source="gencode"</code>。返回：上面第 4 节那份 dict（<code>ftp=True</code> 时只返回 URL 列表）。</span><span class="en">Input: species (human/mouse only) + which + optional release (the GENCODE version number; the mouse <code>M</code> prefix is added automatically) + <code>source="gencode"</code>. Output: the dict from §4 (or, with <code>ftp=True</code>, just a list of URLs).</span></p>
+<pre><code># CLI — fetch human GTF + genome FASTA from GENCODE release 46
+gget ref -w gtf,dna -r 46 --source gencode human
+
+# omit --release to use the latest GENCODE release
+gget ref -w gtf --source gencode human</code></pre>
+<pre><code># Python
+gget.ref("human", which=["gtf", "dna"], release=46, source="gencode")
+gget.ref("mouse", which="gtf", release=35, source="gencode")   # → resolves release_M35 / vM35</code></pre>
+
+<h2 id="s6"><span class="n">6</span><span class="zh">Scope / 边界</span><span class="en">Scope</span></h2>
+<p><span class="zh">这个 PR 只封装 GENCODE 的<b>数据分发层</b>（发现 release + 拼下载链接 + 抓元数据），<b>刻意不做</b>：</span><span class="en">This PR wraps only GENCODE's <b>distribution layer</b> (discover release + build download links + scrape metadata). It <b>deliberately does not</b>:</span></p>
+<ul>
+  <li><span class="ok">✓ <span class="zh">做</span><span class="en">does</span></span>: <span class="zh">人/鼠的 GTF、基因组 FASTA、转录本/lncRNA/蛋白序列的下载链接 + 版本/日期/大小元数据</span><span class="en">provide download links + version/date/size metadata for human/mouse GTF, genome FASTA, transcript / lncRNA / protein sequences</span></li>
+  <li><span class="no">✗ <span class="zh">不做</span><span class="en">does not</span></span>: <span class="zh">人/鼠以外的物种（那是 Ensembl 分支的事，GENCODE 本就只有人鼠）、CDS 文件（GENCODE 不发布）、任何序列处理/比对/建索引（那是 kallisto 等下游工具的活）</span><span class="en">species beyond human/mouse (that's the Ensembl branch; GENCODE only has human/mouse), a CDS file (GENCODE doesn't publish one), or any sequence processing / alignment / index-building (that's downstream tools like kallisto)</span></li>
+</ul>
+<div class="note"><span class="zh">边界干净：完全落在 gget "数据<b>访问</b>而非<b>分析</b>"的定位内，只是把已有 <code>ref</code> 模块从"单一 Ensembl 源"扩成"多源"。</span><span class="en">Clean boundary: squarely within gget's "data <b>access</b>, not <b>analysis</b>" role — it just widens the existing <code>ref</code> module from a single Ensembl source to multi-source.</span></div>
+
+<h2 id="s7"><span class="n">7</span><span class="zh">评估（四 lens）</span><span class="en">Evaluation (four lenses)</span></h2>
+<table>
+  <tr><th>Lens</th><th><span class="zh">判断</span><span class="en">Verdict</span></th><th><span class="zh">依据 / 备注</span><span class="en">Basis / notes</span></th></tr>
+  <tr>
+    <td><span class="zh">① Soundness（正确/健壮）</span><span class="en">① Soundness</span></td>
+    <td class="ok"><span class="zh">好（有小 caveat）</span><span class="en">Good (minor caveats)</span></td>
+    <td><span class="zh">最新 release 解析、鼠 <code>M</code> 前缀、which 校验（含对 <code>cds</code> 的贴心报错提示）都处理了；fixture 精确值已对真值核实。<b>小 caveat</b>：文件找不到时静默回空串 <code>""</code>（而非报错/告警），可能掩盖上游改名。</span><span class="en">Handles latest-release resolution, the mouse <code>M</code> prefix, and <code>which</code> validation (with a helpful hint on <code>cds</code>); fixture exact values verified against ground truth. <b>Minor caveat</b>: a missing file silently yields <code>""</code> (no error/warning), which could mask an upstream rename.</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">② 平台契合度</span><span class="en">② Platform fit</span></td>
+    <td class="ok">PASS <span class="zh">（强）</span><span class="en">(strong)</span></td>
+    <td><span class="zh">纯数据访问；封装 GENCODE 公开分发层，<b>非</b>重实现其注释流程；返回已 gget 化的 dict、外层键与 Ensembl 一致；无二进制/编译依赖。教科书级的"加一个数据源"。</span><span class="en">Pure data access; wraps GENCODE's public distribution layer, <b>not</b> a reimplementation of its annotation pipeline; returns a gget-ified dict with keys identical to Ensembl; no binary/compile dependency. A textbook "add a data source".</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">③ 可复现性</span><span class="en">③ Reproducibility</span></td>
+    <td class="ok"><span class="zh">好</span><span class="en">Good</span></td>
+    <td><span class="zh">固定 release → 确定 URL 与元数据（冻结 release，可写进论文方法、可复跑）。"latest"路径天然非确定（同 Ensembl，已在文档说明）。</span><span class="en">Fixed release → deterministic URL and metadata (frozen releases, citable in a methods section, re-runnable). The "latest" path is non-deterministic by nature (same as Ensembl; documented).</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">④ 维护成本</span><span class="en">④ Maintenance</span></td>
+    <td><span class="zh" style="color:var(--acc)">中等（可控）</span><span class="en" style="color:var(--acc)">Moderate (controllable)</span></td>
+    <td><span class="zh">硬编码文件名模板 + HTML 目录抓取 → GENCODE 若改文件名或改列表格式就会坏。离线 mock 测<b>抓不到</b>这类腐烂。→ 需 live 测试兜底（见第 9 节）。</span><span class="en">Hardcoded filename templates + HTML directory scraping → breaks if GENCODE renames files or changes its listing format. Offline mocks <b>cannot</b> catch that rot. → needs a live test as a safety net (see §9).</span></td>
+  </tr>
+</table>
+<p><span class="zh"><b>总评：</b>方案科学、精准契合 gget "数据访问中枢"的角色、补齐了一个高频主流来源，价值明确且实现干净（复用 Ensembl 结构、边界清晰）。唯一实质短板是<b>测试的健壮性</b>——不是"测得少"，而是"live 那一半没按 live 规范设计"。补齐后这是一个高质量 PR。</span><span class="en"><b>Overall:</b> sound, precisely aligned with gget's "data-access hub" role, and fills in a high-demand mainstream source; clear value with a clean implementation (reuses the Ensembl structure, well-bounded). The one substantive weakness is <b>test robustness</b> — not "too few tests" but "the live half isn't designed to live-test conventions". Fix that and it's a high-quality PR.</span></p>
+
+<h2 id="s8"><span class="n">8</span><span class="zh">设计决策与权衡</span><span class="en">Design decisions &amp; trade-offs</span></h2>
+<h3>① <span class="zh"><code>source</code> 参数 vs 新建模块</span><span class="en"><code>source</code> param vs a new module</span></h3>
+<p><span class="zh">选择在 <code>ref</code> 上加 <code>source="ensembl"|"gencode"</code>，而非另造 <code>gget gencode</code>。<b>对</b>——两者是同一种"取参考文件"的数据访问，返回同构 dict；合并避免重复接口、让用户一个心智模型切换来源。默认 <code>ensembl</code>，既有行为零变化。</span><span class="en">Chose to add <code>source="ensembl"|"gencode"</code> on <code>ref</code> rather than a separate <code>gget gencode</code>. <b>Right call</b> — both are the same "fetch reference files" access returning an isomorphic dict; merging avoids a duplicate interface and lets users switch sources with one mental model. Default <code>ensembl</code>, so existing behavior is unchanged.</span></p>
+<h3>② <span class="zh"><code>which</code> 词表映射（无 cds）</span><span class="en">The <code>which</code> vocabulary mapping (no cds)</span></h3>
+<p><span class="zh">把 gget 既有词表（gtf/dna/cdna/ncrna/pep）映射到 GENCODE 文件；GENCODE 不发 CDS，于是 <code>cds</code> 触发一条<b>带指引</b>的报错（"用 cdna 取转录本或 pep 取翻译"）。好 UX——不是冷冰冰的 invalid，而是告诉用户替代项。</span><span class="en">Maps gget's existing vocabulary (gtf/dna/cdna/ncrna/pep) onto GENCODE files; GENCODE ships no CDS, so <code>cds</code> raises a <b>hinted</b> error ("use cdna for transcripts or pep for translations"). Good UX — not a cold "invalid" but a pointer to the alternative.</span></p>
+<h3>③ <span class="zh">基因组 FASTA 模板不带 <code>{ver}</code></span><span class="en">Genome FASTA template without <code>{ver}</code></span></h3>
+<p><span class="zh"><code>dna</code> 的模板是 <code>primary_assembly.genome.fa.gz</code>（不含版本），靠 <code>find_FTP_link</code> 的<b>子串匹配</b>去命中真实的 <code>GRCh38.primary_assembly.genome.fa.gz</code>/<code>GRCm39.…</code>。能工作，但依赖"子串匹配"这一隐式约定——若某 release 目录里出现另一个含该子串的文件会有歧义（目前不会）。可接受，值得一条注释。</span><span class="en">The <code>dna</code> template is <code>primary_assembly.genome.fa.gz</code> (no version), relying on <code>find_FTP_link</code>'s <b>substring match</b> to hit the real <code>GRCh38.primary_assembly.genome.fa.gz</code>/<code>GRCm39.…</code>. Works, but leans on the implicit "substring match" convention — ambiguous if a release dir ever holds another file containing that substring (it currently doesn't). Acceptable; worth a comment.</span></p>
+
+<h2 id="s9"><span class="n">9</span><span class="zh">测试 / live data test</span><span class="en">Testing / live data test</span></h2>
+<p><span class="zh">两条正交线现状：离线单元测试<b>写得好</b>，live 那半<b>需按规范加固</b>。</span><span class="en">Two orthogonal lines: the offline unit tests are <b>well done</b>; the live half <b>needs hardening to convention</b>.</span></p>
+<table>
+  <tr><th><span class="zh">测试层</span><span class="en">Layer</span></th><th><span class="zh">位置 / 内容</span><span class="en">Where / what</span></th><th><span class="zh">评价</span><span class="en">Assessment</span></th></tr>
+  <tr>
+    <td><span class="zh">离线单元</span><span class="en">Offline unit</span></td>
+    <td><code>test_ref.py :: TestGencodeRefOffline</code>（11）—<span class="zh">mock <code>requests.get</code> / <code>find_FTP_link</code>，覆盖最新解析、坏物种、which 冲突、cds 提示、链接缺失、ftp+save、release=None、委派</span><span class="en">mocks <code>requests.get</code> / <code>find_FTP_link</code>; covers latest-resolution, bad species, which conflicts, cds hint, missing link, ftp+save, release=None, delegation</span></td>
+    <td class="ok"><span class="zh">好：确定性、无网络、覆盖全代码路径</span><span class="en">Good: deterministic, network-free, covers all code paths</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">JSON fixture</span><span class="en">JSON fixture</span></td>
+    <td><code>test_ref.json :: test_ref_gencode</code> / <code>test_ref_gencode_ftp</code> — <span class="zh">经 <code>from_json</code> 调真实 <code>ref()</code> → <code>find_FTP_link</code> → 真打 GENCODE FTP，断言精确 URL/日期/时间/大小</span><span class="en">via <code>from_json</code>, call the real <code>ref()</code> → <code>find_FTP_link</code> → hit the real GENCODE FTP, asserting exact URL/date/time/size</span></td>
+    <td class="no"><span class="zh">"伪装成单元测试的 live 测试"</span><span class="en">"de-facto live test disguised as a unit test"</span></td>
+  </tr>
+</table>
+<div class="warn"><span class="zh"><b>核心发现：</b>那两个 fixture 测试<b>真的联网</b>打 EBI FTP。断言精确值本身 OK——因为锚的是<b>冻结 release</b> v46/M35（我已对真值核实，值不会变）。真问题是<b>没有 skip-on-network-error / 限流兜底</b>：EBI 一旦临时不可达或变慢，CI 就<b>红</b>（而这与 PR 代码无关，正是之前 Ensembl 系列 PR 反复踩的坑）。</span><span class="en"><b>Core finding:</b> those two fixtures <b>actually hit the network</b> (EBI FTP). The exact-value assertions are fine in themselves — they anchor a <b>frozen release</b> v46/M35 (I verified the values against ground truth; they won't change). The real problem is <b>no skip-on-network-error / rate-limit handling</b>: if EBI is briefly unreachable or slow, CI goes <b>red</b> (unrelated to the PR — the exact trap the earlier Ensembl PRs kept hitting).</span></div>
+<div class="warn"><span class="zh"><b>覆盖缺口：</b>最容易腐烂的<b>"最新 release HTML 抓取"</b>路径（<code>_find_latest_gencode_release</code>）只有离线 mock 测试——<b>没有任何 live 测试</b>确认真实 GENCODE 目录页仍能解析。若 EBI 改列表格式，离线测试全绿、线上却已坏，无人知。（我的探针今日确认该路径尚有效：human→50、mouse→M39。）</span><span class="en"><b>Coverage gap:</b> the most rot-prone path — <b>HTML-scraping the "latest release"</b> (<code>_find_latest_gencode_release</code>) — has only offline mocks; <b>no live test</b> confirms the real GENCODE listing still parses. If EBI changes its listing format, offline tests stay green while production is already broken, unnoticed. (My probe confirmed the path works today: human→50, mouse→M39.)</span></div>
+<p><span class="zh"><b>建议（按 skill 的 live-data-test 规范）：</b></span><span class="en"><b>Recommendations (per the skill's live-data-test conventions):</b></span></p>
+<ol>
+  <li><span class="zh">给那两个 fixture 测试（或迁到 <code>test_ref.py</code> 重写为显式 live 测试）加 <b>skip-on-network-error + 限流/HTML 页 skip</b>；精确断言可保留（冻结 release）。</span><span class="en">Wrap the two fixtures (or move them into <code>test_ref.py</code> as explicit live tests) with <b>skip-on-network-error + skip on rate-limit/HTML page</b>; the exact assertions can stay (frozen release).</span></li>
+  <li><span class="zh">新增一个 <b>latest 路径的 live 测试</b>：调 <code>_find_latest_gencode_release</code>，断言返回是合理的 human 整数 / mouse <code>M</code>+整数（宽松、不绑具体号），网络错则 skip——这是对"HTML 抓取会腐烂"唯一的回归保险。</span><span class="en">Add a <b>live test for the latest path</b>: call <code>_find_latest_gencode_release</code> and assert the result is a plausible human int / mouse <code>M</code>+int (loose, not pinned to a number), skipping on network error — the only regression net against "HTML scraping rots".</span></li>
+  <li><span class="zh">可选：文件缺失时 <code>logger.warning</code> 而非静默空串。</span><span class="en">Optional: <code>logger.warning</code> on a missing file instead of a silent empty string.</span></li>
+</ol>
+
+<h2 id="s10"><span class="n">10</span><span class="zh">当前状态</span><span class="en">Current status</span></h2>
+<pre><code>PR scverse/gget#238  (DRAFT)  feature/ref-seq-gencode-73 → dev   +361 / -6, 7 files
+commits:
+  f761b38  feat(ref): support fetching GENCODE GTFs and FASTAs (#73)
+  4f78b0c  [pre-commit.ci] auto fixes
+  7b932f0  test(ref): cover remaining lines for codecov (#73)
+files: gget/gget_ref.py (+152) · gget/main.py (+13) · gget/constants.py (+3)
+       tests/test_ref.py (+110) · tests/fixtures/test_ref.json (+59) · docs en/ref.md, updates.md
+CI (2026-07-03): hatch-test py3.12 / 3.13 / 3.14  ✓ pass · pre-commit.ci ✓ · Tests pass ✓</code></pre>
+
+<h2 id="s11"><span class="n">11</span><span class="zh">未决 / 建议</span><span class="en">Open items / suggestions</span></h2>
+<ul>
+  <li><span class="zh"><b>测试健壮性（主）：</b>两个 fixture live 测试加 skip-on-network-error；补一个 latest 抓取路径的 live 测试。见第 9 节。</span><span class="en"><b>Test robustness (main):</b> add skip-on-network-error to the two live fixtures; add a live test for the latest-scraping path. See §9.</span></li>
+  <li><span class="zh"><b>Draft 状态：</b>PR 仍是 draft——可能作者正是在等这些收尾。</span><span class="en"><b>Draft status:</b> still a draft — likely the author is finishing exactly this kind of polish.</span></li>
+  <li><span class="zh"><b>版本字段名：</b><code>gencode_release</code> vs <code>ensembl_release</code> 随 source 而变；合理但值得在文档点一句，方便下游。</span><span class="en"><b>Version field name:</b> <code>gencode_release</code> vs <code>ensembl_release</code> changes with source; reasonable but worth a doc note for downstream consumers.</span></li>
+  <li><span class="zh"><b>静默空串：</b>文件缺失时的行为可考虑加 warning。</span><span class="en"><b>Silent empty string:</b> consider a warning on a missing file.</span></li>
+  <li><span class="zh"><b>仅人/鼠：</b>这是 GENCODE 的真实范围，<b>非</b>缺陷；报错信息已正确引导到 <code>source='ensembl'</code>。</span><span class="en"><b>Human/mouse only:</b> this is GENCODE's actual scope, <b>not</b> a limitation; the error correctly redirects to <code>source='ensembl'</code>.</span></li>
+</ul>
+
+<h2 id="s12"><span class="n">12</span><span class="zh">参考链接</span><span class="en">References</span></h2>
+<ul>
+  <li>PR：<a href="https://github.com/scverse/gget/pull/238">scverse/gget#238</a></li>
+  <li>Issue：<a href="https://github.com/scverse/gget/issues/73">#73 — GENCODE GTFs+FASTAs</a>（by Yenaled）</li>
+  <li>GENCODE：<a href="https://www.gencodegenes.org/">gencodegenes.org</a> · <a href="https://ftp.ebi.ac.uk/pub/databases/gencode/">EBI GENCODE FTP</a></li>
+  <li><span class="zh">相关 gget 模块</span><span class="en">Related gget module</span>：<a href="https://github.com/scverse/gget/blob/main/docs/src/en/ref.md">gget ref docs</a></li>
+</ul>
+
+<footer>
+  <span class="zh">本文档由 Claude Opus 4.8 (1M context) 于 2026-07-03 21:34 SGT 整理，基于对 PR #238 完整 diff、issue #73、gget 源码（Ensembl 分支键名对照）以及一次对 EBI GENCODE FTP 的实时探针的核查。已核实项：v46 human GTF 的真实字节数/日期/时间与 fixture 精确断言吻合、最新 release（human 50 / mouse M39）说明抓取路径当前有效、GENCODE 与 Ensembl 分支的外层返回键逐字一致。未独立验证项：其余 which 文件（cdna/ncrna/pep）的实测大小、mouse M35 fixture 的逐字段真值（仅验证了 URL 结构）。GENCODE 数据与目录格式可能随时间变化——使用前请以 <a href="https://www.gencodegenes.org/">GENCODE 官方</a> 为准。本报告为 AI 生成的分析，供参考，不构成对 PR 的最终评审结论。</span>
+  <span class="en">Compiled by Claude Opus 4.8 (1M context) at 2026-07-03 21:34 SGT, based on the full PR #238 diff, issue #73, the gget source (Ensembl-branch key comparison), and a live probe of the EBI GENCODE FTP. Verified: the v46 human GTF's real byte size/date/time match the fixture's exact assertions; the latest releases (human 50 / mouse M39) show the scraping path works today; the GENCODE and Ensembl branches share byte-for-byte identical outer return keys. Not independently verified: the measured sizes of the other which-files (cdna/ncrna/pep) and the per-field ground truth of the mouse M35 fixture (only its URL structure was checked). GENCODE data and directory formats may change over time — defer to <a href="https://www.gencodegenes.org/">GENCODE</a> before use. This is an AI-generated analysis for reference, not a final review verdict on the PR.</span>
+</footer>
+
+</div>
+<script>
+  function setLang(l){
+    document.body.className = 'lang-' + l;
+    document.querySelectorAll('.langtoggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.l === l);
+    });
+  }
+</script>
+</body>
+</html>
