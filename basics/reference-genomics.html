@@ -76,8 +76,10 @@
   <a href="#s2">2 · RNA-seq</a>
   <a href="#s3">3 · <span class="zh">比对 / kallisto·STAR 索引</span><span class="en">Alignment / kallisto·STAR index</span></a>
   <a href="#s4">4 · <span class="zh">GTF 与 FASTA</span><span class="en">GTF &amp; FASTA</span></a>
-  <a href="#s5">5 · <span class="zh">Ensembl vs GENCODE：为什么要两个</span><span class="en">Ensembl vs GENCODE: why both</span></a>
-  <a href="#s6">6 · <span class="zh">串起来 & 与 gget 的关系</span><span class="en">Putting it together &amp; gget</span></a>
+  <a href="#s5">5 · <span class="zh">which 词表：gtf/dna/cdna/cds/ncrna/pep</span><span class="en">The which vocabulary</span></a>
+  <a href="#s6">6 · <span class="zh">Ensembl vs GENCODE：为什么要两个</span><span class="en">Ensembl vs GENCODE: why both</span></a>
+  <a href="#s7">7 · <span class="zh">基因组装配版：GRCh38 / GRCm39</span><span class="en">Genome assembly: GRCh38 / GRCm39</span></a>
+  <a href="#s8">8 · <span class="zh">串起来 & 与 gget 的关系</span><span class="en">Putting it together &amp; gget</span></a>
 </div>
 
 <h2 id="s1"><span class="n">1</span><span class="zh">转录本 (transcript) 是什么</span><span class="en">What is a transcript</span></h2>
@@ -118,7 +120,20 @@
 </ul>
 <div class="note"><span class="zh"><b>为什么两个都要？</b>光有字母（FASTA）不知道哪段是基因；光有坐标（GTF）不知道具体序列。合起来才能"从整条染色体上、按 GTF 的坐标、切出某基因的序列"。</span><span class="en"><b>Why both?</b> With only letters (FASTA) you can't tell which stretch is a gene; with only coordinates (GTF) you don't have the actual sequence. Together they let you "cut out a gene's sequence from the whole chromosome, at the coordinates GTF specifies".</span></div>
 
-<h2 id="s5"><span class="n">5</span><span class="zh">Ensembl 和 GENCODE：既然都有转录本，为什么还要两个？</span><span class="en">Ensembl vs GENCODE: both have transcripts, so why both?</span></h2>
+<h2 id="s5"><span class="n">5</span><span class="zh">gget ref 的 which 词表：gtf / dna / cdna / cds / ncrna / pep</span><span class="en">gget ref's which vocabulary: gtf / dna / cdna / cds / ncrna / pep</span></h2>
+<p><span class="zh"><code>gget ref -w &lt;...&gt;</code> 里这几个词各对应参考里的一类文件。用第 1 节"设计图 → 副本 → 零件"的三层来记最清楚：</span><span class="en">Each word in <code>gget ref -w &lt;...&gt;</code> maps to a class of reference file. The easiest way to remember them is the three layers from §1 — "blueprint → copy → part":</span></p>
+<table>
+  <tr><th><code>which</code></th><th><span class="zh">大白话</span><span class="en">Plain meaning</span></th><th><span class="zh">属于哪一层</span><span class="en">Which layer</span></th><th><span class="zh">文件</span><span class="en">File</span></th></tr>
+  <tr><td><code>dna</code></td><td><span class="zh">整条染色体的<b>基因组序列</b>（含内含子、基因间区，什么都有）</span><span class="en">the whole-chromosome <b>genome sequence</b> (introns, intergenic regions — everything)</span></td><td><span class="zh">设计图库<b>全本</b></span><span class="en">the <b>full</b> blueprint archive</span></td><td>genome FASTA</td></tr>
+  <tr><td><code>gtf</code></td><td><span class="zh"><b>坐标标注</b>（谁在哪，不含序列字母）</span><span class="en"><b>coordinate annotation</b> (who sits where; no sequence letters)</span></td><td><span class="zh">图书<b>目录</b></span><span class="en">the <b>table of contents</b></span></td><td>annotation GTF</td></tr>
+  <tr><td><code>cdna</code></td><td><span class="zh"><b>转录本序列</b>（外显子拼接后的完整 mRNA，含两端 UTR）</span><span class="en"><b>transcript sequences</b> (the spliced full mRNA, including both UTRs)</span></td><td><span class="zh">抄出的<b>工作副本全文</b></span><span class="en">the <b>full working copy</b></span></td><td>transcript FASTA</td></tr>
+  <tr><td><code>cds</code></td><td><span class="zh">只取<b>编码区</b>（起始→终止密码子，去掉 UTR 和内含子）</span><span class="en">only the <b>coding region</b> (start→stop codon; no UTR, no intron)</span></td><td><span class="zh">副本里"真正的施工步骤"那段</span><span class="en">the "actual build steps" part of the copy</span></td><td><span class="zh">CDS FASTA（<b>GENCODE 不发</b>）</span><span class="en">CDS FASTA (<b>not shipped by GENCODE</b>)</span></td></tr>
+  <tr><td><code>ncrna</code></td><td><span class="zh"><b>非编码 RNA</b> 转录本（抄出来但不造蛋白那类）</span><span class="en"><b>non-coding RNA</b> transcripts (copied out but never made into protein)</span></td><td><span class="zh">不用于造零件的副本</span><span class="en">copies not used to build parts</span></td><td>ncRNA FASTA</td></tr>
+  <tr><td><code>pep</code></td><td><span class="zh"><b>蛋白质（氨基酸）序列</b>，是 CDS 翻译出的成品</span><span class="en">the <b>protein (amino-acid) sequence</b>, the product of translating the CDS</span></td><td><span class="zh">照步骤造出的<b>零件本身</b></span><span class="en">the finished <b>part</b> itself</span></td><td>protein FASTA</td></tr>
+</table>
+<div class="note"><span class="zh"><b>最容易混的 cdna / cds / pep：</b><br>· <b>cdna</b> = 完整食谱卡（标题+备注+步骤都有）：<code>5'UTR + 编码区 + 3'UTR</code>，整条 mRNA。<br>· <b>cds</b> = 只留"烹饪步骤"那段：去掉两端 UTR，只剩编码区。<br>· <b>pep</b> = 照步骤做出的<b>成品菜</b>：把 cds 翻译成氨基酸的蛋白。<br>（<b>cdna = complementary DNA</b>，字面是"把 mRNA 反转录成 DNA 字母写下来"，所以 cdna 文件本质是"用 DNA 字母记的转录本序列"。）</span><span class="en"><b>The easily-confused cdna / cds / pep:</b><br>· <b>cdna</b> = the full recipe card (title + notes + steps): <code>5'UTR + coding region + 3'UTR</code>, the whole mRNA.<br>· <b>cds</b> = only the "cooking steps": drop both UTRs, keep just the coding region.<br>· <b>pep</b> = the finished <b>dish</b> made by following the steps: the protein from translating the CDS.<br>(<b>cdna = complementary DNA</b> — literally "the mRNA reverse-transcribed into DNA letters", so a cdna file is really "transcript sequences written in DNA letters".)</span></div>
+
+<h2 id="s6"><span class="n">6</span><span class="zh">Ensembl 和 GENCODE：既然都有转录本，为什么还要两个？</span><span class="en">Ensembl vs GENCODE: both have transcripts, so why both?</span></h2>
 <p><span class="zh"><b>核心答案：对人和小鼠，GENCODE 与 Ensembl 的注释其实"同源"——同一批人协同产出、内容高度重叠——但它们不是同一份文件，发布节奏、打包方式、ID 习惯、社区默认都不同，所以要能分别取。</b></span><span class="en"><b>Core answer: for human and mouse, GENCODE and Ensembl annotations are essentially co-produced by the same groups and overlap heavily — but they are not the same file. Release cadence, packaging, ID conventions, and community defaults all differ, so you need to fetch each.</b></span></p>
 <ol>
   <li><span class="zh"><b>同源但不等同：</b>人/鼠的 GENCODE 与 Ensembl 注释由同一团队（EBI/Havana + Ensembl）协同产生，内容高度重叠；但 GENCODE 有自己的 release 节奏、会额外发布一些资源，版本号体系也不同（GENCODE v46 ≠ Ensembl 110）。</span><span class="en"><b>Co-produced, not identical:</b> human/mouse GENCODE and Ensembl annotations come from the same teams (EBI/Havana + Ensembl) and overlap heavily; but GENCODE has its own release cadence, publishes some extra resources, and uses a different version scheme (GENCODE v46 ≠ Ensembl 110).</span></li>
@@ -128,7 +143,29 @@
 </ol>
 <div class="note"><span class="zh"><b>一句话：</b>不是"一样的东西取两遍"，而是"两套虽同源、但各有默认场景的标准，得都能取"。所以 gget 加 GENCODE 不是重复造轮子，而是补上另一套社区标准——<code>gget ref … --source ensembl|gencode</code> 让你精确取到需要的那一份。</span><span class="en"><b>In one line:</b> it's not "fetching the same thing twice", but "two co-produced standards, each the default in different settings — you must be able to fetch either". So adding GENCODE to gget isn't reinventing a wheel; it fills in the other community standard — <code>gget ref … --source ensembl|gencode</code> gets you exactly the one you need.</span></div>
 
-<h2 id="s6"><span class="n">6</span><span class="zh">串起来：一条典型链路</span><span class="en">Putting it together: a typical chain</span></h2>
+<h2 id="s7"><span class="n">7</span><span class="zh">基因组装配版：GRCh38 / GRCm39 是什么</span><span class="en">Genome assembly: what GRCh38 / GRCm39 mean</span></h2>
+<p><span class="zh"><b>一句话：它是"参考基因组的版本号"，也就是这张基因组地图的"第几版"。</b>拆开这串字母：</span><span class="en"><b>In one line: it's the "version number of the reference genome" — which edition of the genome map this is.</b> Breaking the string apart:</span></p>
+<table>
+  <tr><th><span class="zh">部分</span><span class="en">Part</span></th><th><span class="zh">含义</span><span class="en">Meaning</span></th></tr>
+  <tr><td><code>GRC</code></td><td><b>G</b>enome <b>R</b>eference <b>C</b>onsortium — <span class="zh">维护人/鼠参考基因组的官方联盟</span><span class="en">the body that maintains the human/mouse reference assemblies</span></td></tr>
+  <tr><td><code>h</code> / <code>m</code></td><td><span class="zh">物种：<b>h</b>uman（人）/ <b>m</b>ouse（鼠）</span><span class="en">species: <b>h</b>uman / <b>m</b>ouse</span></td></tr>
+  <tr><td><code>38</code> / <code>39</code></td><td><span class="zh">第几次大版本：人的第 38 版、鼠的第 39 版</span><span class="en">the major build number: human build 38, mouse build 39</span></td></tr>
+</table>
+<p><span class="zh">所以 <b>GRCh38 = 人类参考基因组第 38 版</b>，<b>GRCm39 = 小鼠第 39 版</b>。（人的上一版是 <b>GRCh37</b>，临床和老数据里还大量在用；UCSC 给它们起的别名是 <b>hg38 / hg19</b>，同一个东西。）</span><span class="en">So <b>GRCh38 = human reference build 38</b>, <b>GRCm39 = mouse build 39</b>. (The previous human build is <b>GRCh37</b>, still heavily used in clinical and legacy data; UCSC's aliases for these are <b>hg38 / hg19</b> — same thing.)</span></p>
+<h3><span class="zh">为什么会有"版本"</span><span class="en">Why there are "versions"</span></h3>
+<p><span class="zh">测序拿到的是碎片，科学家把碎片<b>拼</b>成完整染色体——这个拼装结果就叫<b>基因组装配 (genome assembly)</b>。随着技术进步、补上空洞、修正错误，会发布新版本。每换一版<b>坐标就变了</b>："1 号染色体第 100 万位"在 GRCh37 和 GRCh38 上<b>不是同一个地方</b>。</span><span class="en">Sequencing yields fragments; scientists <b>piece</b> them into whole chromosomes — that reconstruction is a <b>genome assembly</b>. As technology improves, gaps are filled and errors fixed, so new versions are released. Each new build <b>shifts the coordinates</b>: "chromosome 1, position 1,000,000" is <b>not the same place</b> on GRCh37 vs GRCh38.</span></p>
+<h3><span class="zh">关键区分：装配版 ≠ 注释版</span><span class="en">Key distinction: assembly ≠ annotation</span></h3>
+<p><span class="zh">这是最容易混的一点——两个"版本号"是不同层面的东西：</span><span class="en">This is the easiest thing to confuse — the two "version numbers" live on different layers:</span></p>
+<table>
+  <tr><th></th><th><span class="zh"><b>装配版 (assembly)</b></span><span class="en"><b>Assembly</b></span></th><th><span class="zh"><b>注释版 (annotation)</b></span><span class="en"><b>Annotation</b></span></th></tr>
+  <tr><td><span class="zh">例子</span><span class="en">Example</span></td><td>GRCh38 / GRCm39</td><td>GENCODE v46 / Ensembl 110</td></tr>
+  <tr><td><span class="zh">是什么</span><span class="en">What</span></td><td><span class="zh"><b>坐标系统</b>——地图的底图</span><span class="en">the <b>coordinate system</b> — the base map</span></td><td><span class="zh">底图上<b>画了哪些基因</b></span><span class="en"><b>which genes are drawn</b> on the base map</span></td></tr>
+  <tr><td><span class="zh">谁定的</span><span class="en">By whom</span></td><td>GRC</td><td>GENCODE / Ensembl</td></tr>
+</table>
+<div class="analogy"><span class="zh">🗺️ <b>装配版 = 地图的"底图版次"</b>（海岸线、经纬度画法）；<b>注释版 = 在这张底图上标注的地名/建筑</b>。同一张底图（GRCh38）上可以陆续出多版注释（GENCODE v20 到 v46 全基于 GRCh38），底图坐标不动，只是标注越来越精细。</span><span class="en">🗺️ <b>Assembly = the "edition of the base map"</b> (coastlines, how the grid is drawn); <b>annotation = the place-names/buildings labelled on that base map</b>. Many annotation versions can sit on the same base map (GENCODE v20 through v46 all build on GRCh38): the coordinates stay fixed while the labels get ever finer.</span></div>
+<div class="note"><span class="zh"><b>连回 gget / PR #238：</b>这就是为什么 GENCODE 的基因组 FASTA 文件名带这个前缀——<code>GRCh38.primary_assembly.genome.fa.gz</code>（人）、<code>GRCm39.primary_assembly.genome.fa.gz</code>（鼠）：文件名里直接写明"这份序列是哪一版装配"。而注释文件（GTF）则按 GENCODE release（v46）编号——两个版本号并存、各管一层。</span><span class="en"><b>Back to gget / PR #238:</b> this is why GENCODE's genome FASTA carries the prefix — <code>GRCh38.primary_assembly.genome.fa.gz</code> (human), <code>GRCm39.primary_assembly.genome.fa.gz</code> (mouse): the filename states which assembly the sequence belongs to. The annotation (GTF), meanwhile, is numbered by GENCODE release (v46) — two version numbers coexisting, each governing its own layer.</span></div>
+
+<h2 id="s8"><span class="n">8</span><span class="zh">串起来：一条典型链路</span><span class="en">Putting it together: a typical chain</span></h2>
 <pre><code>1. gget ref  --source gencode -w cdna,gtf human      # 取参考：转录本 FASTA + GTF
 2. kb ref  /  STAR --runMode genomeGenerate           # 建索引（给参考编"目录"）
 3. kallisto quant  /  STAR  (你的 RNA-seq reads)      # 把 reads 归位并计数
