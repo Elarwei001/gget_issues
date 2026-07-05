@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生物学基础 · 从测序到基因组 (Sequencing → genomes)</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--panel2:#1d212b;--ink:#e6e9ef;--muted:#9aa4b2;--acc:#f5a623;--acc2:#5aa9e6;--green:#4cc38a;--red:#e5648a;--line:#2a2f3a;--code:#0b0d11;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:900px;margin:0 auto;padding:32px 24px 80px}
+  header.top{position:relative;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:28px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:15px}
+  .stamp{position:absolute;top:0;right:0;font-size:12px;color:var(--muted);text-align:right}
+  .back{font-size:13px;color:var(--acc2)}
+  h2{font-size:21px;margin:34px 0 12px;padding-top:8px;border-top:1px solid var(--line);color:#fff}
+  h2 .n{color:var(--acc);margin-right:8px}
+  h3{font-size:16px;margin:18px 0 6px;color:var(--acc2)}
+  p{margin:10px 0}
+  a{color:var(--acc2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;color:#ffd9a0}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:13px;line-height:1.55}
+  pre code{background:none;border:none;padding:0;color:#d6deeb}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#fff}
+  tr:nth-child(even) td{background:var(--panel)}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:5px 0}
+  .tldr{background:linear-gradient(135deg,#1b2330,#171a21);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:16px 18px;margin:16px 0}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc2);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .analogy{background:#132018;border:1px solid #26402f;border-left:4px solid var(--green);border-radius:10px;padding:12px 16px;margin:14px 0}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:18px 0;font-size:14px}
+  .toc a{display:block;padding:2px 0;color:var(--ink)}
+  .toc a:hover{color:var(--acc2)}
+  .muted{color:var(--muted)}
+  .langtoggle{margin-bottom:6px}
+  .langtoggle button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;margin-left:4px}
+  .langtoggle button.active{background:var(--acc2);color:#08121c;border-color:var(--acc2);font-weight:600}
+  body.lang-zh .en{display:none}
+  body.lang-en .zh{display:none}
+  footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body class="lang-zh">
+<div class="wrap">
+
+<header class="top">
+  <div class="stamp">
+    <div class="langtoggle">
+      <button data-l="zh" class="active" onclick="setLang('zh')">中文</button><button data-l="en" onclick="setLang('en')">EN</button>
+    </div>
+    Generated: 2026-07-05 22:04 SGT<br>by Claude Opus 4.8 (1M context)
+  </div>
+  <div class="back"><a href="../index.html">← <span class="zh">返回首页</span><span class="en">Back to index</span></a></div>
+  <h1>🧫 <span class="zh">从测序到基因组</span><span class="en">From sequencing to genomes</span></h1>
+  <div class="sub"><span class="zh">给非生物背景读者:一份基因组是怎么从"一管样本"变出来的——装配、测序数据档案(SRA/SRR)、宏基因组分箱,以及 NCBI 装配号和那个分片 FTP 目录怎么读。</span><span class="en">For non-biologists: how a genome comes to exist from "a tube of sample" — assembly, sequence archives (SRA/SRR), metagenomic binning, and how to read an NCBI assembly accession and its sharded FTP directory.</span></div>
+</header>
+
+<div class="tldr">
+  <strong>TL;DR:</strong>
+  <span class="zh">一条主线:<b>样本 → 测序(得到一堆乱序碎片 reads,存进 SRA,编号如 SRR…)→ 装配(把碎片拼成基因组)→ 登记装配号(GCA/GCF…)</b>。如果样本是"一锅多物种混合"(<b>宏基因组</b>),还要<b>分箱</b>把混杂序列按物种归类,挖出一个个 <b>MAG</b>。分箱靠两个信号:序列的 <b>k-mer 指纹</b> 和 <b>覆盖深度(丰度)</b>。NCBI 把每份装配放在按装配号切三段的 FTP 目录里,目录里的文件分三类:数据本身(fna/gbff)、说明书(assembly_report/stats)、质检报告(ani/fcs)。</span>
+  <span class="en">One backbone: <b>sample → sequencing (a pile of shuffled fragments = reads, stored in the SRA with an ID like SRR…) → assembly (piece the fragments into a genome) → register an assembly accession (GCA/GCF…)</b>. If the sample is a "mixed pot of many organisms" (a <b>metagenome</b>), you additionally <b>bin</b> the jumbled sequences by organism to recover individual <b>MAGs</b>. Binning uses two signals: each sequence's <b>k-mer fingerprint</b> and its <b>coverage depth (abundance)</b>. NCBI stores each assembly in an FTP directory sharded from the accession into three digit-groups; its files fall into three kinds: the data itself (fna/gbff), the "manuals" (assembly_report/stats), and the "QC reports" (ani/fcs).</span>
+</div>
+
+<div class="toc">
+  <a href="#s1">1 · <span class="zh">一条主线</span><span class="en">The backbone</span></a>
+  <a href="#s2">2 · <span class="zh">装配 (assembly)</span><span class="en">Assembly</span></a>
+  <a href="#s3">3 · <span class="zh">SRA 与测序数据档案</span><span class="en">SRA &amp; sequence archives</span></a>
+  <a href="#s4">4 · <span class="zh">INSDC:NCBI / EBI / DDBJ</span><span class="en">INSDC: NCBI / EBI / DDBJ</span></a>
+  <a href="#s5">5 · <span class="zh">宏基因组与分箱</span><span class="en">Metagenomes &amp; binning</span></a>
+  <a href="#s6">6 · <span class="zh">分箱靠什么:k-mer + 覆盖深度</span><span class="en">Binning signals: k-mer + coverage</span></a>
+  <a href="#s7">7 · <span class="zh">NCBI 装配号与分片目录</span><span class="en">NCBI accession &amp; sharded directory</span></a>
+  <a href="#s8">8 · <span class="zh">装配目录里的文件详解</span><span class="en">Files in an assembly directory</span></a>
+</div>
+
+<h2 id="s1"><span class="n">1</span><span class="zh">一条主线:从样本到基因组</span><span class="en">The backbone: from sample to genome</span></h2>
+<p><span class="zh">这一页所有概念都挂在同一条流水线上,先把它记住,后面每节都是它的某一步:</span><span class="en">Every concept on this page hangs off one pipeline. Remember it first; each later section zooms into one step:</span></p>
+<pre><code>样本 sample
+  │  测序 sequencing
+  ▼
+一堆乱序碎片 reads  ──存进──▶  SRA 档案（编号 SRR…）
+  │  装配 assembly
+  ▼
+拼好的连续序列 contigs ──►（多物种混合时）分箱 binning ──► 一个个 MAG
+  │  登记 register
+  ▼
+基因组装配 assembly（装配号 GCA_… / GCF_…）──► 放上 NCBI FTP（分片目录 + 一批文件）</code></pre>
+<p><span class="zh">这条链接着之前那页<a href="./reference-genomics.html">《参考基因组学入门》</a>:那页讲"有了基因组之后怎么用(转录本、注释、GTF/FASTA、Ensembl/GENCODE)",这页讲"基因组本身是怎么来的"。</span><span class="en">This connects to the earlier <a href="./reference-genomics.html">"Reference genomics 101"</a>: that page covers what you do once you have a genome (transcripts, annotation, GTF/FASTA, Ensembl/GENCODE); this page covers where the genome itself comes from.</span></p>
+
+<h2 id="s2"><span class="n">2</span><span class="zh">装配 (assembly):把碎片拼回基因组</span><span class="en">Assembly: piecing fragments back into a genome</span></h2>
+<p><span class="zh"><b>装配既是动作也是产物</b>:把测序得到的一堆 DNA 碎片,拼回成完整(或尽量完整)的基因组——拼这个动作叫装配,拼出来的成品也叫"一份装配"。</span><span class="en"><b>Assembly is both a verb and a noun</b>: piecing the pile of sequenced DNA fragments back into a complete (or as-complete-as-possible) genome — the act is "assembly", and the product is also called "an assembly".</span></p>
+<h3><span class="zh">为什么需要它</span><span class="en">Why it's needed</span></h3>
+<p><span class="zh">测序仪读不完整条染色体(人 1 号染色体有 2.5 亿碱基),只能把 DNA 打断成几百~几万碱基的小片段逐条读——一次产出几千万~几亿条乱序、彼此重叠的碎片(<b>reads</b>)。要得到完整基因组,就得把它们拼回去。</span><span class="en">A sequencer can't read a whole chromosome (human chr1 has 250 million bases); it breaks DNA into fragments of hundreds-to-tens-of-thousands of bases and reads them one by one — tens of millions to billions of shuffled, overlapping fragments (<b>reads</b>) per run. To get a complete genome you must reassemble them.</span></p>
+<div class="analogy"><span class="zh">🧩 想象把一本书撕成几百万张小纸片(每张几个词)再打乱。<b>装配</b> = 靠纸片间<b>重叠的词</b>判断谁接谁,一点点拼回整本书。拼出来的"整本书"就是一份基因组装配。</span><span class="en">🧩 Imagine shredding a book into millions of scraps (a few words each) and shuffling them. <b>Assembly</b> = using the <b>overlapping words</b> between scraps to work out what follows what, rebuilding the whole book. The rebuilt "book" is a genome assembly.</span></div>
+<h3><span class="zh">产物与质量</span><span class="en">Product &amp; quality</span></h3>
+<p><span class="zh">拼的结果是一批尽量长的连续序列(<b>contig</b> 连续片段,进一步排序定向连成 <b>scaffold</b>)。理想能拼成完整染色体,但常常是草图。衡量质量常看 <b>N50</b>(把 contig 按长度排,累计到一半总长时那条 contig 的长度——越大说明拼得越连续)、总长、contig 数、GC%。这些就在装配目录的 <code>*_assembly_stats.txt</code> 里(见第 8 节)。</span><span class="en">The output is a set of long-as-possible continuous sequences (<b>contigs</b>; further ordered/oriented into <b>scaffolds</b>). Ideally whole chromosomes, but often a draft. Quality is judged by <b>N50</b> (sort contigs by length; the length of the contig at which cumulative length reaches half the total — bigger = more contiguous), total length, contig count, GC%. These live in <code>*_assembly_stats.txt</code> in the assembly directory (see §8).</span></p>
+<div class="note"><span class="zh"><b>装配 ≠ 注释:</b>装配是把序列<b>拼出来</b>(得到"字母 + 坐标系");注释是在拼好的序列上<b>标哪段是基因</b>(GENCODE/Ensembl 干的,见另一页)。先有装配,才能注释。装配还有"版本",如 <b>GRCh38</b> = 人类参考基因组第 38 版装配。</span><span class="en"><b>Assembly ≠ annotation:</b> assembly <b>builds the sequence</b> (giving letters + a coordinate system); annotation <b>labels which stretch is a gene</b> on top (GENCODE/Ensembl, other page). Assembly comes first. Assemblies are versioned too, e.g. <b>GRCh38</b> = human reference build 38.</span></div>
+
+<h2 id="s3"><span class="n">3</span><span class="zh">SRA:原始测序数据的档案库</span><span class="en">SRA: the archive of raw sequencing data</span></h2>
+<p><span class="zh"><b>SRA = Sequence Read Archive(测序读长档案库)</b>,NCBI 的公共数据库,专存<b>原始 reads</b>(测序仪吐出来、还没拼没分析的生料)。全球研究者把原始数据传上去公开,别人可下载复现。</span><span class="en"><b>SRA = Sequence Read Archive</b>, NCBI's public database for <b>raw reads</b> — the unassembled, unanalyzed output straight from the sequencer. Researchers deposit raw data publicly so others can download and reproduce.</span></p>
+<h3><span class="zh">"run" 与编号体系</span><span class="en">"Run" &amp; the accession hierarchy</span></h3>
+<p><span class="zh"><b>run(运行)= 测序仪对一个文库跑一次测序的产物</b>,一次 run 出一批 reads,是 SRA 里最小的数据单元。像 <code>SRR30861082</code> 就是某一次 run 的编号(<b>SRR</b> 前缀 + 数字),凭它能唯一定位那批原始 reads。SRA 的编号是分层的:</span><span class="en">A <b>run = the product of one sequencing execution on one library</b>; each run yields a batch of reads and is the smallest data unit in the SRA. Something like <code>SRR30861082</code> is one run's accession (<b>SRR</b> prefix + digits) that uniquely locates that batch of raw reads. SRA accessions are layered:</span></p>
+<table>
+  <tr><th><span class="zh">前缀</span><span class="en">Prefix</span></th><th><span class="zh">层级</span><span class="en">Level</span></th><th><span class="zh">类比</span><span class="en">Analogy</span></th></tr>
+  <tr><td><code>SRP</code></td><td><span class="zh">Study / 研究项目</span><span class="en">Study / project</span></td><td><span class="zh">整个课题</span><span class="en">the whole research project</span></td></tr>
+  <tr><td><code>SRS</code></td><td><span class="zh">Sample / 样本</span><span class="en">Sample</span></td><td><span class="zh">采的那管样本</span><span class="en">the tube of sample collected</span></td></tr>
+  <tr><td><code>SRX</code></td><td><span class="zh">Experiment / 实验设计</span><span class="en">Experiment</span></td><td><span class="zh">对样本的一次测序设计</span><span class="en">one sequencing design on that sample</span></td></tr>
+  <tr><td><code>SRR</code></td><td><span class="zh"><b>Run / 运行</b></span><span class="en"><b>Run</b></span></td><td><span class="zh"><b>实际跑出来的那批 reads</b></span><span class="en"><b>the actual batch of reads produced</b></span></td></tr>
+</table>
+<p><span class="zh"><code>SRR</code> 是最底层——具体的数据本身,也是你在装配名里最常见到的(标明"这基因组的原料是哪批 reads",可溯源)。</span><span class="en"><code>SRR</code> is the bottom layer — the data itself, and the one you most often see inside an assembly name (marking "which reads this genome was built from", for provenance).</span></p>
+
+<h2 id="s4"><span class="n">4</span><span class="zh">INSDC:NCBI / EBI / DDBJ 三镜像</span><span class="en">INSDC: the NCBI / EBI / DDBJ mirrors</span></h2>
+<p><span class="zh">这三家是<b>国际核酸序列数据库联盟(INSDC)</b>的成员,分属三大洲,<b>每天互相镜像</b>同一份数据:</span><span class="en">These three are members of the <b>International Nucleotide Sequence Database Collaboration (INSDC)</b>, on three continents, <b>mirroring the same data daily</b>:</span></p>
+<table>
+  <tr><th></th><th><span class="zh">机构</span><span class="en">Institution</span></th><th><span class="zh">SRA 前缀</span><span class="en">SRA prefix</span></th></tr>
+  <tr><td><b>NCBI</b></td><td><span class="zh">美国 · National Center for Biotechnology Information(NIH 旗下)</span><span class="en">USA · National Center for Biotechnology Information (part of NIH)</span></td><td><code>SRR</code></td></tr>
+  <tr><td><b>EBI</b></td><td><span class="zh">欧洲 · European Bioinformatics Institute(EMBL 旗下,运营 ENA)</span><span class="en">Europe · European Bioinformatics Institute (part of EMBL; runs ENA)</span></td><td><code>ERR</code></td></tr>
+  <tr><td><b>DDBJ</b></td><td><span class="zh">日本 · DNA Data Bank of Japan</span><span class="en">Japan · DNA Data Bank of Japan</span></td><td><code>DRR</code></td></tr>
+</table>
+<div class="note"><span class="zh">所以同一批数据提交到哪家,前缀就是 <b>S</b>RR / <b>E</b>RR / <b>D</b>RR——<b>同一份数据,三个前门</b>。这也是为什么你会在不同地方看到不同首字母,但内容一致。</span><span class="en">So the same data gets an <b>S</b>RR / <b>E</b>RR / <b>D</b>RR prefix depending on where it was submitted — <b>one dataset, three front doors</b>. That's why you see different leading letters in different places for identical content.</span></div>
+
+<h2 id="s5"><span class="n">5</span><span class="zh">宏基因组与分箱:从"一锅混样"挖基因组</span><span class="en">Metagenomes &amp; binning: mining genomes from a mixed pot</span></h2>
+<p><span class="zh">普通测序:先<b>纯培养</b>一种微生物再单独测 → 一个干净基因组。但大多数微生物<b>没法培养</b>,且天然是<b>成千上万种混在一起</b>(肠道/土壤/海水)。<b>宏基因组学</b>=不分离,直接把样本里<b>所有微生物的 DNA 一锅全测</b>,产物是来自几百上千物种、混在一起的 reads。</span><span class="en">Normal sequencing: <b>pure-culture</b> one microbe, sequence it alone → one clean genome. But most microbes <b>can't be cultured</b>, and are naturally <b>thousands of species mixed together</b> (gut/soil/seawater). <b>Metagenomics</b> = don't separate; sequence <b>all the DNA in the sample at once</b>, yielding reads from hundreds-to-thousands of species jumbled together.</span></p>
+<div class="analogy"><span class="zh">🎙️ 不是录一个人独唱,而是把<b>整个嘈杂菜市场</b>的声音一次性全录下来。</span><span class="en">🎙️ Not recording one soloist, but recording the whole noisy marketplace all at once.</span></div>
+<p><span class="zh">把这坨混合 reads <b>装配</b>后,得到一堆 contig——但它们<b>属于不同微生物、全混着、没标签</b>。<b>分箱(binning)</b>就是:把这些 contig 按"来自同一个微生物"<b>重新归类分组</b>,每组(一个"箱")≈ 一个微生物的基因组草图。</span><span class="en">Assembling that mixed pile gives a heap of contigs — but they come from <b>different microbes, all mixed, unlabeled</b>. <b>Binning</b> means <b>regrouping</b> those contigs by "which microbe they came from"; each group (a "bin") ≈ one microbe's draft genome.</span></p>
+<div class="note"><span class="zh">一个箱拼出的基因组叫 <b>MAG(Metagenome-Assembled Genome,宏基因组组装基因组)</b>——从环境样本里"挖"出来、而非纯培养得到的微生物基因组(通常是草图,可能不完整/有杂质,所以要看质检报告,见第 8 节)。</span><span class="en">A genome from one bin is a <b>MAG (Metagenome-Assembled Genome)</b> — a microbial genome "mined" from an environmental sample rather than pure-cultured (usually a draft, possibly incomplete/impure — hence the QC reports in §8).</span></div>
+
+<h2 id="s6"><span class="n">6</span><span class="zh">分箱靠什么信号:k-mer 指纹 + 覆盖深度</span><span class="en">What binning uses: k-mer fingerprint + coverage depth</span></h2>
+<h3><span class="zh">① 碱基组成 / k-mer 频率(序列指纹)</span><span class="en">① Base composition / k-mer frequency (a sequence fingerprint)</span></h3>
+<p><span class="zh"><b>碱基组成</b>:一段序列里 A/C/G/T 的比例和模式,最简单的是 <b>GC 含量</b>(G+C 占比),不同物种常常不同。<b>k-mer</b> = 长度为 k 的连续小片段;比如 4-mer(四联体)是所有长度 4 的"词"(ACGT、TTGC…共 4⁴=256 种)。<b>k-mer 频率</b> = 每种词出现的频次分布。关键:<b>同一基因组的不同片段,k-mer 频率高度相似</b>——像"同一作者的文风/指纹"。分箱就把 k-mer 指纹相近的 contig 归一起(四联体频率是经典特征)。</span><span class="en"><b>Base composition</b>: the proportions/patterns of A/C/G/T in a sequence; the simplest is <b>GC content</b> (fraction of G+C), which often differs between species. A <b>k-mer</b> is a continuous substring of length k; e.g. a 4-mer (tetranucleotide) is any length-4 "word" (ACGT, TTGC, … 4⁴=256 of them). <b>k-mer frequency</b> = the distribution of how often each word appears. Key: <b>different fragments of the same genome share very similar k-mer frequencies</b> — like one author's writing style / fingerprint. Binning groups contigs with similar k-mer fingerprints (tetranucleotide frequency is the classic feature).</span></p>
+<h3><span class="zh">② 覆盖深度 / 丰度</span><span class="en">② Coverage depth / abundance</span></h3>
+<p><span class="zh"><b>覆盖深度</b>:某位置平均被多少条 reads 覆盖(如 50× = 每个位置平均 50 条 reads 经过)。在宏基因组里,每个微生物有个<b>丰度</b>(细胞越多→DNA 越多→贡献的 reads 越多→它的 contig 覆盖深度越高;稀有的就低)。</span><span class="en"><b>Coverage depth</b>: how many reads cover a given position on average (e.g. 50× = ~50 reads pass through each position). In a metagenome each microbe has an <b>abundance</b> (more cells → more DNA → more reads → higher coverage on its contigs; rare ones → lower).</span></p>
+<p><span class="zh"><b>为什么能分箱</b>:同一个微生物的所有 contig,丰度相同 → 覆盖深度应当一致。所以"深度相近"是个按物种的信号——深度相近的 contig 很可能是一伙的。</span><span class="en"><b>Why it bins</b>: all contigs from the same microbe share one abundance → their coverage depths should match. So "similar depth" is a per-organism signal — contigs with similar depth likely belong together.</span></p>
+<div class="analogy"><span class="zh">📈 <b>差异丰度分箱(更强)</b>:若有<b>多个样本</b>,同一微生物在各样本里的丰度会<b>同涨同落</b>;那些"跨样本变化曲线一致"的 contig 就是一伙的——比单样本分得更准。<br>把 <b>k-mer 指纹(①)+ 覆盖深度(②)</b> 结合,分箱工具就能把混杂 contig 归成一个个 MAG。</span><span class="en">📈 <b>Differential-coverage binning (stronger)</b>: with <b>multiple samples</b>, a microbe's abundance <b>rises and falls together</b> across samples; contigs whose across-sample curves match belong together — more accurate than a single sample.<br>Combine the <b>k-mer fingerprint (①) + coverage depth (②)</b>, and binning tools group jumbled contigs into individual MAGs.</span></div>
+
+<h2 id="s7"><span class="n">7</span><span class="zh">NCBI 装配号与分片 FTP 目录</span><span class="en">NCBI assembly accession &amp; the sharded FTP directory</span></h2>
+<p><span class="zh">每份装配有个<b>装配号 + 版本</b>,如 <code>GCA_981441385.1</code>:</span><span class="en">Each assembly has an <b>accession + version</b>, e.g. <code>GCA_981441385.1</code>:</span></p>
+<ul>
+  <li><span class="zh"><code>GCA</code> = GenBank 版装配(<b>G</b>enome <b>C</b>ollection <b>A</b>ssembly);<code>GCF</code> = RefSeq 版(NCBI 审编过的)。</span><span class="en"><code>GCA</code> = a GenBank assembly (<b>G</b>enome <b>C</b>ollection <b>A</b>ssembly); <code>GCF</code> = the RefSeq version (NCBI-curated).</span></li>
+  <li><span class="zh"><code>.1</code> = 版本号(这份装配的第几版)。</span><span class="en"><code>.1</code> = the version (which revision of this assembly).</span></li>
+</ul>
+<p><span class="zh">NCBI 把它放在这样的 FTP 路径(截取你看到的那个):</span><span class="en">NCBI stores it at an FTP path like (from the one you saw):</span></p>
+<pre><code>.../genomes/all/ GCA / 981 / 441 / 385 / GCA_981441385.1_SRR30861082_bin_11172/
+                └── 分片路径 sharded path ──┘ └──── 装配文件夹 assembly folder ────┘</code></pre>
+<p><span class="zh"><b>那几个数字不是随机的</b>——是装配号数字部分 <code>981441385</code> <b>每 3 位切一段</b>:<code>981 / 441 / 385</code>。为什么切?NCBI 有几百万个装配,全塞一个目录会让文件系统/网页列表崩溃;切成三级树,每层最多 1000 个子目录,查找快。版本号 <code>.1</code> <b>不进</b>分片路径,只出现在最后的文件夹名里。</span><span class="en"><b>Those digits aren't random</b> — they're the numeric part <code>981441385</code> <b>split every 3 digits</b>: <code>981 / 441 / 385</code>. Why split? NCBI has millions of assemblies; one flat directory would break the filesystem/HTTP listing. A three-level tree caps each level at 1000 subdirs and keeps lookups fast. The version <code>.1</code> does <b>not</b> enter the sharded path — it only appears in the final folder name.</span></p>
+<p><span class="zh">文件夹名格式 = <code>&lt;装配号&gt;.&lt;版本&gt;_&lt;装配名&gt;</code>:<code>GCA_981441385.1_SRR30861082_bin_11172</code> 里,<code>SRR30861082</code> 是原料测序 run(第 3 节),<code>bin_11172</code> 是分箱得到的第 11172 号 MAG(第 5 节)——所以这是个从环境样本挖出来的基因组。</span><span class="en">The folder name = <code>&lt;accession&gt;.&lt;version&gt;_&lt;assembly-name&gt;</code>: in <code>GCA_981441385.1_SRR30861082_bin_11172</code>, <code>SRR30861082</code> is the source sequencing run (§3) and <code>bin_11172</code> is the 11172nd MAG from binning (§5) — so this is a genome mined from an environmental sample.</span></p>
+<div class="note"><span class="zh"><b>规律</b>:<code>GCA_981441385.1</code> → 去 <code>GCA_</code> → <code>981441385</code> → 切三段 <code>981 441 385</code> → 拼成 <code>.../all/GCA/981/441/385/</code>。gget PR #237 的 <code>assembly_report</code> 干的正是这套:从装配号推出这个目录、找对文件夹、读里面的 <code>*_assembly_report.txt</code>。</span><span class="en"><b>Rule</b>: <code>GCA_981441385.1</code> → drop <code>GCA_</code> → <code>981441385</code> → split into <code>981 441 385</code> → build <code>.../all/GCA/981/441/385/</code>. gget PR #237's <code>assembly_report</code> does exactly this: derive the directory from the accession, find the right folder, read its <code>*_assembly_report.txt</code>.</span></div>
+
+<h2 id="s8"><span class="n">8</span><span class="zh">装配目录里的文件详解</span><span class="en">The files in an assembly directory</span></h2>
+<p><span class="zh">分三类看最清楚:<b>数据本身</b> · <b>说明书</b> · <b>质检报告</b>。</span><span class="en">Easiest in three groups: <b>the data itself</b> · <b>the manuals</b> · <b>the QC reports</b>.</span></p>
+<table>
+  <tr><th><span class="zh">文件</span><span class="en">File</span></th><th><span class="zh">是什么</span><span class="en">What</span></th><th><span class="zh">科研用途</span><span class="en">Research use</span></th></tr>
+  <tr><td><code>*_genomic.fna.gz</code></td><td><span class="zh">基因组<b>序列</b>(FASTA;fna=FASTA nucleic acid)</span><span class="en">the genome <b>sequence</b> (FASTA; fna = FASTA nucleic acid)</span></td><td><span class="zh">比对、找基因、比较基因组——最核心原料</span><span class="en">alignment, gene finding, comparative genomics — the core material</span></td></tr>
+  <tr><td><code>*_genomic.gbff.gz</code></td><td><span class="zh">GenBank 平文件(序列<b>+注释</b>打包,GBFF)</span><span class="en">GenBank flat file (sequence <b>+ annotation</b>, GBFF)</span></td><td><span class="zh">直接看有哪些基因/特征及其位置和产物</span><span class="en">see genes/features with their locations and products</span></td></tr>
+  <tr><td><code>*_wgsmaster.gbff.gz</code></td><td><span class="zh"><b>WGS 主记录</b>(全基因组鸟枪项目的总入口记录)</span><span class="en">the <b>WGS master record</b> (top-level entry for the whole-genome-shotgun project)</span></td><td><span class="zh">指向该项目所有 contig 的元记录</span><span class="en">the meta-record pointing to all the project's contigs</span></td></tr>
+  <tr><td><code>*_assembly_report.txt</code></td><td><span class="zh"><b>序列命名对照表</b>(名字↔GenBank↔RefSeq↔UCSC + 长度/角色)</span><span class="en">the <b>sequence-name map</b> (name ↔ GenBank ↔ RefSeq ↔ UCSC + length/role)</span></td><td><span class="zh">跨数据库翻译序列/染色体名(<b>gget #237 抓的就是它</b>)</span><span class="en">translate sequence/chromosome names across databases (<b>what gget #237 fetches</b>)</span></td></tr>
+  <tr><td><code>*_assembly_stats.txt</code></td><td><span class="zh">装配<b>统计</b>(总长、contig 数、<b>N50</b>、GC%…)</span><span class="en">assembly <b>stats</b> (total length, contig count, <b>N50</b>, GC%, …)</span></td><td><span class="zh">判断装配质量/完整度,决定要不要信这份数据</span><span class="en">judge quality/completeness — whether to trust the assembly</span></td></tr>
+  <tr><td><code>*_feature_count.txt</code></td><td><span class="zh">注释<b>特征计数</b>(基因/CDS/rRNA/tRNA…)</span><span class="en">annotated <b>feature counts</b> (genes/CDS/rRNA/tRNA, …)</span></td><td><span class="zh">快速看基因含量概览</span><span class="en">a quick overview of gene content</span></td></tr>
+  <tr><td><code>*_ani_report.txt</code></td><td><span class="zh"><b>ANI</b>(平均核苷酸一致性)比对报告</span><span class="en"><b>ANI</b> (Average Nucleotide Identity) report</span></td><td><span class="zh">核实"这基因组是哪个物种"、和已知参考多像</span><span class="en">verify the organism's identity and similarity to known references</span></td></tr>
+  <tr><td><code>*_ani_contam_ranges.tsv</code></td><td><span class="zh">ANI 判定的可疑<b>污染区间</b></span><span class="en">suspected <b>contamination ranges</b> flagged by ANI</span></td><td><span class="zh">标出可能混入的外源序列</span><span class="en">flag possibly foreign sequence</span></td></tr>
+  <tr><td><code>*_fcs_report.txt</code></td><td><span class="zh"><b>FCS</b>(外源污染筛查)报告</span><span class="en"><b>FCS</b> (Foreign Contamination Screen) report</span></td><td><span class="zh">检测接头/其它物种污染(MAG 尤其需要)</span><span class="en">detect adaptor/other-species contamination (crucial for MAGs)</span></td></tr>
+  <tr><td><code>md5checksums.txt</code></td><td><span class="zh">校验和</span><span class="en">checksums</span></td><td><span class="zh">下载后验完整性</span><span class="en">verify download integrity</span></td></tr>
+</table>
+<div class="note"><span class="zh">一句话:<b>fna/gbff 是"数据本身",assembly_report/stats 是"说明书",ani/fcs 是"质检报告"</b>。对 MAG(环境挖出、容易不纯)尤其要看 ani/fcs 这类质检文件。</span><span class="en">In one line: <b>fna/gbff are "the data", assembly_report/stats are "the manual", ani/fcs are "the QC report"</b>. For MAGs (mined from the environment, prone to impurity) the ani/fcs QC files especially matter.</span></div>
+
+<footer>
+  <span class="zh">本页由 Claude Opus 4.8 (1M context) 于 2026-07-05 SGT 整理,面向非生物背景读者的入门科普,配合对 <a href="https://github.com/scverse/gget/pull/237">gget PR #237</a>(NCBI assembly_report)的分析。为便于理解做了大量简化;术语精确定义请以 <a href="https://www.ncbi.nlm.nih.gov/sra">NCBI SRA</a>、<a href="https://www.ncbi.nlm.nih.gov/assembly">NCBI Assembly</a> 等权威来源为准。AI 生成内容,供参考。</span>
+  <span class="en">Compiled by Claude Opus 4.8 (1M context) on 2026-07-05 SGT as an intro primer for non-biologists, accompanying the analysis of <a href="https://github.com/scverse/gget/pull/237">gget PR #237</a> (NCBI assembly_report). Heavily simplified for clarity; for precise definitions defer to authoritative sources such as <a href="https://www.ncbi.nlm.nih.gov/sra">NCBI SRA</a> and <a href="https://www.ncbi.nlm.nih.gov/assembly">NCBI Assembly</a>. AI-generated, for reference.</span>
+</footer>
+
+</div>
+<script>
+  function setLang(l){
+    document.body.className = 'lang-' + l;
+    document.querySelectorAll('.langtoggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.l === l);
+    });
+  }
+</script>
+</body>
+</html>
