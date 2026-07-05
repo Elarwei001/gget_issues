@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>gget ref · NCBI assembly report (PR #237) — 概览</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --ink:#e6e9ef; --muted:#9aa4b2;
+    --acc:#f5a623; --acc2:#5aa9e6; --green:#4cc38a; --red:#e5648a; --line:#2a2f3a; --code:#0b0d11;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 24px 80px}
+  header.top{position:relative;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:28px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:15px}
+  .stamp{position:absolute;top:0;right:0;font-size:12px;color:var(--muted);text-align:right}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--muted);margin:2px 4px 2px 0}
+  h2{font-size:21px;margin:38px 0 12px;padding-top:8px;border-top:1px solid var(--line);color:#fff}
+  h2 .n{color:var(--acc);font-variant-numeric:tabular-nums;margin-right:8px}
+  h3{font-size:17px;margin:22px 0 8px;color:var(--acc2)}
+  p{margin:10px 0}
+  a{color:var(--acc2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;color:#ffd9a0}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:13px;line-height:1.55}
+  pre code{background:none;border:none;padding:0;color:#d6deeb}
+  .tldr{background:linear-gradient(135deg,#1b2330,#171a21);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:16px 18px;margin:16px 0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#fff}
+  tr:nth-child(even) td{background:var(--panel)}
+  .ok{color:var(--green);font-weight:600}
+  .no{color:var(--red);font-weight:600}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc2);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .warn{background:#251c1c;border:1px solid #4a2b2b;border-left:4px solid var(--red);border-radius:8px;padding:12px 16px;margin:14px 0}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:5px 0}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:18px 0;columns:2;font-size:14px}
+  .toc a{display:block;padding:2px 0;color:var(--ink)}
+  .toc a:hover{color:var(--acc2)}
+  .muted{color:var(--muted)}
+  .primer{background:#132018;border:1px solid #26402f;border-left:4px solid var(--green);border-radius:10px;padding:14px 18px;margin:16px 0}
+  body.lang-zh .en{display:none}
+  body.lang-en .zh{display:none}
+  .langtoggle{margin-bottom:6px}
+  .langtoggle button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;margin-left:4px}
+  .langtoggle button.active{background:var(--acc2);color:#08121c;border-color:var(--acc2);font-weight:600}
+  footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body class="lang-zh">
+<div class="wrap">
+
+<!-- ===== 页头 ===== -->
+<header class="top">
+  <div class="stamp">
+    <div class="langtoggle">
+      <button data-l="zh" class="active" onclick="setLang('zh')">中文</button><button data-l="en" onclick="setLang('en')">EN</button>
+    </div>
+    Generated: 2026-07-05 21:33 SGT<br>by Claude Opus 4.8 (1M context)
+  </div>
+  <h1>🧬 <span class="zh">gget ref：接入 NCBI 装配报告</span><span class="en">gget ref: NCBI assembly reports</span></h1>
+  <div class="sub"><span class="zh">给 <code>gget ref</code> 增加一个开关，返回 NCBI 的「装配报告」，用来在不同数据库之间翻译染色体/序列名字</span><span class="en">A flag on <code>gget ref</code> that returns NCBI "assembly reports" to translate chromosome / sequence names across databases</span></div>
+  <div style="margin-top:10px">
+    <span class="pill">PR: scverse/gget#237 (DRAFT)</span>
+    <span class="pill">Issue: #179</span>
+    <span class="pill"><span class="zh">类别：B · 增强已有模块</span><span class="en">Type: B · enhance existing module</span></span>
+    <span class="pill"><span class="zh">上游：NCBI genomes FTP</span><span class="en">Upstream: NCBI genomes FTP</span></span>
+  </div>
+</header>
+
+<!-- ===== 背景科普 ===== -->
+<div class="primer">
+  <strong>📖 <span class="zh">背景科普</span><span class="en">Primer</span> · <span class="zh">染色体名字的「巴别塔」</span><span class="en">The Babel of chromosome names</span></strong><br>
+  <span class="zh">一个基因组（一个物种的全套 DNA）被切成若干条<strong>序列</strong>（sequence，通常就是一条染色体或一段脚手架）。麻烦在于：不同数据库给同一条染色体起的名字都不一样——人类 1 号染色体在 Ensembl 里叫 <code>1</code>、在 UCSC 浏览器里叫 <code>chr1</code>、在 NCBI 的 GenBank 里叫 <code>CM000663.2</code>、在 RefSeq 里叫 <code>NC_000001.11</code>。分析数据时如果两个文件用了不同命名体系，程序就会「对不上号」。NCBI 官方为每个基因组<strong>装配（assembly，即拼装好的一版参考基因组）</strong>发布一张<strong>装配报告</strong>（assembly report）——一张纯文本对照表，把同一条序列在四套命名体系下的名字并排列出。这个 PR 让 <code>gget ref</code> 能一键取回这张对照表。</span>
+  <span class="en">A genome (a species' full DNA) is split into several <strong>sequences</strong> (usually one chromosome or scaffold each). The catch: different databases name the same chromosome differently — human chromosome 1 is <code>1</code> in Ensembl, <code>chr1</code> in the UCSC browser, <code>CM000663.2</code> in NCBI GenBank, and <code>NC_000001.11</code> in RefSeq. When two files use different naming systems, tools fail to line them up. NCBI publishes an <strong>assembly report</strong> for each genome <strong>assembly (one assembled version of a reference genome)</strong> — a plain-text lookup table listing each sequence's name under all four conventions side by side. This PR lets <code>gget ref</code> fetch that table in one command.</span>
+  <div class="muted" style="margin-top:6px">🔗 <a href="https://www.ncbi.nlm.nih.gov/datasets/docs/v2/troubleshooting/faq/#what-is-an-assembly-report">NCBI: what is an assembly report</a> · <a href="https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_assembly_report.txt">real example (GRCh38.p14)</a></div>
+</div>
+
+<!-- ===== TOC ===== -->
+<div class="toc">
+  <a href="#s1">1 · TL;DR</a>
+  <a href="#s2"><span class="zh">2 · 背景 / 问题</span><span class="en">2 · Background / problem</span></a>
+  <a href="#s3"><span class="zh">3 · 上游 / 数据源</span><span class="en">3 · Upstream / data source</span></a>
+  <a href="#s4"><span class="zh">4 · 返回值形态详解</span><span class="en">4 · Return-value shape</span></a>
+  <a href="#s5"><span class="zh">5 · 如何使用</span><span class="en">5 · How to use</span></a>
+  <a href="#s6"><span class="zh">6 · Scope / 边界</span><span class="en">6 · Scope / boundary</span></a>
+  <a href="#s7"><span class="zh">7 · 评估（四 lens）</span><span class="en">7 · Evaluation (4 lenses)</span></a>
+  <a href="#s8"><span class="zh">8 · 设计决策与权衡</span><span class="en">8 · Design decisions</span></a>
+  <a href="#s9"><span class="zh">9 · 测试 / live data test</span><span class="en">9 · Tests / live data test</span></a>
+  <a href="#s10"><span class="zh">10 · 当前状态</span><span class="en">10 · Current status</span></a>
+  <a href="#s11"><span class="zh">11 · 未决 / 后续</span><span class="en">11 · Open items</span></a>
+  <a href="#s12"><span class="zh">12 · 参考链接</span><span class="en">12 · References</span></a>
+</div>
+
+<!-- ===== TL;DR ===== -->
+<div class="tldr" id="s1">
+  <strong>TL;DR：</strong>
+  <span class="zh">这是一个<strong>教科书级契合 gget 定位</strong>的 B 类增强：给 <code>gget ref</code> 加 <code>--assembly_report</code> / <code>assembly_report=True</code> 开关，把位置参数从「物种名」改解为「NCBI 装配号」（如 <code>GCF_000001405.40</code>），返回 NCBI 装配报告的 <code>pandas</code> DataFrame（或 <code>json=True</code> 的字典列表），解决 issue #179（跨数据库翻译染色体名）。纯数据访问、不越界做分析、返回值已 gget 化、双接口俱全。我用 curl 独立核验了两个装配号的真值——SARS-CoV-2 单行数据与测试 fixture 逐字段完全一致、人类 GRCh38.p14 的 <code>1↔chr1↔CM000663.2↔NC_000001.11</code> 映射与文档一致。<strong>主要瑕疵</strong>：(1) 有一个「伪装成单元测试的 live 测试」（fixture 里 <code>test_ref_assembly_report</code> 真打网络、断言精确、无 skip-on-network/限流处理）；(2) CLI 的 <code>--csv</code> 旗标语义与名字<strong>相反</strong>（打开它反而输出 JSON）；(3) 目录解析用 <code>startswith</code>+取第 0 个，有极小概率的版本号前缀撞车。都可控，值得合入但建议先修这三点。</span>
+  <span class="en">A <strong>textbook-fit</strong> Type-B enhancement: a <code>--assembly_report</code> / <code>assembly_report=True</code> switch on <code>gget ref</code> reinterprets the positional argument as an NCBI assembly accession (e.g. <code>GCF_000001405.40</code>) and returns the NCBI assembly report as a <code>pandas</code> DataFrame (or a list of dicts with <code>json=True</code>), resolving issue #179 (translating chromosome names across databases). Pure data access, no over-reach into analysis, gget-ified return value, dual interface. I independently verified truth anchors for two accessions with curl — the SARS-CoV-2 single data row matches the test fixture field-for-field, and the human GRCh38.p14 <code>1↔chr1↔CM000663.2↔NC_000001.11</code> mapping matches the docs. <strong>Main warts</strong>: (1) a "live test disguised as a unit test" (fixture <code>test_ref_assembly_report</code> hits the real network, asserts exact equality, no skip-on-network/rate-limit handling); (2) the CLI <code>--csv</code> flag is <strong>inverted</strong> — turning it on emits JSON; (3) folder resolution uses <code>startswith</code>+first-match, a tiny prefix-collision risk on version numbers. All manageable — mergeable, but fix these three first.</span>
+</div>
+
+<h2 id="s2"><span class="n">2</span><span class="zh">背景 / 问题</span><span class="en">Background / problem</span></h2>
+<p><span class="zh"><a href="https://github.com/scverse/gget/issues/179">Issue #179</a> 由 <code>nh13</code>（Nils Homer）提出：<code>gget ref</code> 只从 Ensembl 取参考基因组的 FTP 链接，但他需要的是 NCBI 的<strong>装配报告</strong>，用来在不同数据库间翻译染色体名。维护者 <code>lauraluebbert</code> 回复说「这功能在待办清单上很久了」。这是<strong>字面需求即底层需求</strong>：拿到那张对照表就够了，用户不需要 gget 帮他做名字替换本身（那属于下游数据处理）。</span><span class="en"><a href="https://github.com/scverse/gget/issues/179">Issue #179</a> was filed by <code>nh13</code> (Nils Homer): <code>gget ref</code> only fetches Ensembl FTP links, but he needs NCBI <strong>assembly reports</strong> to translate chromosome names across databases. Maintainer <code>lauraluebbert</code> replied it had "been on my to-do list forever." Here the literal ask <em>is</em> the underlying need: getting the lookup table is enough — the user doesn't need gget to perform the name substitution itself (that would be downstream data processing).</span></p>
+<div class="note"><span class="zh">原文引用："these assembly reports are super useful for translating chromosome names. E.g. <code>chr1</code> could be <code>1</code>, <code>CM000663.2</code>, or <code>NC_000001.11</code>."</span><span class="en">From the issue: "these assembly reports are super useful for translating chromosome names. E.g. <code>chr1</code> could be <code>1</code>, <code>CM000663.2</code>, or <code>NC_000001.11</code>."</span></div>
+
+<h2 id="s3"><span class="n">3</span><span class="zh">上游 / 数据源</span><span class="en">Upstream / data source</span></h2>
+<p><span class="zh">上游是 <strong>NCBI genomes FTP</strong>（<code>https://ftp.ncbi.nlm.nih.gov/genomes/all/</code>）。<strong>没有专门的查询 API</strong>——报告是静态文本文件（取 blob 型），但要拿到它得先<strong>解析 HTML 目录列表</strong>找到确切的文件夹名。路径规则：装配号 <code>GCF_000001405.40</code> → 拆成 <code>GCF / 000 / 001 / 405 /</code> 四段目录 → 该目录下列出所有版本文件夹（如 <code>GCF_000001405.40_GRCh38.p14/</code>）→ 报告文件是 <code>{folder}/{folder}_assembly_report.txt</code>。PR 用 <code>requests.get</code> + <code>BeautifulSoup</code> 抓 <code>&lt;a&gt;</code> 链接、按 <code>startswith(accession)</code> 匹配文件夹名（因为装配号后面还跟着人读的装配名，如 <code>_GRCh38.p14</code>，事先不知道）。</span><span class="en">Upstream is the <strong>NCBI genomes FTP</strong> (<code>https://ftp.ncbi.nlm.nih.gov/genomes/all/</code>). There is <strong>no dedicated query API</strong> — the report is a static text file (blob-type), but reaching it requires <strong>scraping the HTML directory listing</strong> to find the exact folder name. Path rule: accession <code>GCF_000001405.40</code> → split into <code>GCF / 000 / 001 / 405 /</code> → that directory lists all version folders (e.g. <code>GCF_000001405.40_GRCh38.p14/</code>) → the report file is <code>{folder}/{folder}_assembly_report.txt</code>. The PR uses <code>requests.get</code> + <code>BeautifulSoup</code> to grab <code>&lt;a&gt;</code> links and match the folder by <code>startswith(accession)</code> (because the accession is followed by a human-readable assembly name like <code>_GRCh38.p14</code> that isn't known ahead of time).</span></p>
+<table>
+  <tr><th><span class="zh">探针（我实测）</span><span class="en">Probe (I ran)</span></th><th><span class="zh">结果</span><span class="en">Result</span></th></tr>
+  <tr><td><code>GET .../GCF/009/858/895/</code></td><td><span class="zh">列出 <code>GCF_009858895.1_...</code> 与 <code>GCF_009858895.2_ASM985889v3/</code>，200 OK</span><span class="en">Lists <code>GCF_009858895.1_...</code> and <code>GCF_009858895.2_ASM985889v3/</code>, 200 OK</span></td></tr>
+  <tr><td><code>GET .../GCF_009858895.2_ASM985889v3_assembly_report.txt</code></td><td><span class="zh">单条数据行，逐字段 = 测试 fixture 期望值 ✅</span><span class="en">Single data row, field-for-field = test fixture expectation ✅</span></td></tr>
+  <tr><td><code>GET .../GCF/000/001/405/</code></td><td><span class="zh">27 个人类版本文件夹（<code>.8</code>~<code>.40</code>），<code>.40</code> 解析到 GRCh38.p14</span><span class="en">27 human version folders (<code>.8</code>–<code>.40</code>); <code>.40</code> resolves to GRCh38.p14</span></td></tr>
+  <tr><td><code>GRCh38.p14 report</code></td><td><span class="zh">709 条数据行；<code>1 → CM000663.2 → NC_000001.11 → chr1</code> ✅ 与文档示例一致</span><span class="en">709 data rows; <code>1 → CM000663.2 → NC_000001.11 → chr1</code> ✅ matches the docs example</span></td></tr>
+</table>
+
+<h2 id="s4"><span class="n">4</span><span class="zh">返回值形态详解（供接口设计）</span><span class="en">Return-value shape (for interface design)</span></h2>
+<p><span class="zh">这是 B 类增强，没有多文件/多 sheet，返回<strong>一个 DataFrame</strong>：一行 = 一条序列，列 = NCBI 报告的原生列（直接照搬表头，不改名）。下表列头以我实测的真实报告为准（人类 GRCh38.p14）。原始文件里 <code>#</code> 开头是注释元数据，唯一以 <code># Sequence-Name</code> 开头的注释行被当作列头解析。</span><span class="en">Type-B enhancement: no multi-file/multi-sheet structure — it returns <strong>one DataFrame</strong>: one row = one sequence, columns = the report's native columns (verbatim headers, not renamed). Headers below are from the real report I fetched (human GRCh38.p14). In the source file, <code>#</code>-prefixed lines are comment metadata; the single line starting <code># Sequence-Name</code> is parsed as the header.</span> · 🔗 <a href="https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_assembly_report.txt">raw report</a></p>
+<table>
+  <tr><th><span class="zh">列名（表头）</span><span class="en">Column</span></th><th><span class="zh">含义（大白话）</span><span class="en">Meaning (plain)</span></th></tr>
+  <tr><td><code>Sequence-Name</code></td><td><span class="zh">Ensembl/短名，如 <code>1</code>、<code>X</code>、<code>MT</code></span><span class="en">Ensembl/short name, e.g. <code>1</code>, <code>X</code>, <code>MT</code></span></td></tr>
+  <tr><td><code>Sequence-Role</code></td><td><span class="zh">这条序列的角色：<code>assembled-molecule</code>（已拼好的完整染色体）/ 脚手架 / 补丁等</span><span class="en">Role of the sequence: <code>assembled-molecule</code> (a finished chromosome) / scaffold / patch, etc.</span></td></tr>
+  <tr><td><code>Assigned-Molecule</code></td><td><span class="zh">它属于哪条分子（染色体号）</span><span class="en">Which molecule (chromosome) it belongs to</span></td></tr>
+  <tr><td><code>Assigned-Molecule-Location/Type</code></td><td><span class="zh">位置/类型，如 <code>Chromosome</code>、<code>Mitochondrion</code></span><span class="en">Location/type, e.g. <code>Chromosome</code>, <code>Mitochondrion</code></span></td></tr>
+  <tr><td><code>GenBank-Accn</code></td><td><span class="zh"><strong>GenBank</strong> 命名下的登录号，如 <code>CM000663.2</code></span><span class="en">Accession under <strong>GenBank</strong>, e.g. <code>CM000663.2</code></span></td></tr>
+  <tr><td><code>Relationship</code></td><td><span class="zh">GenBank 与 RefSeq 的关系（<code>=</code> 表示两者相同）</span><span class="en">GenBank↔RefSeq relationship (<code>=</code> means identical)</span></td></tr>
+  <tr><td><code>RefSeq-Accn</code></td><td><span class="zh"><strong>RefSeq</strong> 命名下的登录号，如 <code>NC_000001.11</code></span><span class="en">Accession under <strong>RefSeq</strong>, e.g. <code>NC_000001.11</code></span></td></tr>
+  <tr><td><code>Assembly-Unit</code></td><td><span class="zh">所属装配单元，如 <code>Primary Assembly</code></span><span class="en">Assembly unit, e.g. <code>Primary Assembly</code></span></td></tr>
+  <tr><td><code>Sequence-Length</code></td><td><span class="zh">该序列碱基长度（字符串，如 <code>248956422</code>）</span><span class="en">Sequence length in bases (string, e.g. <code>248956422</code>)</span></td></tr>
+  <tr><td><code>UCSC-style-name</code></td><td><span class="zh"><strong>UCSC</strong> 命名，如 <code>chr1</code>（无对应时为 <code>na</code>）</span><span class="en">Name in <strong>UCSC</strong> style, e.g. <code>chr1</code> (<code>na</code> if none)</span></td></tr>
+</table>
+<div class="warn"><span class="zh"><strong>形态 quirk：</strong>所有列都是<strong>字符串</strong>（PR 未做类型转换），<code>Sequence-Length</code> 也是字符串而非整数；缺失值是字面量 <code>na</code>（不是 <code>NaN</code>）。列集合<strong>因装配而异</strong>——SARS-CoV-2 报告只有 10 列且部分为 <code>na</code>，人类报告列数/含义一致但行数达 709。开发者若想按数值排序 <code>Sequence-Length</code> 需自行 <code>astype(int)</code>。</span><span class="en"><strong>Shape quirk:</strong> all columns are <strong>strings</strong> (no dtype coercion), including <code>Sequence-Length</code>; missing values are the literal <code>na</code> (not <code>NaN</code>). The column set <strong>varies by assembly</strong> — the SARS-CoV-2 report has 10 columns with some <code>na</code>, while the human report has the same columns but 709 rows. To sort <code>Sequence-Length</code> numerically, callers must <code>astype(int)</code> themselves.</span></div>
+
+<h2 id="s5"><span class="n">5</span><span class="zh">如何使用</span><span class="en">How to use</span></h2>
+<p><span class="zh"><strong>输入</strong>：一个 NCBI 装配号（含版本后缀）。<strong>返回</strong>：DataFrame（默认）或字典列表（<code>json=True</code>）。<strong>副作用</strong>：<code>save=True</code> 时写 <code>{accession}_assembly_report.csv/.json</code> 到当前目录。</span><span class="en"><strong>Input</strong>: an NCBI assembly accession (with version suffix). <strong>Returns</strong>: a DataFrame (default) or list of dicts (<code>json=True</code>). <strong>Side effect</strong>: with <code>save=True</code>, writes <code>{accession}_assembly_report.csv/.json</code> to the CWD.</span></p>
+<pre><code># CLI — 默认输出 CSV 到 stdout
+gget ref GCF_000001405.40 --assembly_report
+
+# CLI — 加 --csv 反而输出 JSON（注意名字与行为相反！）
+gget ref GCF_000001405.40 --assembly_report --csv</code></pre>
+<pre><code># Python — 通过 ref() 委派
+gget.ref("GCF_000001405.40", assembly_report=True)          # -> pandas DataFrame
+gget.ref("GCF_000001405.40", assembly_report=True, json=True) # -> list[dict]
+
+# Python — 也可直接调新暴露的函数
+gget.assembly_report("GCF_000001405.40")                    # -> pandas DataFrame</code></pre>
+<table>
+  <tr><th><span class="zh">参数</span><span class="en">Argument</span></th><th><span class="zh">作用</span><span class="en">Effect</span></th></tr>
+  <tr><td><code>assembly_report=True</code> / <code>-ar</code></td><td><span class="zh">把位置参数解释为装配号，返回报告而非 Ensembl 链接</span><span class="en">Interpret positional arg as accession; return report, not Ensembl links</span></td></tr>
+  <tr><td><code>json=True</code> (Py) / <code>--csv</code> (CLI)</td><td><span class="zh">返回字典列表 / 输出 JSON <span class="no">（CLI 旗标名 <code>--csv</code> 与行为相反）</span></span><span class="en">Return list of dicts / emit JSON <span class="no">(CLI flag named <code>--csv</code> is inverted)</span></span></td></tr>
+  <tr><td><code>save=True</code> (Py) / <code>-o</code> (CLI)</td><td><span class="zh">写文件（Py 固定文件名；CLI 写到 <code>-o</code> 指定路径）</span><span class="en">Write file (Py fixed name; CLI to the <code>-o</code> path)</span></td></tr>
+</table>
+
+<h2 id="s6"><span class="n">6</span><span class="zh">Scope / 边界</span><span class="en">Scope / boundary</span></h2>
+<table>
+  <tr><th><span class="zh">做什么</span><span class="en">Does</span></th><th><span class="zh">刻意不做</span><span class="en">Deliberately does not</span></th></tr>
+  <tr>
+    <td>
+      <span class="ok">✔</span> <span class="zh">按装配号取回 NCBI 装配报告对照表</span><span class="en">Fetch the NCBI assembly report table by accession</span><br>
+      <span class="ok">✔</span> <span class="zh">解析成结构化 DataFrame / JSON</span><span class="en">Parse into a structured DataFrame / JSON</span><br>
+      <span class="ok">✔</span> <span class="zh">校验装配号格式、给出可读报错</span><span class="en">Validate accession format, human-readable errors</span>
+    </td>
+    <td>
+      <span class="no">✘</span> <span class="zh">不替用户去「改写文件里的染色体名」（那是下游数据处理）</span><span class="en">Not rewrite chromosome names in the user's files (downstream processing)</span><br>
+      <span class="no">✘</span> <span class="zh">不下载参考序列/FASTA（那是现有 <code>gget ref</code> 的别的路径）</span><span class="en">Not download reference sequences/FASTA (a different existing path)</span><br>
+      <span class="no">✘</span> <span class="zh">不做类型清洗（长度仍是字符串、<code>na</code> 不转 NaN）</span><span class="en">No type cleaning (length stays string, <code>na</code> not NaN)</span>
+    </td>
+  </tr>
+</table>
+<p><span class="zh">判定：这只封装 NCBI 的<strong>数据分发层</strong>（列目录 + 下载 + 解析），刻意不复制上游的任何计算——完全落在 gget「数据<em>访问</em>而非<em>分析</em>」的定位内。</span><span class="en">Verdict: this wraps only NCBI's <strong>data-distribution layer</strong> (list dir + download + parse) and deliberately copies none of its computation — squarely within gget's "data <em>access</em>, not <em>analysis</em>" role.</span></p>
+
+<h2 id="s7"><span class="n">7</span><span class="zh">评估（四 lens）</span><span class="en">Evaluation (4 lenses)</span></h2>
+<table>
+  <tr><th>Lens</th><th><span class="zh">判断</span><span class="en">Verdict</span></th><th><span class="zh">依据 / 备注</span><span class="en">Basis / notes</span></th></tr>
+  <tr>
+    <td><span class="zh">① Soundness（正确/健壮）</span><span class="en">① Soundness</span></td>
+    <td><span class="zh"><b>良好，有小瑕疵</b></span><span class="en"><b>Good, minor warts</b></span></td>
+    <td><span class="zh">装配号用正则校验；对「目录非 200 / 无匹配文件夹 / 报告非 200 / 缺表头」四种失败都显式抛错。<b>瑕疵</b>：目录解析用 <code>startswith(accession)</code>+<code>folders[0]</code>——若装配号版本是单数字（如假想的 <code>.4</code>）会前缀撞上 <code>.40/.41/...</code>；实测已知装配号无碍，但换成精确匹配 <code>{accession}_</code> 更稳。真值全部对得上（见 §3）。</span><span class="en">Accession validated by regex; four failure modes (dir non-200 / no matching folder / report non-200 / missing header) all raise explicitly. <b>Wart</b>: folder resolution uses <code>startswith(accession)</code>+<code>folders[0]</code> — a single-digit version (hypothetical <code>.4</code>) could prefix-collide with <code>.40/.41/...</code>; harmless for tested accessions but exact <code>{accession}_</code> match is safer. All truth anchors match (see §3).</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">② 平台契合度</span><span class="en">② Platform fit</span></td>
+    <td><span class="ok">PASS</span></td>
+    <td><span class="zh"><b>教科书级契合。</b>纯数据访问、封装分发层、不 reimplement 任何上游计算；返回值已 gget 化（DataFrame/JSON）；Python+CLI 双接口；无非-Python 依赖。正好补上「Ensembl↔NCBI 命名鸿沟」，与现有 <code>ref</code> 天然同源。</span><span class="en"><b>Textbook fit.</b> Pure data access; wraps the distribution layer; reimplements no upstream computation; gget-ified return (DataFrame/JSON); dual Python+CLI interface; no non-Python deps. Cleanly bridges the Ensembl↔NCBI naming gap, natural sibling to existing <code>ref</code>.</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">③ 可复现性</span><span class="en">③ Reproducibility</span></td>
+    <td><span class="zh"><b>好</b></span><span class="en"><b>Good</b></span></td>
+    <td><span class="zh">装配号含版本后缀 → 指向固定文件 → 确定输出，可写进论文方法并被审稿人重跑。唯一非确定点是「HTML 目录解析取 <code>folders[0]</code>」，实践中每个版本只有一个文件夹，稳定。</span><span class="en">Accession includes a version suffix → points to a fixed file → deterministic output, citable in a methods section and re-runnable by reviewers. The only non-determinism is "take <code>folders[0]</code> from the HTML listing", but each version has exactly one folder in practice, so it's stable.</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">④ 维护成本</span><span class="en">④ Maintenance</span></td>
+    <td><span class="zh"><b>中等</b></span><span class="en"><b>Moderate</b></span></td>
+    <td><span class="zh">依赖两点会漂移：NCBI FTP 的<b>HTML 目录列表格式</b>（被 <code>BeautifulSoup</code> 抓解析）与 <b>报告文本格式</b>。NCBI FTP 多年稳定，但没有<b>设计良好的</b> live test 兜底——现有的那条 live 断言反而是个隐患（见 §9）。</span><span class="en">Two drift points: NCBI FTP's <b>HTML directory-listing format</b> (scraped by <code>BeautifulSoup</code>) and the <b>report text format</b>. NCBI FTP has been stable for years, but there is no <b>well-designed</b> live test as a safety net — and the one live assertion that exists is itself a liability (see §9).</span></td>
+  </tr>
+</table>
+<p><span class="zh"><b>一句话总评：</b>科学、契合 gget 角色、可复现、维护成本可控——一个高价值、低越界的增强，<b>值得合入</b>；建议在脱离 draft 前修掉 §9 的 live-test 隐患、§8 的 <code>--csv</code> 反义命名、以及目录解析的精确匹配，这三点都很轻。</span><span class="en"><b>Bottom line:</b> sound, on-role, reproducible, and cheap to maintain — a high-value, low-over-reach enhancement, <b>worth merging</b>. Before leaving draft, fix the §9 live-test liability, the §8 inverted <code>--csv</code> naming, and the exact-match on folder resolution — all three are light touches.</span></p>
+
+<h2 id="s8"><span class="n">8</span><span class="zh">设计决策与权衡</span><span class="en">Design decisions & trade-offs</span></h2>
+<h3>① <span class="zh">复用 <code>gget ref</code> 的位置参数，而非新命令</span><span class="en">Reuse the <code>gget ref</code> positional arg, not a new command</span></h3>
+<p><span class="zh">选择：把 <code>species</code> 位置参数在 <code>assembly_report=True</code> 时改解为装配号，并另暴露独立函数 <code>gget.assembly_report()</code>。好处：不新增顶层命令、与「取参考基因组」语义相邻。代价：一个参数身兼两义（物种名 vs 装配号），靠开关切换，稍有认知负担；用 <code>_assembly_report_fn</code> 别名巧妙避开了布尔参数与函数同名的遮蔽问题。</span><span class="en">Choice: reinterpret the <code>species</code> positional arg as an accession when <code>assembly_report=True</code>, and also expose a standalone <code>gget.assembly_report()</code>. Upside: no new top-level command, semantically adjacent to fetching references. Cost: one arg carries two meanings (species vs accession) toggled by a flag — slight cognitive load; a <code>_assembly_report_fn</code> alias neatly avoids the boolean param shadowing the same-named function.</span></p>
+<h3>② <span class="zh">CLI <code>--csv</code> 旗标语义反了</span><span class="en">The CLI <code>--csv</code> flag is inverted</span></h3>
+<div class="warn"><span class="zh">CLI 默认输出就是 CSV；加 <code>--csv</code> 反而输出 JSON（内部 <code>json=args.csv</code>）。名字与行为相反，几乎肯定会让用户困惑。<b>建议改名</b>为 <code>--json</code>（或默认 JSON、用 <code>--csv</code> 切 CSV）。这是本 PR 最该修的表层问题。</span><span class="en">CLI output is CSV by default; passing <code>--csv</code> instead emits JSON (internally <code>json=args.csv</code>). The name contradicts the behavior and will almost certainly confuse users. <b>Suggest renaming</b> to <code>--json</code> (or default to JSON and use <code>--csv</code> to switch to CSV). This is the most worth-fixing surface issue in the PR.</span></div>
+<h3>③ <span class="zh">HTML 目录抓取而非拼死链接</span><span class="en">Scrape the directory instead of hard-coding the link</span></h3>
+<p><span class="zh">因为报告文件名里含事先未知的人读装配名（<code>_GRCh38.p14</code>），无法只凭装配号拼出完整 URL，所以必须先列目录再匹配。这是对上游现实的合理妥协，但也正是维护成本的来源（格式一变就得改解析）。</span><span class="en">Because the report filename embeds an unknown human-readable assembly name (<code>_GRCh38.p14</code>), the full URL can't be built from the accession alone — hence listing the directory first. A reasonable concession to upstream reality, but also the source of maintenance cost (a format change breaks the parse).</span></p>
+
+<h2 id="s9"><span class="n">9</span><span class="zh">测试 / live data test</span><span class="en">Tests / live data test</span></h2>
+<p><span class="zh">PR 有<strong>两条正交测试线</strong>，一条做得好、一条是隐患：</span><span class="en">The PR has <strong>two orthogonal test lines</strong> — one well done, one a liability:</span></p>
+<table>
+  <tr><th></th><th><span class="zh">network-free 单元测试</span><span class="en">network-free unit tests</span></th><th><span class="zh">de-facto live 测试</span><span class="en">de-facto live test</span></th></tr>
+  <tr>
+    <td><span class="zh">在哪</span><span class="en">Where</span></td>
+    <td><code>tests/test_ref.py</code> · <code>TestAssemblyReportOffline</code></td>
+    <td><code>tests/fixtures/test_ref.json</code> · <code>test_ref_assembly_report</code></td>
+  </tr>
+  <tr>
+    <td><span class="zh">测什么</span><span class="en">What</span></td>
+    <td><span class="ok">✔</span> <span class="zh">mock <code>requests.get</code>，覆盖解析 / json / save / 五种报错分支 / <code>ref()</code> 委派。确定性、离线可跑。做得很规范。</span><span class="en"><span class="ok">✔</span> mocks <code>requests.get</code>, covering parse / json / save / five error branches / <code>ref()</code> delegation. Deterministic, offline. Nicely done.</span></td>
+    <td><span class="no">✘</span> <span class="zh">用真装配号 <code>GCF_009858895.2</code> 调 <code>ref(..., assembly_report=True)</code>，<strong>真打 NCBI 网络</strong>，<code>assert_equal</code> 断言整行精确值。</span><span class="en"><span class="no">✘</span> calls <code>ref(..., assembly_report=True)</code> with real accession <code>GCF_009858895.2</code>, <strong>hits the NCBI network</strong>, asserts the exact full row via <code>assert_equal</code>.</span></td>
+  </tr>
+</table>
+<div class="warn"><span class="zh"><strong>点名：这是「伪装成单元测试的 live 测试」。</strong>它藏在 fixture JSON 里、由 <code>from_json</code> 驱动，外表和其它单元测试无异，但实际依赖网络且：(1) 断言<strong>精确整行</strong>——上游报告一改就误红；(2)（据现有 diff 判断）<strong>没有</strong> skip-on-network-error / 限流处理——NCBI 一抖 CI 就挂。<em>缓解因素</em>：选 SARS-CoV-2 很聪明——它只有一行、序列极短、是被冻结的病毒参考，几乎不会变，把精确断言的脆弱性降到最低。<strong>建议</strong>按 skill 的 live-test 规范加固：把它<strong>从单元测试线剥离</strong>成显式 live 测试，加 <code>skipTest</code>-on-<code>RequestException</code>、对 HTML 限流页 skip，真值锚只对<strong>关键 ID/列</strong>（如 <code>RefSeq-Accn == NC_045512.2</code>、<code>Sequence-Length == 29903</code>）而非死绑整行。<em>注：我未在本机跑测试套件，上述「无 skip 处理」是基于 diff 的推断——真要下判断需看 <code>from_json</code> 是否吞了网络异常。</em></span><span class="en"><strong>Named: this is a "live test disguised as a unit test."</strong> Hidden in the fixture JSON and driven by <code>from_json</code>, it looks like any other unit test but actually depends on the network and: (1) asserts the <strong>exact full row</strong> — one upstream edit turns CI red; (2) (per the visible diff) has <strong>no</strong> skip-on-network-error / rate-limit handling — an NCBI hiccup breaks CI. <em>Mitigating factor</em>: choosing SARS-CoV-2 is smart — a single-row, tiny, frozen viral reference that essentially never changes, minimizing the fragility of the exact assertion. <strong>Recommend</strong> hardening per the skill's live-test guidance: <strong>lift it out of the unit-test line</strong> into an explicit live test with <code>skipTest</code>-on-<code>RequestException</code>, skip on HTML rate-limit pages, and anchor truth on <strong>key IDs/columns</strong> (e.g. <code>RefSeq-Accn == NC_045512.2</code>, <code>Sequence-Length == 29903</code>) rather than binding the whole row. <em>Note: I did not run the suite locally; "no skip handling" is inferred from the diff — a firm call needs checking whether <code>from_json</code> swallows network exceptions.</em></span></div>
+
+<h2 id="s10"><span class="n">10</span><span class="zh">当前状态</span><span class="en">Current status</span></h2>
+<p><span class="zh"><strong>DRAFT</strong> PR，作者 Elarwei，+347/−5，触及 6 个文件：</span><span class="en"><strong>DRAFT</strong> PR by Elarwei, +347/−5, touching 6 files:</span></p>
+<pre><code>gget/gget_ref.py     新增 assembly_report() 函数 + ref() 委派分支 + _assembly_report_fn 别名
+gget/main.py         新增 -ar/--assembly_report、-csv/--csv 参数 + CLI 输出分支
+gget/__init__.py     导出 assembly_report
+gget/constants.py    新增 NCBI_FTP_GENOMES_URL
+tests/test_ref.py            TestAssemblyReportOffline（离线 mock，7 个用例）
+tests/fixtures/test_ref.json test_ref_assembly_report（live）+ _bad_accession（ValueError）
+docs/src/en/ref.md, docs/src/en/updates.md   文档</code></pre>
+
+<h2 id="s11"><span class="n">11</span><span class="zh">未决 / 后续可选项</span><span class="en">Open items / optional follow-ups</span></h2>
+<ul>
+  <li><span class="zh"><strong>修 <code>--csv</code> 反义命名</strong>（§8②）——合入前最该改的一点。</span><span class="en"><strong>Fix the inverted <code>--csv</code> flag</strong> (§8②) — the top thing to change before merge.</span></li>
+  <li><span class="zh"><strong>加固 live 测试</strong>（§9）：剥离出单元测试线、加 skip-on-network、真值锚改关键列。</span><span class="en"><strong>Harden the live test</strong> (§9): lift out of the unit line, add skip-on-network, anchor on key columns.</span></li>
+  <li><span class="zh"><strong>目录解析改精确匹配</strong> <code>startswith(accession + "_")</code>，消除版本前缀撞车（§7①）。</span><span class="en"><strong>Use exact match</strong> <code>startswith(accession + "_")</code> to remove version prefix collisions (§7①).</span></li>
+  <li><span class="zh">可选：把 <code>Sequence-Length</code> 转 int、<code>na</code> 转 <code>NaN</code>（但也可能违背「原样返回」的克制，见仁见智）。</span><span class="en">Optional: coerce <code>Sequence-Length</code> to int, <code>na</code> to <code>NaN</code> (though this may conflict with returning data verbatim — a judgment call).</span></li>
+  <li><span class="zh">可选：支持不带版本号的装配号（自动取最新版本目录），当前强制要求版本后缀。</span><span class="en">Optional: accept version-less accessions (auto-pick the latest folder); currently a version suffix is required.</span></li>
+</ul>
+
+<h2 id="s12"><span class="n">12</span><span class="zh">参考链接</span><span class="en">References</span></h2>
+<ul>
+  <li>PR：<a href="https://github.com/scverse/gget/pull/237">scverse/gget#237</a> (DRAFT)</li>
+  <li>Issue：<a href="https://github.com/scverse/gget/issues/179">scverse/gget#179</a> — nh13</li>
+  <li><span class="zh">上游文档</span><span class="en">Upstream docs</span>：<a href="https://www.ncbi.nlm.nih.gov/datasets/docs/v2/troubleshooting/faq/#what-is-an-assembly-report">NCBI — what is an assembly report</a></li>
+  <li><span class="zh">真值示例</span><span class="en">Truth examples</span>：<a href="https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/GCF_000001405.40_GRCh38.p14_assembly_report.txt">GRCh38.p14 report</a> · <a href="https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/009/858/895/GCF_009858895.2_ASM985889v3/GCF_009858895.2_ASM985889v3_assembly_report.txt">SARS-CoV-2 report</a></li>
+</ul>
+
+<!-- ===== footer ===== -->
+<footer>
+  <span class="zh">本文档由 Claude Opus 4.8 (1M context) 于 2026-07-05 21:33 SGT 整理，基于对 PR #237 diff、issue #179，以及对 NCBI genomes FTP 的独立 curl 探针核查。<strong>已核验</strong>：SARS-CoV-2 与人类 GRCh38.p14 两个装配报告的真值（行内容、列头、目录解析、chr1 映射）均与 PR 一致。<strong>未核验 / 推断项</strong>：我未在本机运行测试套件——§9「live 测试缺 skip 处理」是基于 diff 的推断，确证需查 <code>from_json</code> 是否吞网络异常；「NCBI FTP 多年稳定」是一般观察而非本次实测；<code>--csv</code> 反义、目录前缀撞车是读代码判断。使用前请以 <a href="https://github.com/scverse/gget/pull/237">原始 PR</a> 与 NCBI 官方为准。AI 生成，可能有误。</span>
+  <span class="en">Compiled by Claude Opus 4.8 (1M context) at 2026-07-05 21:33 SGT, based on the PR #237 diff, issue #179, and independent curl probes of the NCBI genomes FTP. <strong>Verified</strong>: truth anchors for the SARS-CoV-2 and human GRCh38.p14 reports (row content, headers, folder resolution, chr1 mapping) all match the PR. <strong>Unverified / inferred</strong>: I did not run the test suite locally — the §9 "live test lacks skip handling" is inferred from the diff; a firm call needs checking whether <code>from_json</code> swallows network exceptions; "NCBI FTP stable for years" is general observation, not measured here; the <code>--csv</code> inversion and folder prefix-collision are code-reading judgments. Defer to the <a href="https://github.com/scverse/gget/pull/237">original PR</a> and NCBI for authority. AI-generated; may contain errors.</span>
+</footer>
+
+</div>
+
+<script>
+  function setLang(l){
+    document.body.className = 'lang-' + l;
+    document.querySelectorAll('.langtoggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.l === l);
+    });
+  }
+</script>
+</body>
+</html>

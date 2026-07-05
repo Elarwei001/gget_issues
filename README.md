@@ -10,6 +10,7 @@
 
 | PR | 模块 | 一句话 | 在线浏览 |
 |----|------|--------|----------|
+| [#237](https://github.com/scverse/gget/pull/237) | `gget ref` | 给 `ref` 加 `assembly_report`，把位置参数当 NCBI 装配号、返回跨命名映射表（`chr1↔1↔CM000663.2↔NC_000001.11`） | [🌐 打开](https://elarwei001.github.io/gget_issues/pr237-ref-assembly-report.html) |
 | [#238](https://github.com/scverse/gget/pull/238) | `gget ref` | 给 `ref` 加 GENCODE 数据源（人/鼠 GTF+FASTA），与 Ensembl 并列、复用同一返回结构 | [🌐 打开](https://elarwei001.github.io/gget_issues/pr238-ref-gencode.html) |
 | [#245](https://github.com/scverse/gget/pull/245) | `gget pineapple` | 接入 Pineapple 策展的生物影像数据集/权重（仅下载，不做图像处理） | [🌐 打开](https://elarwei001.github.io/gget_issues/pr245-pineapple.html) |
 | [#242](https://github.com/scverse/gget/pull/242) | `gget mitocarta` | 取 Broad MitoCarta3.0 的两个 `.xls` 线粒体蛋白/通路数据库 | [🌐 打开](https://elarwei001.github.io/gget_issues/pr242-mitocarta.html) |
