@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>gget reactome (PR #236) — 分析</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--panel2:#1d212b;--ink:#e6e9ef;--muted:#9aa4b2;--acc:#f5a623;--acc2:#5aa9e6;--green:#4cc38a;--red:#e5648a;--line:#2a2f3a;--code:#0b0d11;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 24px 80px}
+  header.top{position:relative;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:28px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:15px}
+  .stamp{position:absolute;top:0;right:0;font-size:12px;color:var(--muted);text-align:right}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--muted);margin:2px 4px 2px 0}
+  h2{font-size:21px;margin:38px 0 12px;padding-top:8px;border-top:1px solid var(--line);color:#fff}
+  h2 .n{color:var(--acc);font-variant-numeric:tabular-nums;margin-right:8px}
+  h3{font-size:17px;margin:22px 0 8px;color:var(--acc2)}
+  p{margin:10px 0}
+  a{color:var(--acc2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;color:#ffd9a0}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:13px;line-height:1.55}
+  pre code{background:none;border:none;padding:0;color:#d6deeb}
+  .tldr{background:linear-gradient(135deg,#1b2330,#171a21);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:16px 18px;margin:16px 0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#fff}
+  tr:nth-child(even) td{background:var(--panel)}
+  .ok{color:var(--green);font-weight:600}
+  .no{color:var(--red);font-weight:600}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc2);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .warn{background:#251c1c;border:1px solid #4a2b2b;border-left:4px solid var(--red);border-radius:8px;padding:12px 16px;margin:14px 0}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:5px 0}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:18px 0;columns:2;font-size:14px}
+  .toc a{display:block;padding:2px 0;color:var(--ink)}
+  .toc a:hover{color:var(--acc2)}
+  .muted{color:var(--muted)}
+  .primer{background:#132018;border:1px solid #26402f;border-left:4px solid var(--green);border-radius:10px;padding:14px 18px;margin:16px 0}
+  body.lang-zh .en{display:none}
+  body.lang-en .zh{display:none}
+  .langtoggle{margin-bottom:6px}
+  .langtoggle button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;margin-left:4px}
+  .langtoggle button.active{background:var(--acc2);color:#08121c;border-color:var(--acc2);font-weight:600}
+  footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body class="lang-zh">
+<div class="wrap">
+
+<header class="top">
+  <div class="stamp">
+    <div class="langtoggle">
+      <button data-l="zh" class="active" onclick="setLang('zh')">中文</button><button data-l="en" onclick="setLang('en')">EN</button>
+    </div>
+    Generated: 2026-07-06 20:56 SGT<br>by Claude Opus 4.8 (1M context)
+  </div>
+  <h1>🔬 <span class="zh">gget reactome:接入 Reactome 通路库</span><span class="en">gget reactome: querying the Reactome pathway database</span></h1>
+  <div class="sub"><span class="zh">新模块,用 Reactome 的 ContentService REST API 做三类查询(通路 / 搜索 / 实体)—— PR #236 分析</span><span class="en">A new module querying Reactome's ContentService REST API in three ways (pathways / search / entity) — analysis of PR #236</span></div>
+  <div style="margin-top:10px">
+    <span class="pill">PR: scverse/gget#236</span>
+    <span class="pill">Issue: #114 (by Laura)</span>
+    <span class="pill">上游 Upstream: Reactome ContentService</span>
+    <span class="pill"><span class="zh">类型</span><span class="en">Type</span>: A · <span class="zh">新模块(查询式)</span><span class="en">new module (query API)</span></span>
+    <span class="pill"><span class="zh">状态</span><span class="en">Status</span>: Draft · hatch-test <span class="ok">green</span> / pre-commit <span class="no">red</span></span>
+  </div>
+</header>
+
+<div class="primer">
+  <strong>📖 <span class="zh">背景科普</span><span class="en">Primer</span> · Reactome &amp; <span class="zh">通路</span><span class="en">pathways</span></strong><br>
+  <span class="zh">细胞里的分子不是各干各的,而是一环扣一环地协作完成某件事——比如"细胞凋亡""DNA 修复"。这样一串相互关联的分子反应就叫一条<b>通路(pathway)</b>。<b>Reactome</b> 是一个免费、人工审编的<b>通路知识库</b>(由 EMBL-EBI、OICR 等机构的联盟维护),把"哪个蛋白参与哪条通路、通路里发生哪些反应"系统整理成可查询的数据。研究者常问"我这个基因/蛋白参与了哪些通路?"——Reactome 正是回答这类问题的权威来源之一。此前 gget 没有直接查 Reactome 的入口;这个 PR 补上。</span>
+  <span class="en">Molecules in a cell don't act in isolation — they cooperate step by step to accomplish something, e.g. "apoptosis" or "DNA repair". Such a chain of interconnected molecular reactions is a <b>pathway</b>. <b>Reactome</b> is a free, expertly curated <b>pathway knowledgebase</b> (maintained by a consortium including EMBL-EBI and OICR) that organizes "which protein participates in which pathway, and what reactions happen in it" into queryable data. Researchers often ask "which pathways is my gene/protein in?" — Reactome is one of the authoritative sources for that. gget had no direct Reactome entry point before; this PR adds one.</span>
+  <div class="muted" style="margin-top:6px">🔗 <a href="https://reactome.org/">reactome.org</a> · <a href="https://reactome.org/dev/content-service">ContentService API</a></div>
+</div>
+
+<div class="toc">
+  <a href="#s1">1 · TL;DR</a>
+  <a href="#s2"><span class="zh">2 · 背景 / 问题</span><span class="en">2 · Background</span></a>
+  <a href="#s3"><span class="zh">3 · 上游 / 数据源</span><span class="en">3 · Upstream / data source</span></a>
+  <a href="#s4"><span class="zh">4 · 返回值形态详解</span><span class="en">4 · Return-value shapes</span></a>
+  <a href="#s5"><span class="zh">5 · 如何使用</span><span class="en">5 · How to use</span></a>
+  <a href="#s6"><span class="zh">6 · Scope / 边界</span><span class="en">6 · Scope</span></a>
+  <a href="#s7"><span class="zh">7 · 评估(四 lens)</span><span class="en">7 · Evaluation</span></a>
+  <a href="#s8"><span class="zh">8 · 设计决策</span><span class="en">8 · Design decisions</span></a>
+  <a href="#s9"><span class="zh">9 · 测试 / live data test</span><span class="en">9 · Testing</span></a>
+  <a href="#s10"><span class="zh">10 · 当前状态</span><span class="en">10 · Status</span></a>
+  <a href="#s11"><span class="zh">11 · 未决 / 建议</span><span class="en">11 · Open items</span></a>
+  <a href="#s12"><span class="zh">12 · 参考链接</span><span class="en">12 · References</span></a>
+</div>
+
+<div class="tldr" id="s1">
+  <strong>TL;DR:</strong>
+  <span class="zh">PR #236 新增 <code>gget reactome</code> 模块,用 Reactome 的 <b>ContentService REST API</b> 做三类查询:<code>pathways</code>(某标识符如 UniProt 号参与的通路)、<code>search</code>(全文搜索)、<code>entity</code>(按 Reactome stable ID 取详情),统一返回 gget 化的 DataFrame。这是<b>教科书级的 gget 契合</b>——纯数据访问、查询式模块(像 search/opentargets/enrichr),而且是<b>维护者 Laura 亲自提的需求</b>。测试设计<b>做得好</b>:11 个离线 mock + 5 个"断言不变量、断网 skip"的网络测试(不绑会漂移的精确通路列表)。我实探三个端点全部验证通过、文档示例与真值一致。<b>唯一实质问题</b>:pre-commit.ci 红——<code>main.py:3923</code> 把返回值硬标成 <code>pd.DataFrame</code>,但 <code>reactome()</code> 声明返回 <code>DataFrame | list[dict]</code>,mypy 报错(一行可修)。结论:方案科学、契合、价值高,修掉这个类型标注即可脱 draft。</span>
+  <span class="en">PR #236 adds a <code>gget reactome</code> module that queries Reactome's <b>ContentService REST API</b> in three ways: <code>pathways</code> (the pathways an identifier such as a UniProt accession participates in), <code>search</code> (full-text search), and <code>entity</code> (details for a Reactome stable ID), all returned as gget-ified DataFrames. This is a <b>textbook gget fit</b> — pure data access, a query-type module (like search/opentargets/enrichr), and <b>requested by the maintainer Laura herself</b>. The test design is <b>well done</b>: 11 offline mocked tests + 5 network tests that assert invariants and skip when unreachable (not brittle exact pathway lists). I probed all three endpoints live and confirmed they work and match the doc examples. The <b>one substantive issue</b>: pre-commit.ci is red — <code>main.py:3923</code> annotates the result as <code>pd.DataFrame</code>, but <code>reactome()</code> is declared to return <code>DataFrame | list[dict]</code>, so mypy fails (a one-line fix). Verdict: sound, on-mission, high value; fix that annotation and it's ready to leave draft.</span>
+</div>
+
+<h2 id="s2"><span class="n">2</span><span class="zh">背景 / 问题</span><span class="en">Background / problem</span></h2>
+<p><span class="zh">Issue <a href="https://github.com/scverse/gget/issues/114">#114</a> 由 <b>lauraluebbert(gget 维护者本人)</b>提出,诉求极简:"Add module for reactome",只给了 <a href="https://reactome.org/">reactome.org</a> 链接,无示例。</span><span class="en">Issue <a href="https://github.com/scverse/gget/issues/114">#114</a> was filed by <b>lauraluebbert (the gget maintainer herself)</b>, minimal: "Add module for reactome", with just the <a href="https://reactome.org/">reactome.org</a> link and no examples.</span></p>
+<div class="note"><span class="zh"><b>底层需求:</b>Reactome 是主流通路知识库之一,研究者高频需要"基因/蛋白 → 参与的通路"这类查询。由维护者亲自开口要,说明这是 gget 想覆盖的一块空白。字面是"加个模块",底层是"给 gget 一个查 Reactome 的一致入口"。</span><span class="en"><b>Underlying need:</b> Reactome is a mainstream pathway knowledgebase; researchers frequently need "gene/protein → the pathways it's in" queries. That the maintainer requested it directly signals a gap gget wants to fill. The literal ask is "add a module"; the underlying need is "a consistent gget entry point for querying Reactome".</span></div>
+
+<h2 id="s3"><span class="n">3</span><span class="zh">上游 / 数据源</span><span class="en">Upstream / data source</span></h2>
+<p><span class="zh">上游是 <b>Reactome ContentService</b>——一个成熟、机构维护的 <b>REST API</b>(reactome.org,联盟维护)。这是<b>查询式活数据源</b>(不是取静态大文件),所以 <code>gget reactome</code> 天然属于 gget 里 search / info / opentargets / enrichr 那一类"参数化查活库、返回结构化结果"的模块。</span><span class="en">The upstream is <b>Reactome ContentService</b> — a mature, institutionally-maintained <b>REST API</b> (reactome.org, consortium-run). It's a <b>live query source</b> (not a static blob download), so <code>gget reactome</code> naturally belongs to gget's search / info / opentargets / enrichr family of "parameterized query of a live database, structured results" modules.</span></p>
+<table>
+  <tr><th><code>resource</code></th><th><span class="zh">ContentService 端点</span><span class="en">ContentService endpoint</span></th><th><span class="zh">用途</span><span class="en">Purpose</span></th></tr>
+  <tr><td><code>pathways</code></td><td><code>/data/mapping/{source}/{id}/pathways</code></td><td><span class="zh">标识符 → 参与的通路</span><span class="en">identifier → pathways it's in</span></td></tr>
+  <tr><td><code>search</code></td><td><code>/search/query</code></td><td><span class="zh">全文搜索(可按类型/物种过滤)</span><span class="en">full-text search (filter by type/species)</span></td></tr>
+  <tr><td><code>entity</code></td><td><code>/data/query/{id}</code></td><td><span class="zh">按 stable ID 取实体详情</span><span class="en">entity details by stable ID</span></td></tr>
+</table>
+<div class="note"><span class="zh"><b>探针核实(2026-07-06):</b>三个端点实打全部通过——① <code>UniProt/P04637</code>(人 TP53)→ <b>46 条通路</b>,字段 <code>stId/displayName/speciesName/schemaClass/isInDisease</code> 齐全,前两条正是文档示例的 R-HSA-111448 / R-HSA-139915;② 实体 <code>R-HSA-6804754</code> → "Regulation of TP53 Expression",schemaClass=Pathway;③ 搜索 <code>TP53</code> 返回的 name 里确实带 <code>&lt;span class="highlighting"&gt;</code> 高亮标签——<b>证实代码里剥离 HTML 标签是必要的、不是多余</b>。文档三个示例表与真值一致。访问无鉴权;PR 还带了礼貌的 <code>User-Agent</code> 头。</span><span class="en"><b>Probe verification (2026-07-06):</b> all three endpoints work live — (1) <code>UniProt/P04637</code> (human TP53) → <b>46 pathways</b>, with <code>stId/displayName/speciesName/schemaClass/isInDisease</code> present; the first two are exactly the doc's R-HSA-111448 / R-HSA-139915; (2) entity <code>R-HSA-6804754</code> → "Regulation of TP53 Expression", schemaClass=Pathway; (3) search <code>TP53</code> returns names that do contain <code>&lt;span class="highlighting"&gt;</code> tags — <b>confirming the HTML-tag stripping in the code is necessary, not redundant</b>. All three doc example tables match ground truth. No auth required; the PR also sends a polite <code>User-Agent</code> header.</span></div>
+
+<h2 id="s4"><span class="n">4</span><span class="zh">返回值形态详解(每种 resource 的 DataFrame 列)</span><span class="en">Return-value shapes (DataFrame columns per resource)</span></h2>
+<p><span class="zh">查询式模块没有多文件 schema,关键是<b>每种 <code>resource</code> 返回的 DataFrame 列</b>。三种查询各有一套固定列,便于下游直接用;<code>json=True</code> 时返回等价的 list[dict]。</span><span class="en">A query module has no multi-file schema; what matters is the <b>DataFrame columns returned per <code>resource</code></b>. Each of the three queries has a fixed column set for easy downstream use; <code>json=True</code> returns the equivalent list of dicts.</span></p>
+<table>
+  <tr><th><code>resource</code></th><th><span class="zh">列</span><span class="en">Columns</span></th><th><span class="zh">映射自 ContentService 字段</span><span class="en">From ContentService fields</span></th></tr>
+  <tr><td><code>pathways</code></td><td><code>stable_id, name, species, schema_class, in_disease</code></td><td><code>stId, displayName, speciesName, schemaClass, isInDisease</code></td></tr>
+  <tr><td><code>search</code></td><td><code>stable_id, name, type, species, reactome_id</code></td><td><code>stId, name*, exactType/type, species[0], id</code></td></tr>
+  <tr><td><code>entity</code></td><td><code>stable_id, name, schema_class, species, in_disease, summation</code></td><td><code>stId, displayName/name[0], schemaClass, speciesName, isInDisease, summation[0].text*</code></td></tr>
+</table>
+<p class="muted"><span class="zh">* <code>name</code> 与 <code>summation</code> 会先剥掉 Reactome 搜索/摘要里的 HTML 高亮标签;<code>search</code> 的 <code>species</code> 若是列表会取首个;<code>entity</code> 的 <code>name</code> 在 <code>displayName</code> 缺失时回退到 <code>name[0]</code>。这些是把上游"不那么整齐"的返回<b>规整成 tidy 表</b>的必要处理。</span><span class="en">* <code>name</code> and <code>summation</code> have Reactome's HTML highlight tags stripped first; <code>search</code>'s <code>species</code> takes the first element if it's a list; <code>entity</code>'s <code>name</code> falls back to <code>name[0]</code> when <code>displayName</code> is missing. These are the tidy-up steps that turn the upstream's slightly-uneven responses into clean tables.</span></p>
+
+<h2 id="s5"><span class="n">5</span><span class="zh">如何使用</span><span class="en">How to use</span></h2>
+<pre><code># 1) 某蛋白参与的通路 / pathways a protein is in
+gget reactome P04637 --species "Homo sapiens"
+gget.reactome("P04637", species="Homo sapiens")
+
+# 2) 全文搜索(按类型/物种过滤) / full-text search
+gget reactome TP53 -r search -t Pathway -sp "Homo sapiens"
+gget.reactome("TP53", resource="search", types="Pathway", species="Homo sapiens")
+
+# 3) 按 stable ID 取实体详情 / entity details by stable ID
+gget reactome R-HSA-6804754 -r entity
+gget.reactome("R-HSA-6804754", resource="entity")</code></pre>
+<p><span class="zh">输入:<code>query</code>(含义随 <code>resource</code> 变:标识符 / 搜索词 / stable ID)+ 可选 <code>source</code>(pathways 的标识符库,默认 UniProt)、<code>species</code>、<code>types</code>。返回:第 4 节的 DataFrame(<code>json=True</code> 返回 list[dict])。CLI 默认 JSON、<code>--csv</code> 出 CSV(符合 gget 惯例)。</span><span class="en">Input: <code>query</code> (meaning depends on <code>resource</code>: identifier / search term / stable ID) + optional <code>source</code> (identifier database for pathways, default UniProt), <code>species</code>, <code>types</code>. Output: the §4 DataFrame (<code>json=True</code> → list of dicts). CLI defaults to JSON, <code>--csv</code> gives CSV (per gget convention).</span></p>
+
+<h2 id="s6"><span class="n">6</span><span class="zh">Scope / 边界</span><span class="en">Scope</span></h2>
+<ul>
+  <li><span class="ok">✓ <span class="zh">做</span><span class="en">does</span></span>: <span class="zh">封装 ContentService 的三类核心查询(通路映射 / 搜索 / 实体详情),返回规整 DataFrame</span><span class="en">wrap three core ContentService query types (pathway mapping / search / entity details), returning tidy DataFrames</span></li>
+  <li><span class="no">✗ <span class="zh">不做</span><span class="en">does not</span></span>: <span class="zh">ContentService 还有大量其它端点(交互体 interactors、正字法 orthology、事件层级 event hierarchy…)和独立的 <b>Analysis Service</b>(通路富集分析);本 PR<b>刻意只做查询/取数据</b>,不碰富集分析等计算——富集属"分析"、超出 gget "数据访问"的定位(且 gget 已有 <code>enrichr</code> 做富集)。</span><span class="en">ContentService has many more endpoints (interactors, orthology, event hierarchy, …) and a separate <b>Analysis Service</b> (pathway enrichment); this PR <b>deliberately does only querying/fetching</b>, not enrichment or other computation — enrichment is "analysis", beyond gget's data-access role (and gget already has <code>enrichr</code> for that).</span></li>
+</ul>
+<div class="note"><span class="zh">边界干净、契合定位。三类查询覆盖了绝大多数"我这个 ID 关联哪些通路 / 搜一下 / 看看这条通路是什么"的高频需求;其余端点可作未来可选扩展(见第 11 节)。</span><span class="en">Clean, well-aligned boundary. The three query types cover the vast majority of "what pathways is my ID in / search / what is this pathway" needs; the remaining endpoints are future optional extensions (see §11).</span></div>
+
+<h2 id="s7"><span class="n">7</span><span class="zh">评估(四 lens)</span><span class="en">Evaluation (four lenses)</span></h2>
+<table>
+  <tr><th>Lens</th><th><span class="zh">判断</span><span class="en">Verdict</span></th><th><span class="zh">依据</span><span class="en">Basis</span></th></tr>
+  <tr>
+    <td><span class="zh">① Soundness</span><span class="en">① Soundness</span></td>
+    <td class="ok"><span class="zh">好(有小 caveat)</span><span class="en">Good (minor caveat)</span></td>
+    <td><span class="zh">404 处理得当(pathways/search 空标识符 → 空 DataFrame;entity 坏 ID → ValueError);剥 HTML、扁平 species、name 回退都处理了;复用共享 <code>http_json</code>(重试/错误处理)。<b>小 caveat</b>:404 判定靠字符串匹配 <code>"HTTP 404" in str(error)</code>,依赖 <code>http_json</code> 报错文案格式,略脆。</span><span class="en">404s handled well (empty identifier for pathways/search → empty DataFrame; bad entity ID → ValueError); HTML stripping, species flattening, name fallback all handled; reuses shared <code>http_json</code> (retry/error handling). <b>Minor caveat</b>: 404 detection uses string-matching <code>"HTTP 404" in str(error)</code>, which depends on <code>http_json</code>'s message format — a bit fragile.</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">② 平台契合度</span><span class="en">② Platform fit</span></td>
+    <td class="ok">PASS <span class="zh">(强)</span><span class="en">(strong)</span></td>
+    <td><span class="zh">纯数据访问、查询式模块(gget 最典型的一类)、返回 DataFrame、双接口、无二进制;且维护者亲自提需。刻意不做富集分析,边界正确。</span><span class="en">Pure data access, a query-type module (gget's most typical kind), returns DataFrames, dual interface, no binaries; and maintainer-requested. Deliberately no enrichment analysis — correct boundary.</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">③ 可复现性</span><span class="en">③ Reproducibility</span></td>
+    <td><span class="zh" style="color:var(--acc)">好(有先天限制)</span><span class="en" style="color:var(--acc)">Good (inherent limit)</span></td>
+    <td><span class="zh">Reactome 内容<b>按季度发布</b>更新,ContentService 只服务最新版,模块不锁版本 → 精确结果会随时间漂移(与 search/opentargets 同类,是活 API 的固有属性)。测试正确地断言不变量而非精确列表。可选增强:在输出/日志里带上 Reactome release 版本号。</span><span class="en">Reactome content updates on a <b>quarterly release</b> cycle and ContentService serves only the latest, with no version pinning → exact results drift over time (same as search/opentargets — inherent to a live API). The tests correctly assert invariants, not exact lists. Optional enhancement: surface the Reactome release version in the output/log.</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">④ 维护成本</span><span class="en">④ Maintenance</span></td>
+    <td class="ok"><span class="zh">低—中</span><span class="en">Low–moderate</span></td>
+    <td><span class="zh">依赖成熟稳定的 ContentService REST(字段名极少变)。主要脆点是上面那个 404 字符串匹配。live 测试兜底了"端点还在、还对"。</span><span class="en">Depends on the mature, stable ContentService REST (field names rarely change). The main fragility is the 404 string-match above. The live tests backstop "endpoints still exist and still work".</span></td>
+  </tr>
+</table>
+<p><span class="zh"><b>总评:</b>方案科学、精准契合 gget "数据访问中枢"、补上一个主流通路库、维护者亲点,价值明确、实现干净(三类查询 + 规整返回 + 复用 http_json + 好的测试)。唯一挡住脱 draft 的是 CI 的一个类型标注错(第 10 节)。修掉即为高质量 PR。</span><span class="en"><b>Overall:</b> sound, precisely aligned with gget's data-access-hub role, fills in a mainstream pathway database, maintainer-requested; clear value with a clean implementation (three query types + tidy returns + reuses http_json + good tests). The only thing blocking it from leaving draft is one CI type-annotation error (§10). Fix it and it's a high-quality PR.</span></p>
+
+<h2 id="s8"><span class="n">8</span><span class="zh">设计决策与权衡</span><span class="en">Design decisions &amp; trade-offs</span></h2>
+<h3>① <span class="zh">一个 <code>resource</code> 参数分派三类查询</span><span class="en">One <code>resource</code> param dispatching three query types</span></h3>
+<p><span class="zh">用 <code>resource="pathways"|"search"|"entity"</code> 在一个模块里分派三个端点,而非三个独立命令。合理——它们同属"查 Reactome",共享 query/species 等参数,一个心智模型;和 opentargets 的 <code>resource</code> 风格一致。</span><span class="en">Dispatches three endpoints in one module via <code>resource="pathways"|"search"|"entity"</code> rather than three separate commands. Reasonable — they're all "query Reactome", share query/species params, one mental model; consistent with opentargets' <code>resource</code> style.</span></p>
+<h3>② <span class="zh">把"不整齐"的上游返回规整成固定列</span><span class="en">Normalizing uneven upstream responses to fixed columns</span></h3>
+<p><span class="zh">剥 HTML 高亮标签、扁平 species 列表、displayName→name[0] 回退——这些是把 ContentService 略显异构的 JSON 变成 tidy 表的必要工作,体现了 gget "把数据源统一成一致接口"的价值。</span><span class="en">Stripping HTML highlight tags, flattening the species list, displayName→name[0] fallback — these turn ContentService's slightly heterogeneous JSON into tidy tables, embodying gget's "unify sources into a consistent interface" value.</span></p>
+<h3>③ <span class="zh">404 当"无结果"而非报错(仅 entity 例外)</span><span class="en">404 as "no results" (except entity)</span></h3>
+<p><span class="zh">pathways/search 的 404 → 返回<b>空 DataFrame</b>(合理:查无结果是正常态);entity 的 404 → <b>ValueError</b>(合理:给了个无效 stable ID 是用户错误)。这个区分是对的。实现上靠字符串匹配错误文案,建议未来让 <code>http_json</code> 暴露结构化状态码更稳。</span><span class="en">pathways/search 404 → an <b>empty DataFrame</b> (reasonable: no results is a normal outcome); entity 404 → a <b>ValueError</b> (reasonable: a bad stable ID is user error). This distinction is right. It's implemented via string-matching the error message; a sturdier future option is to have <code>http_json</code> expose a structured status code.</span></p>
+
+<h2 id="s9"><span class="n">9</span><span class="zh">测试 / live data test</span><span class="en">Testing / live data test</span></h2>
+<p><span class="zh">两条正交线都在,且<b>都做得好</b>——尤其网络那条<b>正是</b>我在别的 PR 常点名的"伪装成单元测试的 live 测试"的<b>正面反例</b>。</span><span class="en">Both orthogonal lines are present and <b>both well done</b> — the network line especially is a <b>positive counter-example</b> to the "de-facto live test disguised as a unit test" anti-pattern I flag on other PRs.</span></p>
+<table>
+  <tr><th><span class="zh">测试层</span><span class="en">Layer</span></th><th><span class="zh">内容</span><span class="en">What</span></th><th><span class="zh">评价</span><span class="en">Assessment</span></th></tr>
+  <tr><td><span class="zh">离线 mock</span><span class="en">Offline (mock)</span></td><td><code>TestReactomeOffline</code>(11)+ fixture(2)—mock <code>http_json</code>,覆盖三类查询的解析、404/其它错误分支、HTML 剥离、name 回退、summation、参数校验</td><td class="ok"><span class="zh">好:确定性、无网络、覆盖全</span><span class="en">Good: deterministic, network-free, thorough</span></td></tr>
+  <tr><td><span class="zh">网络不变量</span><span class="en">Network invariant</span></td><td><code>TestReactome</code>(5)—真打 Reactome,断言<b>列/ID 形态/物种过滤生效/HTML 已剥/已知条目是 Pathway</b>,<b>不</b>断言会漂移的精确通路列表;<code>RuntimeError</code> → <code>skipTest</code></td><td class="ok"><span class="zh">好:抗季度漂移 + 断网不红</span><span class="en">Good: robust to quarterly drift + won't redden on outage</span></td></tr>
+</table>
+<div class="note"><span class="zh"><b>值得表扬:</b>网络测试锚在"结构不变量 + 一个稳定的知名条目(R-HSA-6804754 恒为 Pathway)",而非"P04637 恰好有 N 条通路"——所以 Reactome 季度更新不会把它弄红,上游不可达时 skip 而非 fail。这正是 live-data-test 规范想要的样子。<b>一个可选加强</b>:网络测试目前用 <code>species="9606"</code>(taxon ID),可再加一例用物种名,顺带覆盖两种 species 写法。</span><span class="en"><b>Worth praising:</b> the network tests anchor on "structural invariants + one stable well-known entry (R-HSA-6804754 is always a Pathway)", not "P04637 happens to have N pathways" — so Reactome's quarterly updates won't redden them, and an upstream outage skips rather than fails. This is exactly what the live-data-test convention wants. <b>One optional strengthening</b>: the network tests use <code>species="9606"</code> (taxon ID); adding one case with a species name would also cover both species spellings.</span></div>
+
+<h2 id="s10"><span class="n">10</span><span class="zh">当前状态</span><span class="en">Current status</span></h2>
+<pre><code>PR scverse/gget#236  (DRAFT)  feature/reactome-114 → dev   +661 / -0, 8 files
+commits: eca2d0d feat(reactome) · 1488b3b [pre-commit.ci] auto fixes · 3ef868a test(reactome) codecov
+files: gget/gget_reactome.py (+237) · gget/main.py (+116) · tests/test_reactome.py (+175)
+       tests/fixtures/test_reactome.json (+19) · gget/__init__.py · docs (reactome.md +111, SUMMARY, updates)
+CI: hatch-test py3.12 / 3.13 / 3.14  ✓ pass  ·  pre-commit.ci  ✗ FAIL</code></pre>
+<div class="warn"><span class="zh"><b>pre-commit.ci 红的根因(我用固定版工具链核实):</b>ruff 干净;失败是 <b>mypy 一处</b>——<code>gget/main.py:3923</code> 写了 <code>reactome_results: pd.DataFrame = reactome(...)</code>,但 <code>reactome()</code> 声明返回 <code>pd.DataFrame | list[dict[str, Any]]</code>,mypy 报 <code>[assignment]</code> 不兼容。CLI 这里没传 <code>json=</code> 故运行时确是 DataFrame,但类型上不成立。<b>一行可修</b>:去掉该显式标注(让它推断为联合类型,再在 to_csv/to_json 分支里按 gget 惯例处理),或用 <code>cast</code>,或参照其它模块的 CLI 输出结构。修完 pre-commit 即绿。</span><span class="en"><b>Root cause of the red pre-commit.ci (verified with the pinned toolchain):</b> ruff is clean; the failure is <b>a single mypy error</b> — <code>gget/main.py:3923</code> writes <code>reactome_results: pd.DataFrame = reactome(...)</code>, but <code>reactome()</code> is declared to return <code>pd.DataFrame | list[dict[str, Any]]</code>, so mypy raises <code>[assignment]</code>. The CLI passes no <code>json=</code> here so it's a DataFrame at runtime, but the type doesn't hold. <b>One-line fix</b>: drop the explicit annotation (let it infer the union and branch in to_csv/to_json per gget's convention), or use <code>cast</code>, or mirror another module's CLI output structure. That turns pre-commit green.</span></div>
+
+<h2 id="s11"><span class="n">11</span><span class="zh">未决 / 建议</span><span class="en">Open items / suggestions</span></h2>
+<ul>
+  <li><span class="zh"><b>脱 draft 前必修:</b><code>main.py:3923</code> 的类型标注(pre-commit.ci 红,见第 10 节)。</span><span class="en"><b>Must fix before leaving draft:</b> the <code>main.py:3923</code> annotation (pre-commit.ci red, see §10).</span></li>
+  <li><span class="zh"><b>404 判定更稳(可选):</b>把 <code>"HTTP 404" in str(error)</code> 换成 <code>http_json</code> 暴露的结构化状态码,减少对错误文案格式的依赖。</span><span class="en"><b>Sturdier 404 detection (optional):</b> replace <code>"HTTP 404" in str(error)</code> with a structured status code from <code>http_json</code>, reducing reliance on the message format.</span></li>
+  <li><span class="zh"><b>可复现性(可选):</b>在输出/日志带上 Reactome release 版本号,便于写进论文方法。</span><span class="en"><b>Reproducibility (optional):</b> surface the Reactome release version in the output/log for citability.</span></li>
+  <li><span class="zh"><b>覆盖度(可选):</b>再加一例用物种<b>名</b>(而非 taxon ID)的网络测试。</span><span class="en"><b>Coverage (optional):</b> add one network test that uses a species <b>name</b> (not the taxon ID).</span></li>
+  <li><span class="zh"><b>未来扩展:</b>ContentService 的 interactors / orthology / event hierarchy 端点,以及 Analysis Service(通路富集)——后者属"分析",要接也应谨慎(gget 已有 enrichr)。</span><span class="en"><b>Future extensions:</b> ContentService's interactors / orthology / event-hierarchy endpoints, and the Analysis Service (pathway enrichment) — the latter is "analysis" and should be approached cautiously if at all (gget already has enrichr).</span></li>
+</ul>
+
+<h2 id="s12"><span class="n">12</span><span class="zh">参考链接</span><span class="en">References</span></h2>
+<ul>
+  <li>PR:<a href="https://github.com/scverse/gget/pull/236">scverse/gget#236</a></li>
+  <li>Issue:<a href="https://github.com/scverse/gget/issues/114">#114 — Add module for reactome</a>(by lauraluebbert)</li>
+  <li>Reactome:<a href="https://reactome.org/">reactome.org</a> · <a href="https://reactome.org/dev/content-service">ContentService API</a> · <a href="https://doi.org/10.1093/nar/gkab1028">Reactome 2022 (NAR)</a></li>
+</ul>
+
+<footer>
+  <span class="zh">本文档由 Claude Opus 4.8 (1M context) 于 2026-07-06 20:56 SGT 整理,基于 PR #236 完整 diff、issue #114、以及对 Reactome ContentService 三个端点的实时探针,并用固定版工具链(mypy 1.13.0 + mypy-baseline、ruff)复现了 pre-commit.ci 的失败。已核实:三端点可用且字段/真值锚与文档示例一致、search 返回确实含需剥离的 HTML 标签、pre-commit 红源于 main.py:3923 的单个 mypy 标注错、hatch-test 三版皆绿。未独立验证:各字段在所有物种/边界输入下的行为、http_json 重试细节。Reactome 内容按季度更新,精确结果会随时间变化——以 <a href="https://reactome.org/">Reactome 官方</a> 为准。AI 生成分析,供参考,非对 PR 的最终评审结论。</span>
+  <span class="en">Compiled by Claude Opus 4.8 (1M context) at 2026-07-06 20:56 SGT, based on the full PR #236 diff, issue #114, and a live probe of three Reactome ContentService endpoints, and reproduced the pre-commit.ci failure with the pinned toolchain (mypy 1.13.0 + mypy-baseline, ruff). Verified: the three endpoints work with fields/anchors matching the doc examples, search really returns HTML tags that need stripping, the red pre-commit is a single mypy annotation error at main.py:3923, and hatch-test passes on all three Python versions. Not independently verified: every field's behavior across all species/edge inputs, and http_json retry details. Reactome content updates quarterly, so exact results change over time — defer to <a href="https://reactome.org/">Reactome</a>. AI-generated analysis, for reference, not a final review verdict.</span>
+</footer>
+
+</div>
+<script>
+  function setLang(l){
+    document.body.className = 'lang-' + l;
+    document.querySelectorAll('.langtoggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.l === l);
+    });
+  }
+</script>
+</body>
+</html>

@@ -31,6 +31,11 @@
     每份报告用 <a href="https://github.com/Elarwei001/personal-skills/tree/master/gget-issue-analysis"><code>gget-issue-analysis</code></a> skill 生成：自包含 HTML、开头有面向非生物背景读者的背景科普，随后覆盖「解决什么问题 / 价值 / 数据结构详解 / 如何解决 / 是否契合 gget 平台角色（四 lens 评估）/ live data test 设计 / 当前状态」。较新报告默认双语（中/EN，右上角切换）。
   </div>
 
+  <a class="card" href="./pr236-reactome.html">
+    <div class="t">gget reactome<span class="pr">PR #236</span></div>
+    <div class="d">新模块：用 Reactome ContentService REST API 做三类查询（通路 / 搜索 / 实体），返回 tidy DataFrame。维护者亲点、契合度强、测试设计良好；含 pre-commit 红的根因定位（一处 mypy 标注）。</div>
+  </a>
+
   <a class="card" href="./pr237-ref-assembly-report.html">
     <div class="t">gget ref<span class="pr">PR #237</span></div>
     <div class="d">给已有的 ref 模块加 <code>assembly_report</code>：把位置参数当 NCBI 装配号，返回跨数据库的染色体命名映射表（<code>chr1↔1↔CM000663.2↔NC_000001.11</code>）；含 <code>--csv</code> 反义等评审发现。</div>
