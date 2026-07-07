@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>gget alphafold custom MSA (PR #235) — 分析</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--panel2:#1d212b;--ink:#e6e9ef;--muted:#9aa4b2;--acc:#f5a623;--acc2:#5aa9e6;--green:#4cc38a;--red:#e5648a;--line:#2a2f3a;--code:#0b0d11;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 24px 80px}
+  header.top{position:relative;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:27px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:15px}
+  .stamp{position:absolute;top:0;right:0;font-size:12px;color:var(--muted);text-align:right}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--muted);margin:2px 4px 2px 0}
+  h2{font-size:21px;margin:38px 0 12px;padding-top:8px;border-top:1px solid var(--line);color:#fff}
+  h2 .n{color:var(--acc);font-variant-numeric:tabular-nums;margin-right:8px}
+  h3{font-size:17px;margin:22px 0 8px;color:var(--acc2)}
+  p{margin:10px 0}
+  a{color:var(--acc2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;color:#ffd9a0}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:13px;line-height:1.55}
+  pre code{background:none;border:none;padding:0;color:#d6deeb}
+  .tldr{background:linear-gradient(135deg,#1b2330,#171a21);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:16px 18px;margin:16px 0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#fff}
+  tr:nth-child(even) td{background:var(--panel)}
+  .ok{color:var(--green);font-weight:600}
+  .no{color:var(--red);font-weight:600}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc2);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .warn{background:#251c1c;border:1px solid #4a2b2b;border-left:4px solid var(--red);border-radius:8px;padding:12px 16px;margin:14px 0}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:5px 0}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:18px 0;columns:2;font-size:14px}
+  .toc a{display:block;padding:2px 0;color:var(--ink)}
+  .toc a:hover{color:var(--acc2)}
+  .muted{color:var(--muted)}
+  .primer{background:#132018;border:1px solid #26402f;border-left:4px solid var(--green);border-radius:10px;padding:14px 18px;margin:16px 0}
+  body.lang-zh .en{display:none}
+  body.lang-en .zh{display:none}
+  .langtoggle{margin-bottom:6px}
+  .langtoggle button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;margin-left:4px}
+  .langtoggle button.active{background:var(--acc2);color:#08121c;border-color:var(--acc2);font-weight:600}
+  footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body class="lang-zh">
+<div class="wrap">
+
+<header class="top">
+  <div class="stamp">
+    <div class="langtoggle">
+      <button data-l="zh" class="active" onclick="setLang('zh')">中文</button><button data-l="en" onclick="setLang('en')">EN</button>
+    </div>
+    Generated: 2026-07-07 20:25 SGT<br>by Claude Opus 4.8 (1M context)
+  </div>
+  <h1>🧬 <span class="zh">gget alphafold:接受自定义 MSA</span><span class="en">gget alphafold: accept a custom MSA</span></h1>
+  <div class="sub"><span class="zh">给 <code>gget alphafold</code> 加一个 <code>msa</code> 参数,允许传入自定义多序列比对、跳过内部 jackhmmer 搜索 —— PR #235 分析</span><span class="en">Adds an <code>msa</code> argument to <code>gget alphafold</code> so a custom multiple sequence alignment can be supplied instead of the internal jackhmmer search — analysis of PR #235</span></div>
+  <div style="margin-top:10px">
+    <span class="pill">PR: scverse/gget#235</span>
+    <span class="pill">Issue: #52 (by kchennen)</span>
+    <span class="pill"><span class="zh">类型</span><span class="en">Type</span>: B · <span class="zh">增强已有模块</span><span class="en">module enhancement</span></span>
+    <span class="pill"><span class="zh">状态</span><span class="en">Status</span>: Draft · hatch-test <span class="ok">green</span> / pre-commit <span class="no">red</span></span>
+  </div>
+</header>
+
+<div class="primer">
+  <strong>📖 <span class="zh">背景科普</span><span class="en">Primer</span> · AlphaFold &amp; MSA</strong><br>
+  <span class="zh"><b>AlphaFold</b> 是从蛋白质<b>氨基酸序列</b>预测其<b>三维结构</b>的 AI。它的关键输入不是单条序列,而是一份<b>多序列比对(MSA,Multiple Sequence Alignment)</b>——把这条蛋白和许多<b>来自不同物种的同源序列</b>按列对齐排在一起。AlphaFold 从"哪些位置一起变化(共进化)"里推断出氨基酸之间的空间接触,从而预测结构。<b>MSA 的质量直接影响预测好坏。</b>gget alphafold 平时会自动去庞大的基因数据库里搜同源序列(用 jackhmmer)拼出 MSA;但自动搜索会混进错误序列(异构体、片段、预测错误…)。这个 PR 让用户<b>直接传一份人工审编好的 MSA</b>,以求更准的折叠(PMID: 33172385),顺带还<b>省掉了 ~2GB 数据库下载</b>。</span>
+  <span class="en"><b>AlphaFold</b> is an AI that predicts a protein's <b>3D structure</b> from its <b>amino-acid sequence</b>. Its key input is not a single sequence but a <b>multiple sequence alignment (MSA)</b> — the protein lined up, column by column, with many <b>homologous sequences from other species</b>. AlphaFold reads which positions co-evolve to infer spatial contacts and predict the structure. <b>MSA quality strongly affects the prediction.</b> gget alphafold normally builds the MSA automatically by searching huge genetic databases (with jackhmmer); but automatic search pulls in erroneous sequences (isoforms, fragments, mispredictions). This PR lets users <b>supply a manually curated MSA</b> for a better fold (PMID: 33172385) — and as a bonus <b>skips the ~2GB database download</b>.</span>
+  <div class="muted" style="margin-top:6px">🔗 <a href="https://doi.org/10.1038/s41586-021-03819-2">AlphaFold (Jumper et al. 2021)</a> · <a href="https://github.com/scverse/gget/issues/52">issue #52</a></div>
+</div>
+
+<div class="toc">
+  <a href="#s1">1 · TL;DR</a>
+  <a href="#s2"><span class="zh">2 · 背景 / 问题</span><span class="en">2 · Background</span></a>
+  <a href="#s3"><span class="zh">3 · 上下文:平时怎么跑</span><span class="en">3 · Context: the default path</span></a>
+  <a href="#s4"><span class="zh">4 · 自定义 MSA 输入 & 解析详解</span><span class="en">4 · Custom MSA input &amp; parsing</span></a>
+  <a href="#s5"><span class="zh">5 · 如何使用</span><span class="en">5 · How to use</span></a>
+  <a href="#s6"><span class="zh">6 · Scope / 边界</span><span class="en">6 · Scope</span></a>
+  <a href="#s7"><span class="zh">7 · 评估(四 lens)</span><span class="en">7 · Evaluation</span></a>
+  <a href="#s8"><span class="zh">8 · 设计决策</span><span class="en">8 · Design decisions</span></a>
+  <a href="#s9"><span class="zh">9 · 测试</span><span class="en">9 · Testing</span></a>
+  <a href="#s10"><span class="zh">10 · 当前状态</span><span class="en">10 · Status</span></a>
+  <a href="#s11"><span class="zh">11 · 未决 / 建议</span><span class="en">11 · Open items</span></a>
+  <a href="#s12"><span class="zh">12 · 参考链接</span><span class="en">12 · References</span></a>
+</div>
+
+<div class="tldr" id="s1">
+  <strong>TL;DR:</strong>
+  <span class="zh">PR #235 给 <code>gget alphafold</code> 加了 <code>msa</code> 参数:传一份 a3m 或对齐 FASTA 的自定义 MSA,gget 就<b>跳过整个 jackhmmer 同源搜索</b>(不下载 ~2GB 基因库),直接用你的 MSA 折叠。这是维护者社区里 kchennen(#52)提的真实科研需求——用人工审编的 MSA 改善预测。实现<b>扎实</b>:a3m 解析(小写=插入 → deletion matrix)<b>忠实复现了 AlphaFold 自己的 <code>parse_a3m</code> 算法</b>,返回 AlphaFold 原生的 <code>parsers.Msa</code> 对象;校验齐全(格式、文件存在、首序列须等于 query)。<b>还顺带改善了可复现性</b>——固定 MSA 是确定性输入,比"搜远端会漂移的库 + 选最近镜像"更可复现。测试在 AlphaFold 无法在 CI 跑的硬约束下,合理地把可测面(MSA 解析/校验 + CLI 旗标)测到位。<b>唯一挡住脱 draft 的</b>:pre-commit.ci 红——<code>gget_alphafold.py:712</code> 一处 mypy 错(<code>custom_msa_paths</code> 被当 <code>list|None</code> 索引),一行可修。结论:方案科学、契合(增强已有模块、且用户亲点)、价值高。</span>
+  <span class="en">PR #235 adds an <code>msa</code> argument to <code>gget alphafold</code>: pass a custom a3m or aligned-FASTA MSA and gget <b>skips the entire jackhmmer homology search</b> (no ~2GB genetic-database download), folding directly from your MSA. This is a real research need raised by kchennen (#52) — using a manually curated MSA to improve the prediction. The implementation is <b>solid</b>: the a3m parsing (lowercase = insertions → deletion matrix) <b>faithfully reproduces AlphaFold's own <code>parse_a3m</code> algorithm</b> and returns AlphaFold's native <code>parsers.Msa</code> object; validation is thorough (format, file exists, first sequence must equal the query). It also <b>improves reproducibility</b> — a fixed MSA is a deterministic input, more reproducible than "search remote drifting DBs + pick the nearest mirror". Given that AlphaFold cannot run in CI, the tests sensibly cover the testable surface (MSA parsing/validation + the CLI flag). The <b>one thing blocking it from leaving draft</b>: pre-commit.ci is red — a single mypy error at <code>gget_alphafold.py:712</code> (<code>custom_msa_paths</code> indexed as <code>list|None</code>), a one-line fix. Verdict: sound, on-mission (enhances an existing, maintainer-accepted module, user-requested), high value.</span>
+</div>
+
+<h2 id="s2"><span class="n">2</span><span class="zh">背景 / 问题</span><span class="en">Background / problem</span></h2>
+<p><span class="zh">Issue <a href="https://github.com/scverse/gget/issues/52">#52</a> 由 <b>kchennen</b> 提出,诉求具体:希望能<b>提交一份 MSA(而非一条原始序列)</b>作为 gget alphafold 的输入。用例是:自动同源搜索会带进"预测错误、异构体、片段"等问题序列;传<b>人工审编</b>的干净 MSA 能提升折叠质量(引 PMID 33172385)。</span><span class="en">Issue <a href="https://github.com/scverse/gget/issues/52">#52</a> was filed by <b>kchennen</b>, a concrete request: to be able to <b>submit an MSA (rather than a raw sequence)</b> as input to gget alphafold. The use case: automatic homology search brings in problematic sequences (prediction errors, isoforms, fragments); a <b>manually curated</b>, clean MSA improves the fold (cites PMID 33172385).</span></p>
+<div class="note"><span class="zh"><b>底层需求:</b>不是"换个输入格式"那么表面,而是<b>把 MSA 构建的控制权交给用户</b>——让懂行的人用自己精挑的同源集来折叠,这在结构预测里是公认能显著改善结果的做法。附带的实际好处:跳过 jackhmmer 就不必下载庞大基因库。</span><span class="en"><b>Underlying need:</b> not merely "another input format" but <b>handing MSA construction control to the user</b> — letting experts fold from their own hand-picked homolog set, a recognized way to materially improve structure prediction. A practical bonus: skipping jackhmmer avoids the huge genetic-database download.</span></div>
+
+<h2 id="s3"><span class="n">3</span><span class="zh">上下文:gget alphafold 平时怎么跑</span><span class="en">Context: how gget alphafold normally works</span></h2>
+<p><span class="zh">默认流程:<b>序列 → jackhmmer 搜索多个远端基因库(uniref90 / smallbfd / mgnify…)拼出 MSA → 折叠</b>。这一步要选"最近的镜像源"、流式下载分块的库(可达 ~2GB 临时文件),是整个流程里最重、最依赖网络的一段。本 PR 加的 <code>msa</code> 参数把这一整段<b>短路</b>掉:一旦提供 MSA,就完全不搜索、不下载,直接把用户 MSA 喂进后续折叠。</span><span class="en">The default flow: <b>sequence → jackhmmer searches several remote genetic databases (uniref90 / smallbfd / mgnify …) to build an MSA → fold</b>. That step picks the "nearest mirror" and streams chunked databases (up to ~2GB of temp files); it's the heaviest, most network-dependent part of the pipeline. This PR's <code>msa</code> argument <b>short-circuits</b> all of it: once an MSA is provided, there is no search and no download — the user's MSA feeds straight into the fold.</span></p>
+<div class="note"><span class="zh"><b>平台契合度的关键背景:</b><code>gget alphafold</code> 本来就是 gget 里<b>最"重"、最不像"数据访问"</b>的模块(它真的跑 AlphaFold:重依赖、要 GPU、下模型参数)——是一个既有的、经维护者接受的例外。本 PR 是<b>增强这个已存在的模块</b>,不是把 gget 的范围扩到新的分析领域;而且它其实<b>减轻</b>了负担(免下库)。所以契合度按"改进既有模块"来评,是 PASS。</span><span class="en"><b>Key context for platform fit:</b> <code>gget alphafold</code> is already gget's <b>heaviest, least "data-access"</b> module (it actually runs AlphaFold: heavy deps, GPU, model-parameter downloads) — a pre-existing, maintainer-accepted exception. This PR <b>enhances that existing module</b>; it does not expand gget's scope into new analysis territory, and it actually <b>reduces</b> a burden (no DB download). So platform fit, judged as "improving an accepted module", is a PASS.</span></div>
+
+<h2 id="s4"><span class="n">4</span><span class="zh">自定义 MSA 输入 & 解析详解</span><span class="en">Custom MSA input &amp; parsing</span></h2>
+<p><span class="zh">这是本 PR 最该看懂的技术核心。输入是一个 <b>a3m</b> 或<b>对齐 FASTA</b> 文件,<b>第一条必须是 query</b>(去掉 gap 后要逐字等于输入 <code>sequence</code>)。</span><span class="en">This is the technical heart of the PR. The input is an <b>a3m</b> or <b>aligned-FASTA</b> file, whose <b>first sequence must be the query</b> (equal to the input <code>sequence</code> once gaps are removed).</span></p>
+<h3><span class="zh">a3m 格式的大小写约定</span><span class="en">The a3m upper/lower-case convention</span></h3>
+<p><span class="zh">a3m 用<b>大小写编码对齐信息</b>:<b>大写字母/gap(<code>-</code>)= 与 query 对齐的列</b>;<b>小写字母 = 相对 query 的"插入"</b>(query 在此处没有对应残基)。解析要把这两类拆开:</span><span class="en">a3m encodes alignment with case: <b>uppercase letters / gaps (<code>-</code>) = columns aligned to the query</b>; <b>lowercase letters = "insertions" relative to the query</b> (positions the query has no residue for). Parsing separates the two:</span></p>
+<pre><code># fixture 里的一条 homolog（带插入 "ef"）:
+>sp|homolog3_with_insertion
+MKVefLAAGSTKDEFGHIKLMN
+        │└┴─ 小写 "ef" = 两个插入字符（不占对齐列）
+        └─── 大写/gap 才是对齐列</code></pre>
+<p><span class="zh"><code>parse_custom_msa()</code> 产出三样东西,正是 AlphaFold 需要的 MSA 组件:</span><span class="en"><code>parse_custom_msa()</code> yields the three MSA components AlphaFold needs:</span></p>
+<table>
+  <tr><th><span class="zh">产出</span><span class="en">Output</span></th><th><span class="zh">含义</span><span class="en">Meaning</span></th></tr>
+  <tr><td><code>aligned_sequences</code></td><td><span class="zh">删掉所有小写插入后的序列(每行长度 = query 长度)</span><span class="en">sequences with all lowercase insertions removed (each row = query length)</span></td></tr>
+  <tr><td><code>deletion_matrix</code></td><td><span class="zh">每个对齐列前"插入了几个字符"的计数(如 homolog3 在第 4 列前是 2)</span><span class="en">per aligned column, how many characters were inserted before it (e.g. homolog3 is 2 before column 4)</span></td></tr>
+  <tr><td><code>descriptions</code></td><td><span class="zh">各序列的 header</span><span class="en">each sequence's header</span></td></tr>
+</table>
+<div class="note"><span class="zh"><b>正确性核实(核心):</b>这套"小写计入 deletion matrix + 用 <code>str.maketrans</code> 去小写得到对齐行"的逻辑,<b>与 AlphaFold 自己的 <code>parsers.parse_a3m</code> 算法逐字一致</b>,最后还包成 AlphaFold 原生的 <code>alphafold.data.parsers.Msa</code> 对象直接喂进流程——所以它不是"另写一套解析",而是复用 AlphaFold 的规范。对齐 FASTA 因为没有小写插入,deletion matrix 自然全 0。<span class="muted">(我通过比对 AlphaFold 公开的 a3m 解析算法核实;本机无 AlphaFold 运行环境,未端到端跑折叠。)</span></span><span class="en"><b>Correctness check (core):</b> this "count lowercase into the deletion matrix + strip lowercase via <code>str.maketrans</code> to get aligned rows" logic is <b>byte-for-byte identical to AlphaFold's own <code>parsers.parse_a3m</code></b>, and the result is wrapped in AlphaFold's native <code>alphafold.data.parsers.Msa</code> object fed straight into the pipeline — so it is not a re-implementation but a reuse of AlphaFold's convention. Aligned FASTA has no lowercase insertions, so its deletion matrix is all zeros. <span class="muted">(Verified by comparing against AlphaFold's public a3m-parsing algorithm; no AlphaFold runtime here, so no end-to-end fold was run.)</span></span></div>
+
+<h2 id="s5"><span class="n">5</span><span class="zh">如何使用</span><span class="en">How to use</span></h2>
+<pre><code># CLI —— 传自定义 MSA，跳过 jackhmmer 搜索
+gget alphafold MKVLAAGSTKDEFGHIKLMN --msa my_curated.a3m
+
+# Python
+gget.alphafold("MKVLAAGSTKDEFGHIKLMN", msa="my_curated.a3m")</code></pre>
+<p><span class="zh">输入:<code>sequence</code>(query 序列)+ <code>msa</code>(a3m/FASTA 文件路径)。有 <code>msa</code> 时:校验格式/文件/首序列=query → 跳过搜索 → 用该 MSA 折叠。副作用与平时一致(把预测的 PDB 和 PAE json 存到 <code>out</code> 目录),函数本身返回 <code>None</code>。</span><span class="en">Input: <code>sequence</code> (the query) + <code>msa</code> (path to an a3m/FASTA file). When <code>msa</code> is given: validate format/file/first-sequence-equals-query → skip the search → fold from that MSA. Side effects are the same as usual (saves the predicted PDB and PAE json to the <code>out</code> folder); the function itself returns <code>None</code>.</span></p>
+
+<h2 id="s6"><span class="n">6</span><span class="zh">Scope / 边界</span><span class="en">Scope</span></h2>
+<ul>
+  <li><span class="ok">✓ <span class="zh">做</span><span class="en">does</span></span>: <span class="zh">接受 a3m / 对齐 FASTA 自定义 MSA(<b>单序列 / monomer</b>),跳过 jackhmmer + 免下库,完整校验</span><span class="en">accept an a3m / aligned-FASTA custom MSA (<b>single-sequence / monomer</b>), skip jackhmmer + the download, with full validation</span></li>
+  <li><span class="no">✗ <span class="zh">不做</span><span class="en">does not</span></span>: <span class="zh"><b>multimer / 多序列</b>的自定义 MSA(显式限制,给出清晰报错);也不改折叠本身</span><span class="en"><b>multimer / multi-sequence</b> custom MSA (explicitly restricted with a clear error); and it does not change the fold itself</span></li>
+</ul>
+<div class="note"><span class="zh">边界清晰、报错友好。monomer-only 是合理的第一步(multimer 的自定义 MSA 要处理成对/链间比对,复杂得多)——可作为未来扩展记入未决。</span><span class="en">Clean boundary with a friendly error. Monomer-only is a reasonable first step (a multimer custom MSA must handle paired/inter-chain alignments, much more involved) — a candidate future extension noted below.</span></div>
+
+<h2 id="s7"><span class="n">7</span><span class="zh">评估(四 lens)</span><span class="en">Evaluation (four lenses)</span></h2>
+<table>
+  <tr><th>Lens</th><th><span class="zh">判断</span><span class="en">Verdict</span></th><th><span class="zh">依据</span><span class="en">Basis</span></th></tr>
+  <tr>
+    <td><span class="zh">① Soundness</span><span class="en">① Soundness</span></td>
+    <td class="ok"><span class="zh">强</span><span class="en">Strong</span></td>
+    <td><span class="zh">a3m/deletion-matrix 解析<b>忠实复现 AlphaFold 原算法</b>、返回原生 <code>Msa</code> 类型;校验齐全(格式/文件存在/首序列去 gap 等于 query);正确地把整个搜索分支短路。</span><span class="en">the a3m/deletion-matrix parsing <b>faithfully reproduces AlphaFold's own algorithm</b> and returns the native <code>Msa</code> type; thorough validation (format / file exists / first sequence equals the query, gaps removed); correctly short-circuits the whole search branch.</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">② 平台契合度</span><span class="en">② Platform fit</span></td>
+    <td class="ok">PASS <span class="zh">(按"增强既有模块")</span><span class="en">(as "enhance an existing module")</span></td>
+    <td><span class="zh">增强 gget 里既有(且已被接受)的 alphafold 模块,不扩范围;用户亲点;还减轻负担(免下库)。</span><span class="en">enhances gget's existing (already-accepted) alphafold module without expanding scope; user-requested; and lightens a burden (no DB download).</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">③ 可复现性</span><span class="en">③ Reproducibility</span></td>
+    <td class="ok"><span class="zh">改善(加分)</span><span class="en">Improved (a plus)</span></td>
+    <td><span class="zh">固定的审编 MSA 是<b>确定性输入</b>,比默认路径(搜远端会季度漂移的库 + 非确定地选"最近镜像")<b>更</b>可复现、更适合写进论文方法。</span><span class="en">a fixed curated MSA is a <b>deterministic input</b>, <b>more</b> reproducible than the default path (searching remote DBs that drift + non-deterministically picking the "nearest mirror") and better suited to a methods section.</span></td>
+  </tr>
+  <tr>
+    <td><span class="zh">④ 维护成本</span><span class="en">④ Maintenance</span></td>
+    <td class="ok"><span class="zh">低—中</span><span class="en">Low–moderate</span></td>
+    <td><span class="zh">解析 helper 自包含、镜像 AlphaFold 稳定算法;仅耦合 <code>parsers.Msa</code> 类型(惰性 import,AlphaFold 已固定版本)。风险低。</span><span class="en">the parsing helpers are self-contained and mirror AlphaFold's stable algorithm; the only coupling is the <code>parsers.Msa</code> type (imported lazily; AlphaFold is pinned). Low risk.</span></td>
+  </tr>
+</table>
+<p><span class="zh"><b>总评:</b>方案科学、精准回应用户需求、契合"增强既有模块"、还改善可复现性,实现干净(复用 AlphaFold 规范 + 完整校验 + 免下库)。唯一挡住脱 draft 的是 CI 的一个类型标注错(第 10 节)。修掉即为高质量 PR。</span><span class="en"><b>Overall:</b> sound, precisely answers the user's need, aligned as "enhance an existing module", and improves reproducibility, with a clean implementation (reuses AlphaFold's convention + full validation + no download). The only thing blocking it from leaving draft is one CI type-annotation error (§10). Fix it and it's a high-quality PR.</span></p>
+
+<h2 id="s8"><span class="n">8</span><span class="zh">设计决策与权衡</span><span class="en">Design decisions &amp; trade-offs</span></h2>
+<h3>① <span class="zh">复用 AlphaFold 自己的 a3m 解析,而非另造</span><span class="en">Reuse AlphaFold's a3m parsing, don't reinvent</span></h3>
+<p><span class="zh">解析逐字对齐 AlphaFold 的 <code>parse_a3m</code>、并返回原生 <code>Msa</code> 对象——保证插入/删除语义和后续 <code>make_msa_features</code> 完全一致,避免"自己解析和 AlphaFold 理解不一致"的隐性 bug。正确的工程选择。</span><span class="en">the parsing matches AlphaFold's <code>parse_a3m</code> byte-for-byte and returns the native <code>Msa</code> object — guaranteeing the insertion/deletion semantics are identical to the downstream <code>make_msa_features</code>, avoiding subtle "our parser disagrees with AlphaFold" bugs. The right engineering choice.</span></p>
+<h3>② <span class="zh">强制首序列 = query</span><span class="en">Require the first sequence to equal the query</span></h3>
+<p><span class="zh">去 gap 后逐字比对首序列与输入 <code>sequence</code>,不一致就报错并把两条都打出来。这防住了"MSA 和 query 对不上"这类会悄悄产出错误结构的严重错误——好的防御。</span><span class="en">compares the first sequence (gaps removed) to the input <code>sequence</code>, erroring with both printed on mismatch. This guards against a serious "MSA doesn't match the query" error that would silently produce a wrong structure — good defense.</span></p>
+<h3>③ <span class="zh">先限 monomer,清晰报错</span><span class="en">Restrict to monomer first, with a clear error</span></h3>
+<p><span class="zh">multimer 自定义 MSA 涉及链间配对,复杂度高;先做 monomer、对多序列/多 MSA 明确报错,是稳妥的分步。</span><span class="en">a multimer custom MSA involves inter-chain pairing and is much more complex; shipping monomer first and erroring clearly on multi-sequence/multi-MSA is a sound incremental step.</span></p>
+
+<h2 id="s9"><span class="n">9</span><span class="zh">测试</span><span class="en">Testing</span></h2>
+<p><span class="zh"><b>硬约束:</b>AlphaFold 的重依赖(alphafold、openmm、jackhmmer、模型参数)在 CI 里装不了,<b>无法端到端跑一次真实折叠</b>。所以这里<b>没有(也不可能有)live 折叠测试</b>——这不是缺陷,是环境使然。正确做法是把<b>可测的那部分</b>测扎实,PR 做到了:</span><span class="en"><b>Hard constraint:</b> AlphaFold's heavy deps (alphafold, openmm, jackhmmer, model parameters) can't be installed in CI, so <b>a real end-to-end fold cannot be exercised</b>. There is therefore <b>no (and can be no) live fold test</b> — not a defect, an environment reality. The right move is to test the <b>testable</b> part solidly, which the PR does:</span></p>
+<ul>
+  <li><span class="zh"><code>detect_msa_format</code>:识别/拒识扩展名(含大小写、不支持格式报错)。</span><span class="en"><code>detect_msa_format</code>: recognize/reject extensions (case-insensitive; unsupported → error).</span></li>
+  <li><span class="zh"><code>parse_custom_msa</code>:用 a3m/FASTA fixture 验列长、首序列=query、<b>deletion matrix</b>(含一条带 "ef" 插入的 homolog,断言其在第 4 列前计数为 2)、空输入/非 FASTA 报错。</span><span class="en"><code>parse_custom_msa</code>: with a3m/FASTA fixtures, checks row lengths, first-sequence-equals-query, the <b>deletion matrix</b> (including a homolog with an "ef" insertion, asserting a count of 2 before column 4), and empty/non-FASTA errors.</span></li>
+  <li><span class="zh">CLI 暴露了 <code>--msa</code> 旗标。</span><span class="en">the CLI exposes the <code>--msa</code> flag.</span></li>
+</ul>
+<div class="note"><span class="zh"><b>诚实的覆盖缺口:</b>端到端那条链(读文件 → 注入 pipeline → 真的跳过 jackhmmer → 折叠)<b>没有</b>被集成测试(不可能)。<code>alphafold()</code> 里的"文件存在""首序列=query"校验是靠<b>读代码</b>确认的;query-match 逻辑有一个<b>镜像测试</b>(测同样的比较,但不经过 <code>alphafold()</code> 本体)。在此约束下,这是合理的取舍——但值得在报告里点明。</span><span class="en"><b>Honest coverage gap:</b> the end-to-end chain (read file → inject into the pipeline → actually skip jackhmmer → fold) is <b>not</b> integration-tested (impossible). The "file exists" / "first sequence equals query" checks inside <code>alphafold()</code> are confirmed by <b>reading the code</b>; the query-match logic has a <b>mirror test</b> (same comparison, but not through <code>alphafold()</code> itself). Under the constraint this is a reasonable trade-off — worth stating explicitly.</span></div>
+
+<h2 id="s10"><span class="n">10</span><span class="zh">当前状态</span><span class="en">Current status</span></h2>
+<pre><code>PR scverse/gget#235  (DRAFT)  feature/alphafold-custom-msa-52 → dev   +367 / -88, 7 files
+commit: 1de9260 feat(alphafold): accept a user-provided custom MSA input (#52)   [单 commit]
+files: gget/gget_alphafold.py (+248 -86) · gget/main.py (+13) · tests/test_alphafold.py (+89 -2)
+       tests/fixtures/test_alphafold_msa.a3m / .fasta · docs (alphafold.md, updates.md)
+CI: hatch-test py3.12 / 3.13 / 3.14  ✓ pass  ·  pre-commit.ci  ✗ FAIL</code></pre>
+<div class="warn"><span class="zh"><b>pre-commit.ci 红的根因(我用固定版工具链复现):</b>ruff 干净;失败是 <b>mypy 一处</b>——<code>gget/gget_alphafold.py:712</code> 在 <code>if msa is not None:</code> 分支里对 <code>custom_msa_paths[...]</code> 索引,但 <code>custom_msa_paths</code> 的类型是 <code>list[str] | None</code>(它只在 <code>msa is not None</code> 时被赋成 list,两者相关但 mypy 不追踪这种关联),报 <code>Value of type "list[str] | None" is not indexable [index]</code>。<b>一行可修</b>:把守卫从 <code>if msa is not None:</code> 改成 <code>if custom_msa_paths is not None:</code>(mypy 能据此收窄),或加一句 <code>assert custom_msa_paths is not None</code>。修完 pre-commit 即绿。<br><span class="muted">(核实小插曲:第一次跑本地 mypy 时环境里的 mypy-baseline 恰好缺失、给出"假干净";重建固定版 mypy 1.13.0 + mypy-baseline 后才抓到此错。)</span></span><span class="en"><b>Root cause of the red pre-commit.ci (reproduced with the pinned toolchain):</b> ruff is clean; the failure is <b>a single mypy error</b> — <code>gget/gget_alphafold.py:712</code> indexes <code>custom_msa_paths[...]</code> inside <code>if msa is not None:</code>, but <code>custom_msa_paths</code> is typed <code>list[str] | None</code> (it is set to a list only when <code>msa is not None</code>; the two are correlated but mypy doesn't track that), raising <code>Value of type "list[str] | None" is not indexable [index]</code>. <b>One-line fix</b>: change the guard from <code>if msa is not None:</code> to <code>if custom_msa_paths is not None:</code> (which mypy narrows), or add <code>assert custom_msa_paths is not None</code>. That turns pre-commit green.<br><span class="muted">(Verification note: on the first local mypy run the environment's mypy-baseline happened to be missing and gave a false "clean"; only after rebuilding the pinned mypy 1.13.0 + mypy-baseline was this error caught.)</span></span></div>
+
+<h2 id="s11"><span class="n">11</span><span class="zh">未决 / 建议</span><span class="en">Open items / suggestions</span></h2>
+<ul>
+  <li><span class="zh"><b>脱 draft 前必修:</b><code>gget_alphafold.py:712</code> 的 mypy 类型收窄(pre-commit.ci 红,见第 10 节)。</span><span class="en"><b>Must fix before leaving draft:</b> the <code>gget_alphafold.py:712</code> mypy narrowing (pre-commit.ci red, see §10).</span></li>
+  <li><span class="zh"><b>可选:</b>为一致性,把 <code>a3m</code> 的 <code>.a3m</code> 之外常见变体(如 <code>.a2m</code>)是否接受想清楚并在文档写明(现仅 a3m + 对齐 FASTA)。</span><span class="en"><b>Optional:</b> for consistency, decide and document whether common variants beyond <code>.a3m</code> (e.g. <code>.a2m</code>) are accepted (currently a3m + aligned FASTA only).</span></li>
+  <li><span class="zh"><b>未来扩展:</b>multimer 自定义 MSA(链间配对);现已明确限 monomer 并友好报错。</span><span class="en"><b>Future extension:</b> multimer custom MSA (inter-chain pairing); currently restricted to monomer with a friendly error.</span></li>
+  <li><span class="zh"><b>文档规约(顺手):</b>changelog 里带了 "Resolves issue 52",按仓库习惯介绍页可不写 issue 号;另建议补西班牙语 <code>es/alphafold.md</code> 的对应改动(如果该模块 es 页存在)。</span><span class="en"><b>Doc conventions (minor):</b> the changelog carries "Resolves issue 52"; per repo habit the doc page need not cite the issue number; and consider mirroring the change in the Spanish <code>es/alphafold.md</code> if that page exists.</span></li>
+</ul>
+
+<h2 id="s12"><span class="n">12</span><span class="zh">参考链接</span><span class="en">References</span></h2>
+<ul>
+  <li>PR:<a href="https://github.com/scverse/gget/pull/235">scverse/gget#235</a></li>
+  <li>Issue:<a href="https://github.com/scverse/gget/issues/52">#52 — submit an MSA instead of a sequence</a>(by kchennen)</li>
+  <li>AlphaFold:<a href="https://doi.org/10.1038/s41586-021-03819-2">Jumper et al. 2021, Nature</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/33172385/">PMID 33172385</a>(MSA 质量对预测的影响)</li>
+</ul>
+
+<footer>
+  <span class="zh">本文档由 Claude Opus 4.8 (1M context) 于 2026-07-07 20:25 SGT 整理,基于 PR #235 完整 diff、issue #52,并用重建的固定版工具链(mypy 1.13.0 + mypy-baseline 0.7.4、ruff)复现了 pre-commit.ci 的失败。已核实:pre-commit 红源于 gget_alphafold.py:712 的单个 mypy 类型错、hatch-test 三版皆绿、a3m 解析逻辑与 AlphaFold 公开的 parse_a3m 算法一致。未独立验证:端到端折叠(本机无 AlphaFold 运行环境)、真实 a3m/多样输入下的全部行为。AlphaFold 预测本身依赖模型版本/参数——以 AlphaFold 官方为准。AI 生成分析,供参考,非对 PR 的最终评审结论。</span>
+  <span class="en">Compiled by Claude Opus 4.8 (1M context) at 2026-07-07 20:25 SGT, based on the full PR #235 diff and issue #52, reproducing the pre-commit.ci failure with a rebuilt pinned toolchain (mypy 1.13.0 + mypy-baseline 0.7.4, ruff). Verified: the red pre-commit is a single mypy type error at gget_alphafold.py:712, hatch-test passes on all three Python versions, and the a3m parsing matches AlphaFold's public parse_a3m algorithm. Not independently verified: an end-to-end fold (no AlphaFold runtime here) and full behavior across real/diverse a3m inputs. AlphaFold prediction itself depends on model version/parameters — defer to AlphaFold. AI-generated analysis, for reference, not a final review verdict.</span>
+</footer>
+
+</div>
+<script>
+  function setLang(l){
+    document.body.className = 'lang-' + l;
+    document.querySelectorAll('.langtoggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.l === l);
+    });
+  }
+</script>
+</body>
+</html>

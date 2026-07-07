@@ -10,6 +10,7 @@
 
 | PR | 模块 | 一句话 | 在线浏览 |
 |----|------|--------|----------|
+| [#235](https://github.com/scverse/gget/pull/235) | `gget alphafold` | 加 `msa` 参数：传自定义 MSA、跳过 jackhmmer 搜索（免下 ~2GB 库）；a3m 解析复现 AlphaFold 原算法、改善可复现性；含 pre-commit 红根因 | [🌐 打开](https://elarwei001.github.io/gget_issues/pr235-alphafold-custom-msa.html) |
 | [#236](https://github.com/scverse/gget/pull/236) | `gget reactome` | 新模块：用 Reactome ContentService REST API 做三类查询（通路/搜索/实体），返回 tidy DataFrame；测试设计良好、含 pre-commit 红根因 | [🌐 打开](https://elarwei001.github.io/gget_issues/pr236-reactome.html) |
 | [#237](https://github.com/scverse/gget/pull/237) | `gget ref` | 给 `ref` 加 `assembly_report`，把位置参数当 NCBI 装配号、返回跨命名映射表（`chr1↔1↔CM000663.2↔NC_000001.11`） | [🌐 打开](https://elarwei001.github.io/gget_issues/pr237-ref-assembly-report.html) |
 | [#238](https://github.com/scverse/gget/pull/238) | `gget ref` | 给 `ref` 加 GENCODE 数据源（人/鼠 GTF+FASTA），与 Ensembl 并列、复用同一返回结构 | [🌐 打开](https://elarwei001.github.io/gget_issues/pr238-ref-gencode.html) |
