@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生物学基础 · 结构预测的输入 (Structure-prediction inputs)</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--panel2:#1d212b;--ink:#e6e9ef;--muted:#9aa4b2;--acc:#f5a623;--acc2:#5aa9e6;--green:#4cc38a;--red:#e5648a;--line:#2a2f3a;--code:#0b0d11;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:900px;margin:0 auto;padding:32px 24px 80px}
+  header.top{position:relative;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:27px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:15px}
+  .stamp{position:absolute;top:0;right:0;font-size:12px;color:var(--muted);text-align:right}
+  .back{font-size:13px;color:var(--acc2)}
+  h2{font-size:21px;margin:34px 0 12px;padding-top:8px;border-top:1px solid var(--line);color:#fff}
+  h2 .n{color:var(--acc);margin-right:8px}
+  h3{font-size:16px;margin:18px 0 6px;color:var(--acc2)}
+  p{margin:10px 0}
+  a{color:var(--acc2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;color:#ffd9a0}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:13px;line-height:1.55}
+  pre code{background:none;border:none;padding:0;color:#d6deeb}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#fff}
+  tr:nth-child(even) td{background:var(--panel)}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:5px 0}
+  .tldr{background:linear-gradient(135deg,#1b2330,#171a21);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:16px 18px;margin:16px 0}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc2);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .analogy{background:#132018;border:1px solid #26402f;border-left:4px solid var(--green);border-radius:10px;padding:12px 16px;margin:14px 0}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:18px 0;font-size:14px}
+  .toc a{display:block;padding:2px 0;color:var(--ink)}
+  .toc a:hover{color:var(--acc2)}
+  .muted{color:var(--muted)}
+  .langtoggle{margin-bottom:6px}
+  .langtoggle button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;margin-left:4px}
+  .langtoggle button.active{background:var(--acc2);color:#08121c;border-color:var(--acc2);font-weight:600}
+  body.lang-zh .en{display:none}
+  body.lang-en .zh{display:none}
+  footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body class="lang-zh">
+<div class="wrap">
+
+<header class="top">
+  <div class="stamp">
+    <div class="langtoggle">
+      <button data-l="zh" class="active" onclick="setLang('zh')">中文</button><button data-l="en" onclick="setLang('en')">EN</button>
+    </div>
+    Generated: 2026-07-07 20:56 SGT<br>by Claude Opus 4.8 (1M context)
+  </div>
+  <div class="back"><a href="../index.html">← <span class="zh">返回首页</span><span class="en">Back to index</span></a></div>
+  <h1>🧩 <span class="zh">结构预测的输入:序列 → MSA → 折叠</span><span class="en">Structure-prediction inputs: sequence → MSA → fold</span></h1>
+  <div class="sub"><span class="zh">给非生物背景读者:AlphaFold 折叠一个蛋白前要准备什么——多序列比对(MSA)、序列对齐、jackhmmer 与它搜的库、a3m/FASTA 格式,以及为什么要"自定义 MSA"、为什么跑不了 CI。</span><span class="en">For non-biologists: what AlphaFold needs before folding a protein — the multiple sequence alignment (MSA), how sequences align, jackhmmer and the databases it searches, the a3m/FASTA formats, and why you'd supply a "custom MSA" and why it can't run in CI.</span></div>
+</header>
+
+<div class="tldr">
+  <strong>TL;DR:</strong>
+  <span class="zh"><b>AlphaFold</b> 从蛋白的<b>氨基酸序列</b>预测<b>三维结构</b>,但它真正吃的关键输入是一份 <b>MSA(多序列比对)</b>——把这条蛋白和许多<b>其它物种的同源序列按列对齐</b>排在一起。AlphaFold 看"哪些位置一起变(共进化)"推断空间接触。默认流程:<b>序列 →(jackhmmer 去 UniRef90/BFD/MGnify 搜同源)拼出 MSA → 折叠</b>。MSA 用 <b>a3m</b> 或<b>对齐 FASTA</b> 存。你也可以<b>自己审编一份干净 MSA</b> 传进去(gget #235 的功能),既提质量又免下 ~2GB 库。整条链因为要 GPU + 重依赖 + GB 级库,<b>没法在 CI 里跑</b>。</span>
+  <span class="en"><b>AlphaFold</b> predicts a protein's <b>3D structure</b> from its <b>amino-acid sequence</b>, but the key input it really consumes is an <b>MSA (multiple sequence alignment)</b> — the protein lined up, column by column, with many <b>homologous sequences from other species</b>. AlphaFold reads which positions co-evolve to infer spatial contacts. The default flow: <b>sequence → (jackhmmer searches UniRef90/BFD/MGnify for homologs) build an MSA → fold</b>. MSAs are stored as <b>a3m</b> or <b>aligned FASTA</b>. You can also <b>curate your own clean MSA</b> and pass it in (the gget #235 feature) — better quality and no ~2GB download. The whole chain needs a GPU + heavy deps + GB-scale databases, so it <b>cannot run in CI</b>.</span>
+</div>
+
+<div class="toc">
+  <a href="#s1">1 · <span class="zh">主线:序列 → MSA → 折叠</span><span class="en">The backbone</span></a>
+  <a href="#s2">2 · MSA <span class="zh">(多序列比对)</span><span class="en">(the alignment)</span></a>
+  <a href="#s3">3 · <span class="zh">序列如何按列对齐</span><span class="en">How sequences align</span></a>
+  <a href="#s4">4 · <span class="zh">jackhmmer 与它搜的库</span><span class="en">jackhmmer &amp; its databases</span></a>
+  <a href="#s5">5 · <span class="zh">a3m 与对齐 FASTA</span><span class="en">a3m &amp; aligned FASTA</span></a>
+  <a href="#s6">6 · <span class="zh">为什么要"自定义 MSA"</span><span class="en">Why a custom MSA</span></a>
+  <a href="#s7">7 · <span class="zh">AlphaFold2 vs 3 & 跑不了 CI</span><span class="en">AF2 vs 3 &amp; the CI limit</span></a>
+</div>
+
+<h2 id="s1"><span class="n">1</span><span class="zh">主线:一个蛋白怎么被折叠出来</span><span class="en">The backbone: how a protein gets folded</span></h2>
+<pre><code>氨基酸序列 sequence   （例：MKVLAAGSTKDEF…）
+   │  搜同源序列 search homologs（jackhmmer + UniRef90/BFD/MGnify）
+   ▼
+多序列比对 MSA（把 query 和一堆同源序列按列对齐）
+   │  折叠 fold（AlphaFold 读共进化信号 → 空间接触 → 3D）
+   ▼
+三维结构 3D structure（PDB 文件）</code></pre>
+<p><span class="zh"><b>关键认知:</b>AlphaFold 折叠靠的不是单条序列,而是<b>这条序列 + 它的一大群同源亲戚</b>。为什么?见下一节。</span><span class="en"><b>Key idea:</b> AlphaFold folds not from a single sequence but from <b>that sequence plus a large family of its homologs</b>. Why? Next section.</span></p>
+
+<h2 id="s2"><span class="n">2</span><span class="zh">MSA(多序列比对):折叠的真正输入</span><span class="en">MSA: the real input to folding</span></h2>
+<p><span class="zh"><b>MSA = Multiple Sequence Alignment(多序列比对)</b>——把目标蛋白(query)和许多<b>同源序列</b>(不同物种里"同一个"蛋白的版本)<b>按列对齐</b>排成一张表,每一列是"进化上对应的同一个位置"。</span><span class="en"><b>MSA = Multiple Sequence Alignment</b> — the target protein (query) and many <b>homologous sequences</b> (versions of "the same" protein in different species) <b>aligned column by column</b> into a table, where each column is "the same evolutionarily corresponding position".</span></p>
+<h3><span class="zh">为什么折叠需要它:共进化</span><span class="en">Why folding needs it: co-evolution</span></h3>
+<p><span class="zh">如果蛋白里两个位置在三维空间里<b>挨得很近、相互接触</b>,那么进化中一个位置变了,另一个往往<b>跟着变</b>来维持接触——这叫<b>共进化(co-evolution)</b>。在 MSA 里看很多物种,就能发现"哪些列总是一起变"→ 反推出"这两个位置在 3D 里靠得近"→ 拼出结构。所以 <b>MSA 越好(同源序列多样且干净),折叠越准</b>。</span><span class="en">If two positions in a protein are <b>close and touch in 3D</b>, then in evolution when one changes the other often <b>changes with it</b> to keep the contact — this is <b>co-evolution</b>. Looking across many species in the MSA reveals "which columns always change together" → infers "these two positions are close in 3D" → builds the structure. So <b>the better the MSA (diverse and clean homologs), the more accurate the fold</b>.</span></p>
+<div class="analogy"><span class="zh">🔗 类比:两个人如果总是<b>成对出现、一起换衣服的颜色</b>,你会猜他们关系很近。共进化就是从"位置总是成对变化"猜"它们在结构里挨着"。</span><span class="en">🔗 Analogy: if two people always <b>show up together and change outfit colors in sync</b>, you'd guess they're closely linked. Co-evolution infers "these positions sit next to each other in the structure" from "they always change in pairs".</span></div>
+
+<h2 id="s3"><span class="n">3</span><span class="zh">不同序列如何"按列对齐"</span><span class="en">How different sequences get aligned column-by-column</span></h2>
+<p><span class="zh">不同物种的同源蛋白<b>长度不一、有插入有缺失</b>,直接并排对不齐。<b>序列对齐(alignment)</b>就是:在合适位置<b>插入 gap(空位,写作 <code>-</code>)</b>,让"同源的同一位置"落到<b>同一列</b>。</span><span class="en">Homologous proteins across species have <b>different lengths, with insertions and deletions</b>, so they don't line up as-is. <b>Sequence alignment</b> inserts <b>gaps (written <code>-</code>)</b> at the right places so that "the same homologous position" lands in the <b>same column</b>.</span></p>
+<pre><code>query : M K V L A A G S T
+homo1 : M K V L A A G S T
+homo2 : M K V L A A - S T   ← 这里缺一个残基，补 gap 对齐
+        └────── 每一列 = 同源的同一个位置 ──────┘</code></pre>
+<p><span class="zh">对齐算法(动态规划 / profile 方法)会找"让整体最相似、gap 尽量少"的排法。对齐好之后,同一列才可比,共进化信号才读得出来。</span><span class="en">Alignment algorithms (dynamic programming / profile methods) find the arrangement that "maximizes overall similarity with as few gaps as possible". Only once aligned are columns comparable and the co-evolution signal readable.</span></p>
+
+<h2 id="s4"><span class="n">4</span><span class="zh">jackhmmer 与它搜的库</span><span class="en">jackhmmer &amp; the databases it searches</span></h2>
+<p><span class="zh">默认情况下,gget alphafold <b>自动</b>帮你找同源序列拼 MSA——用的工具就是 <b>jackhmmer</b>。</span><span class="en">By default, gget alphafold finds homologs and builds the MSA <b>automatically</b> — the tool it uses is <b>jackhmmer</b>.</span></p>
+<h3>jackhmmer</h3>
+<p><span class="zh">HMMER 软件包里的<b>迭代序列搜索</b>工具:给一条 query,它去大库里搜同源序列,并用"<b>profile HMM(概率轮廓模型)</b>"逐轮把找到的序列纳入、扩大搜索范围——比简单的 BLAST 更灵敏,能找到更远的亲戚。</span><span class="en">An <b>iterative sequence-search</b> tool in the HMMER package: given a query, it searches large databases for homologs and uses a <b>profile HMM</b> to fold found sequences back in each round, widening the search — more sensitive than a simple BLAST, catching more distant relatives.</span></p>
+<h3><span class="zh">它搜的几个库</span><span class="en">The databases it searches</span></h3>
+<table>
+  <tr><th><span class="zh">库</span><span class="en">Database</span></th><th><span class="zh">是什么</span><span class="en">What</span></th></tr>
+  <tr><td><b>UniRef90</b></td><td><span class="zh">UniProt 序列按 <b>90% 相似度聚类</b>后的代表集(去冗余、覆盖广)</span><span class="en">UniProt sequences clustered at <b>90% identity</b> (de-duplicated, broad coverage)</span></td></tr>
+  <tr><td><b>BFD / small_bfd</b></td><td><span class="zh"><b>Big Fantastic Database</b>,专为 AlphaFold 建的超大库(UniProt + 宏基因组);<code>small_bfd</code> 是精简版,省资源</span><span class="en">the <b>Big Fantastic Database</b>, a huge DB built for AlphaFold (UniProt + metagenomes); <code>small_bfd</code> is a reduced, resource-light version</span></td></tr>
+  <tr><td><b>MGnify</b></td><td><span class="zh">EBI 的<b>宏基因组</b>蛋白序列库(<code>mgy_clusters</code>);来自环境样本,提供大量"非常规"同源序列</span><span class="en">EBI's <b>metagenomics</b> protein database (<code>mgy_clusters</code>); from environmental samples, adding many "unusual" homologs</span></td></tr>
+</table>
+<div class="note"><span class="zh">三者互补,给 MSA 提供尽量<b>多样</b>的同源序列(多样性=更强的共进化信号)。代价:这些库很大,流式下载可达 <b>~2GB 临时文件</b>,是整个流程最重、最依赖网络的一段。</span><span class="en">The three complement each other, giving the MSA as <b>diverse</b> a set of homologs as possible (diversity = a stronger co-evolution signal). The cost: these databases are large — streaming them can reach <b>~2GB of temp files</b>, the heaviest, most network-dependent part of the pipeline.</span></div>
+
+<h2 id="s5"><span class="n">5</span><span class="zh">MSA 怎么存:a3m 与对齐 FASTA</span><span class="en">Storing an MSA: a3m &amp; aligned FASTA</span></h2>
+<h3><span class="zh">FASTA(与对齐 FASTA)</span><span class="en">FASTA (and aligned FASTA)</span></h3>
+<p><span class="zh"><b>FASTA</b> 是最基础的序列文本格式:每条序列一个 <code>&gt;</code> 开头的标题行 + 若干行序列字母。<b>对齐 FASTA(aligned FASTA)</b> = 里面的序列已经对齐过(等长、用 <code>-</code> 补 gap),就是一份用普通 FASTA 存的 MSA。</span><span class="en"><b>FASTA</b> is the most basic sequence text format: a <code>&gt;</code> header line + sequence lines per entry. <b>Aligned FASTA</b> = the sequences are already aligned (equal length, gaps as <code>-</code>) — an MSA stored as plain FASTA.</span></p>
+<pre><code>>query
+MKVLAAGSTKDEFGHIKLMN
+>homolog1
+MKVLAAGSTKDEF-HIKLMN   ← 对齐 FASTA：用 - 补 gap</code></pre>
+<h3>a3m</h3>
+<p><span class="zh"><b>a3m</b> 也是 MSA 格式(HHsuite/AlphaFold 常用),像 FASTA 但用<b>大小写</b>编码对齐信息:</span><span class="en"><b>a3m</b> is also an MSA format (used by HHsuite/AlphaFold), like FASTA but encoding alignment with <b>case</b>:</span></p>
+<ul>
+  <li><span class="zh"><b>大写字母 / <code>-</code></b> = 与 query 对齐的列;</span><span class="en"><b>uppercase / <code>-</code></b> = columns aligned to the query;</span></li>
+  <li><span class="zh"><b>小写字母</b> = 相对 query 的<b>插入</b>(query 在此没有对应残基)。</span><span class="en"><b>lowercase</b> = an <b>insertion</b> relative to the query (a position the query has no residue for).</span></li>
+</ul>
+<pre><code>>homolog3
+MKVefLAAGSTKDEFGHIKLMN
+    └┴─ 小写 "ef" = 两个插入字符（不占对齐列）</code></pre>
+<div class="note"><span class="zh">gget #235 接受这两种格式;a3m 的小写插入被解析成 AlphaFold 的"deletion matrix",与 AlphaFold 自己的解析一致(见<a href="../pr235-alphafold-custom-msa.html">该 PR 分析</a>)。</span><span class="en">gget #235 accepts both; a3m lowercase insertions are parsed into AlphaFold's "deletion matrix", matching AlphaFold's own parsing (see the <a href="../pr235-alphafold-custom-msa.html">PR analysis</a>).</span></div>
+
+<h2 id="s6"><span class="n">6</span><span class="zh">为什么要"自定义 MSA"</span><span class="en">Why supply a custom MSA</span></h2>
+<p><span class="zh">自动搜索省事,但会<b>混进垃圾</b>:片段、异构体、预测错误的序列……这些会稀释甚至污染共进化信号。<b>自定义 MSA</b> = 你(或懂行的人)<b>手工审编</b>一份只含高质量、真正相关同源序列的 MSA,交给 AlphaFold,以求更准的折叠。附带好处:跳过 jackhmmer 就<b>不用下那 ~2GB 库</b>,也让输入<b>确定、可复现</b>(固定 MSA vs 每次搜可能漂移的远端库)。</span><span class="en">Automatic search is convenient but pulls in <b>junk</b>: fragments, isoforms, mis-predicted sequences… which dilute or even pollute the co-evolution signal. A <b>custom MSA</b> = you (or an expert) <b>hand-curate</b> an MSA of only high-quality, genuinely-related homologs and hand it to AlphaFold for a better fold. Bonuses: skipping jackhmmer means <b>no ~2GB download</b>, and the input becomes <b>deterministic and reproducible</b> (a fixed MSA vs searching remote DBs that may drift).</span></p>
+
+<h2 id="s7"><span class="n">7</span><span class="zh">AlphaFold2 vs 3,以及为什么跑不了 CI</span><span class="en">AlphaFold2 vs 3, and the CI limit</span></h2>
+<h3><span class="zh">都 AlphaFold3 了,还用 AF2 / 还需要 MSA 吗?</span><span class="en">It's AlphaFold3 now — still AF2 / still MSAs?</span></h3>
+<ul>
+  <li><span class="zh"><b>gget 包的是 AlphaFold2</b>(v2.3.0)——完全开源、可本地无限跑;AF3 的权重/使用<b>受限</b>(网页服务器 + 用量限制,本地权重受协议约束),不适合"装了就能无限本地跑"的定位。</span><span class="en"><b>gget wraps AlphaFold2</b> (v2.3.0) — fully open, runnable locally without limits; AF3's weights/use are <b>restricted</b> (a web server with usage caps; local weights under license), not a fit for "install it and run locally without limits".</span></li>
+  <li><span class="zh"><b>AF3 一样要 MSA</b>——它也靠多序列比对提取共进化信号,所以"自定义 MSA"这个需求<b>跨版本都在</b>。大量真实流程仍用 AF2(免费、可控、可复现)。</span><span class="en"><b>AF3 still uses MSAs</b> — it also extracts the co-evolution signal from alignments, so the "custom MSA" need <b>persists across versions</b>. Many real workflows still use AF2 (free, controllable, reproducible).</span></li>
+</ul>
+<h3><span class="zh">为什么 AlphaFold 不能在 CI 里跑</span><span class="en">Why AlphaFold can't run in CI</span></h3>
+<p><span class="zh">CI(如 GitHub Actions)的机器<b>小、CPU-only、有时间/磁盘限制</b>;而跑一次 AlphaFold 需要:<b>重依赖</b>(alphafold 包、JAX、openmm、HMMER/jackhmmer 二进制)+ <b>GPU</b>(CPU 上慢到不可行)+ <b>GB 级模型参数</b> + <b>~2GB 以上的基因库</b>。这些在 CI 里装不下、跑不动、超时——所以相关 PR 的测试只能覆盖"可测的那部分"(如 MSA 解析/校验),没法端到端折叠。</span><span class="en">CI machines (e.g. GitHub Actions) are <b>small, CPU-only, time- and disk-limited</b>; a single AlphaFold run needs <b>heavy deps</b> (the alphafold package, JAX, openmm, HMMER/jackhmmer binaries) + a <b>GPU</b> (unusably slow on CPU) + <b>GB-scale model parameters</b> + <b>2GB+ of genetic databases</b>. These won't install, won't run, and time out in CI — so tests for such PRs can only cover the testable part (e.g. MSA parsing/validation), not an end-to-end fold.</span></p>
+
+<footer>
+  <span class="zh">本页由 Claude Opus 4.8 (1M context) 于 2026-07-07 SGT 整理,面向非生物背景读者的入门科普,配合对 <a href="https://github.com/scverse/gget/pull/235">gget PR #235</a>(alphafold 自定义 MSA)的分析。为便于理解做了大量简化;术语精确定义请以 <a href="https://doi.org/10.1038/s41586-021-03819-2">AlphaFold 论文</a>、<a href="http://hmmer.org/">HMMER</a>、<a href="https://www.uniprot.org/">UniProt</a> 等权威来源为准。AI 生成内容,供参考。</span>
+  <span class="en">Compiled by Claude Opus 4.8 (1M context) on 2026-07-07 SGT as an intro primer for non-biologists, accompanying the analysis of <a href="https://github.com/scverse/gget/pull/235">gget PR #235</a> (alphafold custom MSA). Heavily simplified for clarity; for precise definitions defer to authoritative sources such as the <a href="https://doi.org/10.1038/s41586-021-03819-2">AlphaFold paper</a>, <a href="http://hmmer.org/">HMMER</a>, and <a href="https://www.uniprot.org/">UniProt</a>. AI-generated, for reference.</span>
+</footer>
+
+</div>
+<script>
+  function setLang(l){
+    document.body.className = 'lang-' + l;
+    document.querySelectorAll('.langtoggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.l === l);
+    });
+  }
+</script>
+</body>
+</html>
