@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生物学基础 · 基因组浏览器与转录本 (Genome Browser &amp; transcripts)</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --ink:#e6e9ef; --muted:#9aa4b2;
+    --acc:#f5a623; --acc2:#5aa9e6; --green:#4cc38a; --red:#e5648a; --line:#2a2f3a; --code:#0b0d11;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 24px 80px}
+  header.top{position:relative;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:28px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:15px}
+  .stamp{position:absolute;top:0;right:0;font-size:12px;color:var(--muted);text-align:right}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--muted);margin:2px 4px 2px 0}
+  h2{font-size:21px;margin:38px 0 12px;padding-top:8px;border-top:1px solid var(--line);color:#fff}
+  h2 .n{color:var(--acc);font-variant-numeric:tabular-nums;margin-right:8px}
+  h3{font-size:17px;margin:22px 0 8px;color:var(--acc2)}
+  p{margin:10px 0}
+  a{color:var(--acc2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;color:#ffd9a0}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:13px;line-height:1.55}
+  pre code{background:none;border:none;padding:0;color:#d6deeb}
+  .tldr{background:linear-gradient(135deg,#1b2330,#171a21);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:16px 18px;margin:16px 0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#fff}
+  tr:nth-child(even) td{background:var(--panel)}
+  .ok{color:var(--green);font-weight:600}
+  .no{color:var(--red);font-weight:600}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc2);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .warn{background:#251c1c;border:1px solid #4a2b2b;border-left:4px solid var(--red);border-radius:8px;padding:12px 16px;margin:14px 0}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:5px 0}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:18px 0;columns:2;font-size:14px}
+  .toc a{display:block;padding:2px 0;color:var(--ink)}
+  .toc a:hover{color:var(--acc2)}
+  .muted{color:var(--muted)}
+  .primer{background:#132018;border:1px solid #26402f;border-left:4px solid var(--green);border-radius:10px;padding:14px 18px;margin:16px 0}
+  body.lang-zh .en{display:none}
+  body.lang-en .zh{display:none}
+  .langtoggle{margin-bottom:6px}
+  .langtoggle button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;margin-left:4px}
+  .langtoggle button.active{background:var(--acc2);color:#08121c;border-color:var(--acc2);font-weight:600}
+  footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body class="lang-zh">
+<div class="wrap">
+
+<header class="top">
+  <div class="stamp">
+    <div class="langtoggle">
+      <button data-l="zh" class="active" onclick="setLang('zh')">中文</button><button data-l="en" onclick="setLang('en')">EN</button>
+    </div>
+    Generated: 2026-07-08 21:44 SGT<br>by Claude Opus 4.8 (1M context)
+  </div>
+  <h1>🧬 <span class="zh">基因组浏览器与转录本</span><span class="en">Genome Browser &amp; transcripts</span></h1>
+  <div class="sub"><span class="zh">给非生物背景读者:一个基因怎么变出好多"转录本",以及 UCSC 基因组浏览器那张"好复杂的图"逐条读懂</span><span class="en">For non-biologists: how one gene yields many "transcripts", and how to read that "very busy" UCSC Genome Browser picture, track by track</span></div>
+  <div style="margin-top:10px">
+    <span class="pill">gene → transcript</span>
+    <span class="pill">splicing</span>
+    <span class="pill">UCSC tracks</span>
+    <span class="pill">gget ucsc</span>
+  </div>
+</header>
+
+<div class="primer">
+  <strong>📖 <span class="zh">一句话入门</span><span class="en">One-line primer</span></strong><br>
+  <span class="zh">一个"基因"不是只对应一个产物:细胞可以把它的零件(外显子)按不同方式拼装,得到多个"转录本"。UCSC 基因组浏览器把一段染色体上的各种信息——基因模型、变异、表达、调控、跨物种保守性——各画成一条横向"轨道",叠在同一坐标轴上。看懂这两件事,就看懂了 <code>gget ucsc</code> 背后的数据。</span>
+  <span class="en">A "gene" doesn't map to a single product: the cell can assemble its parts (exons) in different ways to make several "transcripts". The UCSC Genome Browser draws every kind of information over one chromosomal region — gene models, variants, expression, regulation, cross-species conservation — as a horizontal "track" stacked on a shared coordinate axis. Understand these two ideas and you understand the data behind <code>gget ucsc</code>.</span>
+</div>
+
+<div class="toc">
+  <a href="#s1">1 · TL;DR</a>
+  <a href="#s2">2 · 基因 → 转录本 → 蛋白</a>
+  <a href="#s3">3 · 为什么一个基因有多个转录本</a>
+  <a href="#s4">4 · 转录本的多套 ID(ENST / NM / MANE)</a>
+  <a href="#s5">5 · 基因组浏览器:轨道是什么</a>
+  <a href="#s6">6 · 逐轨道读懂那张 BRCA2 图</a>
+  <a href="#s7">7 · 连回 gget ucsc</a>
+  <a href="#s8">8 · 参考链接</a>
+</div>
+
+<div class="tldr" id="s1">
+  <strong>TL;DR:</strong>
+  <span class="zh"><b>转录本</b> = 基因经"转录 + 剪接"后得到的一条成熟 mRNA。同一基因的外显子可按不同方式拼接(<b>可变剪接</b>),所以一个基因有多个转录本、可能编码略不同的蛋白。不同数据库各自给转录本编号(Ensembl <code>ENST</code>、RefSeq <code>NM_</code>),<b>MANE</b> 从中挑一条当"代表"。<b>UCSC 基因组浏览器</b>把同一段坐标上的多类信息各画成一条<b>轨道(track)</b>:基因模型、变异、表达、调控元件、保守性……<code>gget ucsc</code> 做的,就是把这些轨道的"搜索命中"整理成一张表。</span>
+  <span class="en"><b>Transcript</b> = one mature mRNA produced from a gene via transcription + splicing. A gene's exons can be joined in different ways (<b>alternative splicing</b>), so one gene has many transcripts encoding slightly different proteins. Different databases number transcripts differently (Ensembl <code>ENST</code>, RefSeq <code>NM_</code>); <b>MANE</b> picks one "representative". The <b>UCSC Genome Browser</b> draws each kind of information over a region as a <b>track</b>: gene models, variants, expression, regulatory elements, conservation… <code>gget ucsc</code> turns those tracks' search hits into a tidy table.</span>
+</div>
+
+<h2 id="s2"><span class="n">2</span><span class="zh">基因 → 转录本 → 蛋白</span><span class="en">Gene → transcript → protein</span></h2>
+<p><span class="zh">中心法则的简版:</span><span class="en">The short version of the central dogma:</span></p>
+<pre><code>DNA(基因) --转录 transcription--> 前体 RNA --剪接 splicing--> 成熟 mRNA(= 转录本) --翻译 translation--> 蛋白
+</code></pre>
+<ul>
+  <li><span class="zh"><b>外显子(exon)</b>:基因里最终保留、拼进成熟 mRNA 的片段。</span><span class="en"><b>Exon</b>: the parts kept and joined into the mature mRNA.</span></li>
+  <li><span class="zh"><b>内含子(intron)</b>:夹在外显子之间、剪接时被切掉的片段。</span><span class="en"><b>Intron</b>: the parts between exons, cut out during splicing.</span></li>
+  <li><span class="zh"><b>转录本(transcript)</b>:一条剪接完成的成熟 mRNA。它才是"基因的一个具体版本"。</span><span class="en"><b>Transcript</b>: one finished, spliced mature mRNA — a concrete "version" of the gene.</span></li>
+  <li><span class="zh"><b>UTR / CDS</b>:转录本两端不编码蛋白的区段叫 UTR,中间编码蛋白的叫 CDS(编码序列)。在浏览器里 CDS 画成高方块、UTR 画成矮方块。</span><span class="en"><b>UTR / CDS</b>: the non-coding ends are UTRs; the protein-coding middle is the CDS. In the browser, CDS is a tall box, UTR a short box.</span></li>
+</ul>
+
+<h2 id="s3"><span class="n">3</span><span class="zh">为什么一个基因有多个转录本</span><span class="en">Why one gene has many transcripts</span></h2>
+<p><span class="zh">因为拼装方式不唯一——主要来自<b>可变剪接(alternative splicing)</b>,外加不同的起始/终止位点:</span>
+  <span class="en">Because assembly isn't unique — mainly from <b>alternative splicing</b>, plus different start/end sites:</span></p>
+<table>
+  <tr><th><span class="zh">机制</span><span class="en">Mechanism</span></th><th><span class="zh">结果</span><span class="en">Result</span></th></tr>
+  <tr><td><span class="zh">跳过某个外显子 / 保留某个内含子</span><span class="en">Skip an exon / retain an intron</span></td><td><span class="zh">转录本长度、编码的蛋白不同</span><span class="en">Different length &amp; encoded protein</span></td></tr>
+  <tr><td><span class="zh">用不同的转录起点(启动子)</span><span class="en">Alternative start (promoter)</span></td><td><span class="zh">5′ 端不同</span><span class="en">Different 5′ end</span></td></tr>
+  <tr><td><span class="zh">用不同的终止/加尾位点</span><span class="en">Alternative poly-A site</span></td><td><span class="zh">3′ 端不同</span><span class="en">Different 3′ end</span></td></tr>
+</table>
+<div class="note"><span class="zh">这就是为什么在 <code>gget ucsc("BRCA2")</code> 里,<code>knownGene</code> 轨道会返回 <b>44 条</b> match——BRCA2 在 GENCODE 里被注释了 44 个转录本异构体(isoform)。它们共享大部分外显子,但拼法/两端各有差异。</span>
+  <span class="en">This is why <code>gget ucsc("BRCA2")</code> returns <b>44</b> matches from the <code>knownGene</code> track — BRCA2 is annotated with 44 transcript isoforms in GENCODE. They share most exons but differ in splicing/ends.</span></div>
+
+<h2 id="s4"><span class="n">4</span><span class="zh">转录本的多套 ID(为什么"看起来无规律")</span><span class="en">Multiple ID systems for transcripts</span></h2>
+<p><span class="zh">同一个转录本,在不同数据库里有不同编号。<code>gget ucsc</code> 的 <code>ucsc_id</code> 只是把命中轨道的原生 ID 原样带出来:</span>
+  <span class="en">The same transcript has different IDs in different databases. The <code>ucsc_id</code> field just carries each track's native ID verbatim:</span></p>
+<table>
+  <tr><th>ID</th><th><span class="zh">体系 / 出处</span><span class="en">System / source</span></th></tr>
+  <tr><td><code>ENST00000380152.8</code></td><td><span class="zh">Ensembl/GENCODE 转录本(<code>ENST</code>+数字<code>.版本</code>)</span><span class="en">Ensembl/GENCODE transcript</span></td></tr>
+  <tr><td><code>NM_000059.4</code></td><td><span class="zh">RefSeq(NCBI)mRNA</span><span class="en">RefSeq (NCBI) mRNA</span></td></tr>
+  <tr><td><code>HGNC:1101</code></td><td><span class="zh">HGNC 基因编号(注:这是<b>基因</b>级,非转录本)</span><span class="en">HGNC gene ID (note: gene-level, not a transcript)</span></td></tr>
+</table>
+<div class="note"><span class="zh"><b>MANE</b>(Matched Annotation from NCBI and EMBL-EBI):NCBI 与 Ensembl 共同为每个基因<b>钦定一条</b>代表转录本,且让它的 RefSeq 与 Ensembl 编号<b>精确对应同一条序列</b>。所以浏览器里 MANE 轨道只有一条,标签常写成 <code>BRCA2 (NM_000059.4 / ENST00000380152.8)</code>——同一转录本的两套编号并列。</span>
+  <span class="en"><b>MANE</b> (Matched Annotation from NCBI and EMBL-EBI): NCBI and Ensembl jointly pick <b>one</b> representative transcript per gene, with matching RefSeq and Ensembl IDs for the same sequence. So the MANE track has a single entry, often labelled <code>BRCA2 (NM_000059.4 / ENST00000380152.8)</code> — the two IDs for one transcript, side by side.</span></div>
+
+<h2 id="s5"><span class="n">5</span><span class="zh">基因组浏览器:轨道是什么</span><span class="en">The Genome Browser: what a track is</span></h2>
+<p><span class="zh">把染色体坐标当成一条横轴(图上方的尺子)。<b>每一类信息各画成一条横向的"轨道(track)",上下叠放,共享这条横轴</b>。你在某个位置往下看,就是"这个位置上,各类注释分别说了什么"。基因模型轨道里:</span>
+  <span class="en">Treat chromosomal coordinates as a horizontal axis (the ruler at top). <b>Each kind of information is drawn as a horizontal "track", stacked vertically, sharing that axis.</b> Reading down a position tells you "what every annotation says here." In a gene-model track:</span></p>
+<ul>
+  <li><span class="zh"><b>每条横线 = 一个转录本</b>;<b>方块 = 外显子</b>(高=CDS,矮=UTR),<b>细线 = 内含子</b>,线上的<b>小箭头 = 转录方向</b>(链的正负)。</span>
+    <span class="en"><b>Each line = one transcript</b>; <b>boxes = exons</b> (tall=CDS, short=UTR); <b>thin line = introns</b>; <b>arrows = direction of transcription</b> (strand).</span></li>
+</ul>
+
+<h2 id="s6"><span class="n">6</span><span class="zh">逐轨道读懂那张 BRCA2 图</span><span class="en">Reading the BRCA2 view, track by track</span></h2>
+<p><span class="zh">下面这些行,都是对<b>同一段 chr13(约 84.7 kb)</b>的不同注释,自上而下:</span>
+  <span class="en">These rows all annotate the <b>same chr13 region (~84.7 kb)</b>, top to bottom:</span></p>
+<table>
+  <tr><th><span class="zh">轨道</span><span class="en">Track</span></th><th><span class="zh">是什么 / 怎么看</span><span class="en">What it is / how to read</span></th></tr>
+  <tr><td><span class="zh">尺 + 染色体条带</span><span class="en">Scale + ideogram</span></td><td><span class="zh">坐标尺(20 kb 比例尺)+ chr13 全貌,红线=当前位置(q13.1)</span><span class="en">Coordinate ruler + chr13 overview; red mark = current locus</span></td></tr>
+  <tr><td><b>GENCODE V49</b></td><td><span class="zh">主基因模型:BRCA2 的多条转录本(每线一条,方块=外显子)</span><span class="en">Main gene model: BRCA2's many transcripts (one line each, boxes=exons)</span></td></tr>
+  <tr><td><b>RefSeq Curated</b></td><td><span class="zh">NCBI 的另一套基因模型(来源不同,可交叉印证)</span><span class="en">NCBI's gene models (a second, cross-checkable source)</span></td></tr>
+  <tr><td><b>MANE Select</b></td><td><span class="zh">每基因一条"代表"转录本(见 §4)</span><span class="en">The one representative transcript per gene (see §4)</span></td></tr>
+  <tr><td><span class="zh">OMIM Alleles</span><span class="en">OMIM Alleles</span></td><td><span class="zh">OMIM 收录的<b>致病变异位点</b>(绿竖线),每条=一个已知变异</span><span class="en">Disease-associated variants from OMIM (green ticks)</span></td></tr>
+  <tr><td><span class="zh">OMIM Genes</span><span class="en">OMIM Genes</span></td><td><span class="zh">该基因是否有 OMIM 表型(深绿=可能致病)</span><span class="en">Whether the gene has an OMIM phenotype (dark green = possibly disease-causing)</span></td></tr>
+  <tr><td><b>Common dbSNP(155)</b></td><td><span class="zh">dbSNP 里的<b>常见遗传变异(SNP)</b>,每根竖线=一个已知 SNP 位点</span><span class="en">Common variants (SNPs) from dbSNP; each tick = a known SNP</span></td></tr>
+  <tr><td><span class="zh">BRCA2 (GTEx)</span><span class="en">BRCA2 (GTEx)</span></td><td><span class="zh">该基因在 <b>54 种组织的表达量</b>(RNA-seq 柱状图,越高越强)</span><span class="en">Expression across 54 tissues (RNA-seq bars; taller = higher)</span></td></tr>
+  <tr><td><b>ENCODE4 cCREs</b></td><td><span class="zh">候选<b>顺式调控元件</b>(启动子/增强子等,彩色小块)</span><span class="en">Candidate cis-regulatory elements (promoters/enhancers; colored blocks)</span></td></tr>
+  <tr><td><b>Layered H3K27Ac</b></td><td><span class="zh">组蛋白修饰信号,<b>标记活跃调控区/增强子</b>(峰越高越活跃)</span><span class="en">Histone mark flagging active regulatory regions/enhancers (higher = more active)</span></td></tr>
+  <tr><td><b>Cons 100 Verts (PhyloP)</b></td><td><span class="zh"><b>100 种脊椎动物的碱基保守性</b>;峰=高度保守(常有功能)</span><span class="en">Base-wise conservation across 100 vertebrates; peaks = highly conserved (often functional)</span></td></tr>
+  <tr><td><b>Multiz Alignments</b></td><td><span class="zh">与恒河猴/小鼠/狗/象/鸡/爪蟾/斑马鱼的<b>跨物种比对</b>;黑=能对齐(保守),空=对不上</span><span class="en">Cross-species alignment (rhesus/mouse/dog/…); black = aligned/conserved, gaps = not aligned</span></td></tr>
+</table>
+<div class="note"><span class="zh"><b>一句话归纳:</b>最上面几条(GENCODE/RefSeq/MANE)是"基因长什么样";中间几条(OMIM/dbSNP)是"哪里有变异/疾病";下面几条(GTEx/cCRE/H3K27Ac/PhyloP/Multiz)是"哪里在表达、哪里是调控开关、哪里跨物种保守"。</span>
+  <span class="en"><b>In one line:</b> the top rows (GENCODE/RefSeq/MANE) are "what the gene looks like"; the middle (OMIM/dbSNP) are "where the variants/disease are"; the bottom (GTEx/cCRE/H3K27Ac/PhyloP/Multiz) are "where it's expressed, where the regulatory switches are, and what's conserved across species."</span></div>
+
+<h2 id="s7"><span class="n">7</span><span class="zh">连回 gget ucsc</span><span class="en">Back to gget ucsc</span></h2>
+<p><span class="zh"><code>gget ucsc("BRCA2")</code> 打的是 UCSC 的 <code>/search</code> API。它在<b>多条轨道</b>里搜这个词,返回时按轨道分组(<code>positionMatches</code>)。模块把每条命中<b>展平成一行</b>:</span>
+  <span class="en"><code>gget ucsc("BRCA2")</code> hits UCSC's <code>/search</code> API. It searches <b>many tracks</b> and returns matches grouped by track (<code>positionMatches</code>). The module flattens each hit to one row:</span></p>
+<pre><code>track      ucsc_id             chrom  start      end        name
+knownGene  ENST00000380152.8   chr13  32315508   32400268   BRCA2 (ENST00000380152.8)
+hgnc       HGNC:1101           chr13  32315086   32400268   BRCA2
+mane       ENST00000380152.8   chr13  32315508   32400268   BRCA2 (NM_000059.4 / ENST00000380152.8)
+...</code></pre>
+<p><span class="zh">所以浏览器里那一条条<b>轨道</b>,对应 API 里的 <b>track group</b>,再对应 DataFrame 里的 <code>track</code> 列。常见基因命中几十条轨道(BRCA2 约 46 组),所以不加过滤会返回很多行——用 <code>track</code>/<code>limit</code> 收窄。</span>
+  <span class="en">So each browser <b>track</b> corresponds to an API <b>track group</b>, which becomes the <code>track</code> column in the DataFrame. Common genes hit dozens of tracks (~46 for BRCA2), so filter with <code>track</code>/<code>limit</code>.</span></p>
+
+<h2 id="s8"><span class="n">8</span><span class="zh">参考链接</span><span class="en">References</span></h2>
+<ul>
+  <li><span class="zh">UCSC 浏览器(BRCA2 示例)</span><span class="en">UCSC Browser (BRCA2 example)</span>: <a href="https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=chr13:32315508-32400268">hgTracks?db=hg38&amp;position=chr13:32315508-32400268</a></li>
+  <li><span class="zh">UCSC REST API</span><span class="en">UCSC REST API</span>: <a href="https://genome.ucsc.edu/goldenPath/help/api.html">genome.ucsc.edu/goldenPath/help/api.html</a></li>
+  <li>MANE: <a href="https://www.ncbi.nlm.nih.gov/refseq/MANE/">ncbi.nlm.nih.gov/refseq/MANE</a></li>
+  <li>GENCODE: <a href="https://www.gencodegenes.org/">gencodegenes.org</a> · Ensembl <a href="https://www.ensembl.org/">ensembl.org</a></li>
+  <li><span class="zh">相关基础页</span><span class="en">Related basics</span>: <a href="./reference-genomics.html">参考基因组学入门 / Reference genomics</a></li>
+</ul>
+
+<footer>
+  <span class="zh">本页由 Claude Opus 4.8 (1M context) 于 2026-07-08 21:44 SGT 整理,面向非生物背景读者的科普。为清晰做了适度简化(如剪接、调控的细节远比此丰富);以专业教材/官方文档为准。</span>
+  <span class="en">Compiled by Claude Opus 4.8 (1M context) at 2026-07-08 21:44 SGT as a primer for non-biologists. Simplified for clarity (splicing and regulation are far richer than shown); defer to textbooks/official docs for rigor.</span>
+</footer>
+
+</div>
+<script>
+  function setLang(l){
+    document.body.className = 'lang-' + l;
+    document.querySelectorAll('.langtoggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.l === l);
+    });
+  }
+</script>
+</body>
+</html>
