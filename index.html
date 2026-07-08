@@ -31,6 +31,11 @@
     每份报告用 <a href="https://github.com/Elarwei001/personal-skills/tree/master/gget-issue-analysis"><code>gget-issue-analysis</code></a> skill 生成：自包含 HTML、开头有面向非生物背景读者的背景科普，随后覆盖「解决什么问题 / 价值 / 数据结构详解 / 如何解决 / 是否契合 gget 平台角色（四 lens 评估）/ live data test 设计 / 当前状态」。较新报告默认双语（中/EN，右上角切换）。
   </div>
 
+  <a class="card" href="./pr233-ucsc.html">
+    <div class="t">gget ucsc<span class="pr">PR #233</span></div>
+    <div class="d">新模块：包装 UCSC 官方文档化的 <code>/search</code> REST 端点，把「基因名/词条 → UCSC ID + 基因组位置（按轨道分组）」整理成 DataFrame/json，类比 <code>gget search</code>。真机探针证实端点/结构吻合、quirk（URL 编码 ID、HTML 实体）处理正确；含引用顺序 / 缺西语页 / 坏 genome 报错被吞 / 缺 live 测试等评审发现。</div>
+  </a>
+
   <a class="card" href="./pr235-alphafold-custom-msa.html">
     <div class="t">gget alphafold<span class="pr">PR #235</span></div>
     <div class="d">给 alphafold 加 <code>msa</code> 参数：传自定义 MSA、跳过 jackhmmer 搜索（免下 ~2GB 基因库）。a3m 解析忠实复现 AlphaFold 原算法、改善可复现性；含 pre-commit 红的根因（一处 mypy 类型收窄）。</div>

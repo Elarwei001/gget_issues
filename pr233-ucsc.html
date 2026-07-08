@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>gget ucsc (PR #233) — 概览</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --ink:#e6e9ef; --muted:#9aa4b2;
+    --acc:#f5a623; --acc2:#5aa9e6; --green:#4cc38a; --red:#e5648a; --line:#2a2f3a; --code:#0b0d11;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 24px 80px}
+  header.top{position:relative;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:28px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:15px}
+  .stamp{position:absolute;top:0;right:0;font-size:12px;color:var(--muted);text-align:right}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--muted);margin:2px 4px 2px 0}
+  h2{font-size:21px;margin:38px 0 12px;padding-top:8px;border-top:1px solid var(--line);color:#fff}
+  h2 .n{color:var(--acc);font-variant-numeric:tabular-nums;margin-right:8px}
+  h3{font-size:17px;margin:22px 0 8px;color:var(--acc2)}
+  p{margin:10px 0}
+  a{color:var(--acc2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;color:#ffd9a0}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:13px;line-height:1.55}
+  pre code{background:none;border:none;padding:0;color:#d6deeb}
+  .tldr{background:linear-gradient(135deg,#1b2330,#171a21);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:16px 18px;margin:16px 0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#fff}
+  tr:nth-child(even) td{background:var(--panel)}
+  .ok{color:var(--green);font-weight:600}
+  .no{color:var(--red);font-weight:600}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc2);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .warn{background:#251c1c;border:1px solid #4a2b2b;border-left:4px solid var(--red);border-radius:8px;padding:12px 16px;margin:14px 0}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:5px 0}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:18px 0;columns:2;font-size:14px}
+  .toc a{display:block;padding:2px 0;color:var(--ink)}
+  .toc a:hover{color:var(--acc2)}
+  .muted{color:var(--muted)}
+  .primer{background:#132018;border:1px solid #26402f;border-left:4px solid var(--green);border-radius:10px;padding:14px 18px;margin:16px 0}
+  body.lang-zh .en{display:none}
+  body.lang-en .zh{display:none}
+  .langtoggle{margin-bottom:6px}
+  .langtoggle button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;margin-left:4px}
+  .langtoggle button.active{background:var(--acc2);color:#08121c;border-color:var(--acc2);font-weight:600}
+  footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body class="lang-zh">
+<div class="wrap">
+
+<header class="top">
+  <div class="stamp">
+    <div class="langtoggle">
+      <button data-l="zh" class="active" onclick="setLang('zh')">中文</button><button data-l="en" onclick="setLang('en')">EN</button>
+    </div>
+    Generated: 2026-07-08 20:53 SGT<br>by Claude Opus 4.8 (1M context)
+  </div>
+  <h1>🧬 <span class="zh">gget ucsc — 从 UCSC 基因组浏览器查 ID</span><span class="en">gget ucsc — fetching UCSC Genome Browser IDs</span></h1>
+  <div class="sub"><span class="zh">PR #233 分析:一个类比 <code>gget search</code> 的新模块,健壮性与平台契合度评估</span><span class="en">PR #233 review: a new module analogous to <code>gget search</code> — soundness &amp; platform-fit assessment</span></div>
+  <div style="margin-top:10px">
+    <span class="pill">PR: scverse/gget#233</span>
+    <span class="pill">Issue: #18</span>
+    <span class="pill">New module</span>
+    <span class="pill">+515 / −0</span>
+    <span class="pill">author: Elarwei001</span>
+  </div>
+</header>
+
+<div class="primer">
+  <strong>📖 <span class="zh">背景科普</span><span class="en">Primer</span> · UCSC Genome Browser</strong><br>
+  <span class="zh">UCSC 基因组浏览器是加州大学圣克鲁兹分校维护的一个经典基因组数据库/可视化平台(2002 年起),把一个基因组上的各种注释("轨道 track",如已知基因、转录本、变异等)叠在坐标轴上供人查看。研究者常需要:给一个基因名(如 BRCA2),拿到它在 UCSC 里的标识符(如某转录本 ID)和它在染色体上的位置。这正是 issue #18 想要的——像 Ensembl 的 <code>gget search</code> 那样,但查 UCSC。</span>
+  <span class="en">The UCSC Genome Browser (UC Santa Cruz, since 2002) is a classic genome database / visualization platform that stacks many annotations ("tracks" — known genes, transcripts, variants, …) along genomic coordinates. A common need: give a gene name (e.g. BRCA2) and get back its UCSC identifiers (e.g. a transcript ID) and chromosomal position. That is exactly what issue #18 asked for — like Ensembl's <code>gget search</code>, but for UCSC.</span>
+  <div class="muted" style="margin-top:6px">🔗 <a href="https://genome.ucsc.edu/">genome.ucsc.edu</a> · <a href="https://genome.ucsc.edu/goldenPath/help/api.html">UCSC REST API help</a></div>
+</div>
+
+<div class="toc">
+  <a href="#s1">1 · TL;DR</a>
+  <a href="#s2">2 · 背景 / 问题 (issue #18)</a>
+  <a href="#s3">3 · 上游数据源:UCSC /search API</a>
+  <a href="#s4">4 · 响应结构 & 返回值形态</a>
+  <a href="#s5">5 · 如何使用</a>
+  <a href="#s6">6 · Scope / 边界</a>
+  <a href="#s7">7 · 评估(四 lens)</a>
+  <a href="#s8">8 · 实证探针结果</a>
+  <a href="#s9">9 · 测试</a>
+  <a href="#s10">10 · 可改进项(可执行)</a>
+  <a href="#s11">11 · 参考链接</a>
+</div>
+
+<div class="tldr" id="s1">
+  <strong>TL;DR:</strong>
+  <span class="zh">一个扎实、契合 gget 角色的新模块。它包装 UCSC <b>官方文档化的</b> <code>/search</code> REST 端点,把"基因名/词条 → 匹配的 UCSC ID + 基因组位置(按轨道分组)"整理成 DataFrame/json。我对真实 API 做了探针:端点真实、返回结构与代码假设<b>逐字吻合</b>,且作者正确处理了两个真实 quirk(URL 编码的 ID、HTML 实体)。核心正确、可复现、维护成本低。<b>待改</b>:①文档引用顺序(应 UCSC 在前、gget 在后)②updates.md 不该带 issue 链接 ③缺西语页 ④坏 genome(HTTP 400)时把 UCSC 的有用报错吞成了"稍后再试" ⑤缺一个打真实 API 的 live 测试。均为易修的收尾项,不动核心。</span>
+  <span class="en">A solid, on-role new module. It wraps UCSC's <b>officially documented</b> <code>/search</code> REST endpoint and turns "gene name/term → matching UCSC IDs + genomic positions (grouped by track)" into a DataFrame/json. I probed the live API: the endpoint is real, the response schema matches the code's assumptions <b>exactly</b>, and the author correctly handles two real quirks (URL-encoded IDs, HTML entities). The core is correct, reproducible, and low-maintenance. <b>To fix</b>: (1) doc citation order (UCSC before gget), (2) drop the issue link from updates.md, (3) add the Spanish page, (4) on a bad genome (HTTP 400) the useful UCSC error is swallowed into "try again later", (5) no live test hitting the real API. All are easy finishing touches that don't touch the core.</span>
+</div>
+
+<h2 id="s2"><span class="n">2</span><span class="zh">背景 / 问题(issue #18)</span><span class="en">Background / the problem (issue #18)</span></h2>
+<p><span class="zh"><a href="https://github.com/scverse/gget/issues/18">Issue #18</a>(Joaodemeirelles,2022)提出:做一个"像 <code>gget search</code> 但查 UCSC ID"的功能。他当年的做法是手动请求 <code>hgGene?hgg_gene={ucsc_id}&db=hg19</code>,并附了 UCSC API 文档链接。底层诉求:给一个基因/词条,拿到 UCSC 的标识符和位置。</span>
+  <span class="en"><a href="https://github.com/scverse/gget/issues/18">Issue #18</a> (Joaodemeirelles, 2022) asked for a feature "like <code>gget search</code> but for UCSC IDs". His workaround at the time was a manual request to <code>hgGene?hgg_gene={ucsc_id}&db=hg19</code>, and he linked the UCSC API docs. The underlying need: given a gene/term, get UCSC's identifiers and positions.</span></p>
+<div class="note"><span class="zh">PR #233 由 <b>Elarwei001</b> 提交,基于 <code>dev</code> 分支,新增 9 个文件(+515 行)。这是一次<b>自评审</b>。</span><span class="en">PR #233 is by <b>Elarwei001</b>, based on <code>dev</code>, adding 9 files (+515 lines). This is a self-review.</span></div>
+
+<h2 id="s3"><span class="n">3</span><span class="zh">上游数据源:UCSC <code>/search</code> API</span><span class="en">Upstream: the UCSC <code>/search</code> API</span></h2>
+<p><span class="zh">模块打的是 UCSC 官方 REST API 的 <code>/search</code> 端点,而不是 issue 里那个老的 <code>hgGene</code> CGI。关键事实:</span>
+  <span class="en">The module hits the <code>/search</code> endpoint of UCSC's official REST API — not the old <code>hgGene</code> CGI from the issue. Key facts:</span></p>
+<table>
+  <tr><th><span class="zh">属性</span><span class="en">Property</span></th><th><span class="zh">值(探针实测)</span><span class="en">Value (probed)</span></th></tr>
+  <tr><td>Endpoint</td><td><code>https://api.genome.ucsc.edu/search?search=&lt;term&gt;&amp;genome=&lt;genome&gt;</code></td></tr>
+  <tr><td><span class="zh">是否官方文档化</span><span class="en">Officially documented?</span></td><td><span class="ok">✔</span> <span class="zh">是——出现在 API help 页(<code>/search</code> 被提及 14 次),与 <code>/list</code>、<code>/getData</code> 并列</span><span class="en">Yes — appears in the API help page (<code>/search</code> mentioned 14×), alongside <code>/list</code>, <code>/getData</code></span></td></tr>
+  <tr><td><span class="zh">数据类型</span><span class="en">Data type</span></td><td><span class="zh">查询式(活库),非静态 blob → 像 <code>gget search</code>/<code>info</code> 那类</span><span class="en">Query-style (live), not a static blob → like <code>gget search</code>/<code>info</code></span></td></tr>
+  <tr><td><span class="zh">鉴权 / 限流</span><span class="en">Auth / rate limit</span></td><td><span class="zh">无鉴权;公开 API(有礼貌使用约定)</span><span class="en">No auth; public API (fair-use expected)</span></td></tr>
+  <tr><td><span class="zh">托管稳定性</span><span class="en">Hosting</span></td><td><span class="zh">机构级(UCSC 官方),非个人目录</span><span class="en">Institutional (official UCSC), not a personal dir</span></td></tr>
+</table>
+<div class="note"><span class="zh">这是个<b>好信号</b>:官方 + 文档化 + 机构托管 → 维护风险低、不会像硬编码镜像那样腐烂。issue 里的老 <code>hgGene</code> CGI 反而是更脆的路子,作者换成了正规 REST API,是对的。</span><span class="en">This is a <b>good sign</b>: official + documented + institutionally hosted → low maintenance risk, won't rot like a hardcoded mirror. The old <code>hgGene</code> CGI in the issue is the more brittle route; switching to the proper REST API was the right call.</span></div>
+
+<h2 id="s4"><span class="n">4</span><span class="zh">响应结构 & 返回值形态</span><span class="en">Response structure &amp; return shape</span></h2>
+<p><span class="zh"><code>/search</code> 返回一个 JSON,核心是 <code>positionMatches</code>:一个数组,每个元素是一个<b>轨道分组</b>(track group),组内有 <code>matches</code> 数组。模块把它<b>展平</b>成一行一个 match。下面是实测(BRCA2/hg38)结构:</span>
+  <span class="en"><code>/search</code> returns JSON whose core is <code>positionMatches</code>: an array where each element is a <b>track group</b> with a <code>matches</code> array. The module <b>flattens</b> it to one row per match. Probed structure (BRCA2/hg38):</span></p>
+<pre><code>positionMatches: [                     # 46 track groups for BRCA2/hg38
+  { name, trackName:"knownGene", description, vis,
+    matches: [
+      { position:"chr13:32315508-32400268",
+        hgFindMatches:"ENST00000380152.8",   # ← ucsc_id (may be URL-encoded, e.g. HGNC%3A1101)
+        posName:"BRCA2 (NM_000059.4 &#x2F; ENST00000380152.8)",  # ← HTML entities
+        description:"...", canonical, highlight } ] } , ... ]</code></pre>
+<p><span class="zh">映射到返回的 DataFrame(每行一个 match,列如下):</span><span class="en">Mapped to the returned DataFrame (one row per match):</span></p>
+<table>
+  <tr><th>Column</th><th><span class="zh">来源 → 含义</span><span class="en">Source → meaning</span></th></tr>
+  <tr><td><code>track</code></td><td><span class="zh"><code>trackName</code> —— 匹配来自哪个轨道(knownGene / hgnc / mane …)</span><span class="en"><code>trackName</code> — which track the match came from</span></td></tr>
+  <tr><td><code>ucsc_id</code></td><td><span class="zh"><code>hgFindMatches</code>,经 <code>unquote</code> 解 URL 编码 → 如 <code>HGNC:1101</code>、<code>ENST00000380152.8</code></span><span class="en"><code>hgFindMatches</code>, URL-decoded via <code>unquote</code> → e.g. <code>HGNC:1101</code></span></td></tr>
+  <tr><td><code>chrom / start / end</code></td><td><span class="zh"><code>position</code> 拆解:<code>chr13:32315508-32400268</code> → <code>chr13</code>, <code>32315508</code>, <code>32400268</code>(去逗号、转 int)</span><span class="en">split from <code>position</code> (commas stripped, ints)</span></td></tr>
+  <tr><td><code>name</code></td><td><span class="zh"><code>posName</code>,经 <code>html.unescape</code>(把 <code>&amp;#x2F;</code> 还原成 <code>/</code>)</span><span class="en"><code>posName</code>, <code>html.unescape</code>d</span></td></tr>
+  <tr><td><code>description</code></td><td><span class="zh">match 的 <code>description</code>,缺失时回退到组的 <code>description</code>;同样 <code>html.unescape</code></span><span class="en">match <code>description</code>, falling back to the group's; also unescaped</span></td></tr>
+</table>
+<div class="note"><span class="zh"><b>gget 化到位</b>:异构嵌套 JSON → 扁平、带清晰列名的 DataFrame(或 <code>json=True</code> 时给 list[dict])。这正是 gget 的价值:把数据源"统一成可访问的接口"。</span><span class="en"><b>Well gget-ified</b>: heterogeneous nested JSON → a flat, clearly-named DataFrame (or list[dict] with <code>json=True</code>). Exactly gget's value: a uniform, accessible interface over the source.</span></div>
+
+<h2 id="s5"><span class="n">5</span><span class="zh">如何使用</span><span class="en">How to use</span></h2>
+<pre><code># CLI
+gget ucsc BRCA2 --genome hg38 --track knownGene --limit 10</code></pre>
+<pre><code># Python
+import gget
+gget.ucsc("BRCA2", genome="hg38", track="knownGene", limit=10)   # → DataFrame
+gget.ucsc("BRCA2", json=True)                                    # → list[dict]</code></pre>
+<table>
+  <tr><th><span class="zh">参数</span><span class="en">Arg</span></th><th><span class="zh">作用</span><span class="en">Effect</span></th></tr>
+  <tr><td><code>search_term</code></td><td><span class="zh">基因符号 / accession / 自由词条(必填,空则报 ValueError)</span><span class="en">gene symbol / accession / free text (required; empty → ValueError)</span></td></tr>
+  <tr><td><code>genome</code></td><td><span class="zh">装配版本,默认 <code>hg38</code>(也可 <code>hg19</code>、<code>mm39</code> …)</span><span class="en">assembly, default <code>hg38</code></span></td></tr>
+  <tr><td><code>track</code></td><td><span class="zh">按轨道名<b>子串</b>过滤(不分大小写),如只要 <code>knownGene</code></span><span class="en">filter by track-name substring (case-insensitive)</span></td></tr>
+  <tr><td><code>limit</code></td><td><span class="zh">最多返回几行(展平后截取)</span><span class="en">max rows (after flattening)</span></td></tr>
+  <tr><td><code>save / json</code></td><td><span class="zh">存 csv/json;或返回 list[dict]。CLI 用 <code>-o</code> 指定路径</span><span class="en">save csv/json; or return list[dict]. CLI uses <code>-o</code></span></td></tr>
+</table>
+<div class="warn"><span class="zh"><b>注意默认返回量大</b>:BRCA2/hg38 无过滤会返回 <b>46 个轨道组</b>(其中 knownGene 就有 44 条转录本),合计几十上百行。<code>track</code>/<code>limit</code> 就是为此准备的——文档里最好明确提示这一点。</span><span class="en"><b>Default result set is large</b>: BRCA2/hg38 unfiltered returns <b>46 track groups</b> (knownGene alone has 44 transcripts) — dozens-to-hundreds of rows. <code>track</code>/<code>limit</code> exist precisely for this; the docs should call it out.</span></div>
+
+<h2 id="s6"><span class="n">6</span><span class="zh">Scope / 边界</span><span class="en">Scope</span></h2>
+<ul>
+  <li><span class="ok zh">做:</span><span class="ok en">Does:</span> <span class="zh">词条 → UCSC 标识符 + 位置,按轨道分组,DataFrame/json 化,支持 genome/track/limit 过滤。</span><span class="en">term → UCSC IDs + positions, grouped by track, as DataFrame/json, with genome/track/limit filtering.</span></li>
+  <li><span class="no zh">不做:</span><span class="no en">Doesn't:</span> <span class="zh">不取序列、不做基因组分析、不解析轨道数据本身——那些是 <code>getData</code> 端点或别的工具的事。刻意保持在"数据访问"这一层。</span><span class="en">no sequence retrieval, no genomic analysis, no parsing of track data itself — that's the <code>getData</code> endpoint / other tools. Deliberately stays at the "data access" layer.</span></li>
+</ul>
+
+<h2 id="s7"><span class="n">7</span><span class="zh">评估(四 lens)</span><span class="en">Assessment (four lenses)</span></h2>
+<table>
+  <tr><th>Lens</th><th><span class="zh">判断</span><span class="en">Verdict</span></th><th><span class="zh">依据</span><span class="en">Basis</span></th></tr>
+  <tr><td><span class="zh">Soundness(正确/健壮)</span><span class="en">Soundness</span></td><td class="ok"><span class="zh">强</span><span class="en">Strong</span></td><td><span class="zh">解析与真实响应逐字吻合;正确处理 URL 编码 + HTML 实体两个 quirk;无匹配 → None。<b>一处小瑕疵</b>:坏 genome(400)吞掉了 UCSC 的报错(见 §8/§10)。</span><span class="en">Parsing matches the real response exactly; handles the URL-encode + HTML-entity quirks; no-match → None. <b>One minor flaw</b>: bad genome (400) swallows UCSC's error (§8/§10).</span></td></tr>
+  <tr><td><span class="zh">平台契合度</span><span class="en">Platform fit</span></td><td class="ok">PASS</td><td><span class="zh">纯数据<b>访问</b>(查询→标识符),不越界做分析;类比 <code>gget search</code>;直接满足 4 年前的 #18。契合无疑。</span><span class="en">Pure data <b>access</b> (query→identifiers), no analysis overreach; mirrors <code>gget search</code>; directly serves a 4-year-old request. Clear fit.</span></td></tr>
+  <tr><td><span class="zh">可复现性</span><span class="en">Reproducibility</span></td><td><span class="zh"><b>较好</b></span><span class="en"><b>Good</b></span></td><td><span class="zh">官方文档化端点 → 稳定、确定。<b>但</b>结果依赖活数据(位置/ID 随装配更新会变),且<b>没有</b>打真实 API 的 live 测试来抓上游漂移。</span><span class="en">Documented endpoint → stable, deterministic. <b>But</b> results depend on live data (positions/IDs shift with assembly updates), and there's <b>no</b> live test hitting the real API to catch upstream drift.</span></td></tr>
+  <tr><td><span class="zh">维护成本</span><span class="en">Maintenance</span></td><td class="ok"><span class="zh">低</span><span class="en">Low</span></td><td><span class="zh">单个官方端点,无爬虫、无硬编码镜像。主要风险(API 变更)可用一个 live 测试提前预警。</span><span class="en">Single official endpoint, no scraping, no hardcoded mirror. The main risk (API change) can be caught early by a live test.</span></td></tr>
+</table>
+<p><span class="zh"><b>总评</b>:科学、契合 gget 角色、价值/成本划算。核心正确且已对真实 API 验证。剩下的都是收尾:文档约定 + 一处错误提示打磨 + 一个 live 测试。<b>建议:按 §10 修完即可合并。</b></span>
+  <span class="en"><b>Overall</b>: sound, on-role, worthwhile. The core is correct and verified against the live API. What remains are finishing touches: doc conventions + one error-message polish + a live test. <b>Recommendation: address §10, then good to merge.</b></span></p>
+
+<h2 id="s8"><span class="n">8</span><span class="zh">实证探针结果</span><span class="en">Live-probe results</span></h2>
+<p><span class="zh">我对真实 API 做了正/负向探针(2026-07-08):</span><span class="en">I probed the live API, positive and negative (2026-07-08):</span></p>
+<table>
+  <tr><th><span class="zh">探针</span><span class="en">Probe</span></th><th><span class="zh">结果</span><span class="en">Result</span></th><th><span class="zh">代码是否处理正确</span><span class="en">Handled correctly?</span></th></tr>
+  <tr><td>BRCA2 / hg38</td><td><span class="zh">HTTP 200,46 组;字段 <code>trackName/position/hgFindMatches/posName/description</code> 全部存在</span><span class="en">HTTP 200, 46 groups; all assumed fields present</span></td><td class="ok">✔</td></tr>
+  <tr><td><span class="zh">HGNC 匹配</span><span class="en">HGNC match</span></td><td><code>hgFindMatches:"HGNC%3A1101"</code></td><td class="ok"><span class="zh">✔ <code>unquote</code> → <code>HGNC:1101</code></span><span class="en">✔ <code>unquote</code> → <code>HGNC:1101</code></span></td></tr>
+  <tr><td><span class="zh">含 HTML 实体</span><span class="en">HTML entity</span></td><td><code>posName:"...&amp;#x2F;..."</code></td><td class="ok"><span class="zh">✔ <code>html.unescape</code> → <code>/</code></span><span class="en">✔ <code>html.unescape</code> → <code>/</code></span></td></tr>
+  <tr><td><span class="zh">无匹配词</span><span class="en">No-match term</span></td><td><span class="zh">200,响应<b>无</b> <code>positionMatches</code> 键</span><span class="en">200, response has <b>no</b> <code>positionMatches</code> key</span></td><td class="ok"><span class="zh">✔ <code>.get(...,[])</code> → None + warning</span><span class="en">✔ <code>.get(...,[])</code> → None + warning</span></td></tr>
+  <tr><td><span class="zh">坏 genome</span><span class="en">Bad genome</span></td><td><span class="zh"><b>HTTP 400</b> + <code>{"error":"can not find genome='...'"}</code></span><span class="en"><b>HTTP 400</b> + <code>{"error":"can not find genome=..."}</code></span></td><td class="no"><span class="zh">✘ 先命中 <code>not response.ok</code> → 抛通用"稍后再试",UCSC 的有用报错被丢弃</span><span class="en">✘ hits <code>not response.ok</code> first → generic "try again later"; UCSC's useful error discarded</span></td></tr>
+</table>
+
+<h2 id="s9"><span class="n">9</span><span class="zh">测试</span><span class="en">Tests</span></h2>
+<table>
+  <tr><th><span class="zh">测试</span><span class="en">Test</span></th><th><span class="zh">类型</span><span class="en">Type</span></th><th><span class="zh">覆盖</span><span class="en">Covers</span></th></tr>
+  <tr><td><code>test_parse_position / _match_rows</code></td><td>mock/<span class="zh">离线</span><span class="en">offline</span></td><td><span class="zh">位置拆解、URL 解码、HTML 反转义、组描述回退 <span class="ok">✔</span></span><span class="en">position split, URL-decode, unescape, group-desc fallback <span class="ok">✔</span></span></td></tr>
+  <tr><td><code>test_search / track_filter / limit_and_json</code></td><td><span class="zh">mock</span><span class="en">mock</span></td><td><span class="zh">列名、行数、过滤、limit、json <span class="ok">✔</span></span><span class="en">columns, rows, filter, limit, json <span class="ok">✔</span></span></td></tr>
+  <tr><td><code>no_results / error_payload</code></td><td>mock</td><td><span class="zh">无匹配→None;error 键→ValueError</span><span class="en">no-match→None; error key→ValueError</span></td></tr>
+  <tr><td><code>test_ucsc.json</code> (from_json)</td><td><span class="zh">仅空词报错</span><span class="en">empty-term error only</span></td><td class="no"><span class="zh">✘ 无真实 API 的 live 测试</span><span class="en">✘ no live test against the real API</span></td></tr>
+</table>
+<div class="warn"><span class="zh">两个测试缺口:①<code>test_error_payload_raises</code> 用的是 <code>ok=True/200 + error</code> 载荷,但真实坏 genome 是 <b>400</b>,会走另一条(通用报错)分支——所以这个测试<b>没覆盖真实错误路径</b>,也掩盖了 §8 的瑕疵。②整个 fixture 只有一个空词用例,<b>没有</b>抽样打真实 UCSC 的 live 测试;上游 API 若变了,现有 mock 测试抓不到。建议加一个真值锚 live 用例(如 BRCA2/hg38 断言 <code>chrom=="chr13"</code> 或 <code>ENST00000380152</code> 出现在 knownGene 里),网络失败时 skip。</span>
+  <span class="en">Two gaps: (1) <code>test_error_payload_raises</code> uses an <code>ok=True/200 + error</code> payload, but a real bad genome is <b>400</b> and takes the other (generic) branch — so it <b>doesn't cover the real error path</b> and masks the §8 flaw. (2) The whole fixture has only the empty-term case; <b>no</b> live test samples the real UCSC API, so upstream API changes wouldn't be caught. Suggest a truth-anchored live case (e.g. BRCA2/hg38 asserting <code>chrom=="chr13"</code> or that <code>ENST00000380152</code> appears in knownGene), skipped on network failure.</span></div>
+
+<h2 id="s10"><span class="n">10</span><span class="zh">可改进项(可执行)</span><span class="en">Actionable improvements</span></h2>
+<ol>
+  <li><span class="zh"><b>文档引用顺序</b>(<code>docs/src/en/ucsc.md</code> · <code># References</code>):现在 gget(Luebbert &amp; Pachter)在前、UCSC(Kent 2002)在后。按约定应<b>数据源原作者在前</b>:先 Kent WJ et al. 2002,再 gget。</span>
+    <span class="en"><b>Citation order</b> (<code>ucsc.md · # References</code>): currently gget (Luebbert &amp; Pachter) first, UCSC (Kent 2002) second. Convention: <b>data-source author first</b> — Kent WJ et al. 2002, then gget.</span></li>
+  <li><span class="zh"><b>updates.md 去掉 issue 链接</b>:changelog 条目里的 "Resolves [issue 18]" 应删除(读文档的用户不关心;PR 正文保留 <code>Resolves #18</code> 供自动关联即可)。</span>
+    <span class="en"><b>Drop the issue link in updates.md</b>: remove "Resolves [issue 18]" from the changelog entry (PR body may keep <code>Resolves #18</code> for auto-linking).</span></li>
+  <li><span class="zh"><b>补西语页</b>:新建 <code>docs/src/es/ucsc.md</code>(照 en 版翻译,代码/URL/引用原样、引用顺序同上、无 issue 链接),并在 <code>SUMMARY.md</code> 的 <code># Español</code> 区按字母序加一行。现在只加了英文条目。</span>
+    <span class="en"><b>Add the Spanish page</b>: create <code>docs/src/es/ucsc.md</code> (translate from en; keep code/URLs/citations, same citation order, no issue link) and add a line under <code># Español</code> in <code>SUMMARY.md</code>. Only the English entry was added.</span></li>
+  <li><span class="zh"><b>坏 genome 的报错更友好</b>(<code>gget_ucsc.py</code>):在抛通用"稍后再试"之前,先尝试解析响应 JSON 的 <code>error</code> 字段并原样透传给用户(尤其 400)。现在 <code>data.get("error")</code> 分支对 400 是死代码。</span>
+    <span class="en"><b>Surface the real error on bad genome</b> (<code>gget_ucsc.py</code>): before the generic "try again later", try to parse the response JSON's <code>error</code> field and pass it through (esp. for 400). Today the <code>data.get("error")</code> branch is dead code for 400s.</span></li>
+  <li><span class="zh"><b>加一个 live 测试</b>:真值锚 + 网络失败 skip(见 §9)。让上游 API 漂移能被 CI 抓到。</span>
+    <span class="en"><b>Add a live test</b>: truth-anchored, skipped on network failure (see §9), so upstream drift is caught by CI.</span></li>
+  <li><span class="zh"><b>文档提示默认量大</b>(可选):在 ucsc.md 提一句"常见基因不加过滤会返回很多行,建议配合 <code>track</code>/<code>limit</code>"。</span>
+    <span class="en"><b>Doc note on large results</b> (optional): mention in ucsc.md that common genes return many rows unfiltered; suggest pairing with <code>track</code>/<code>limit</code>.</span></li>
+</ol>
+
+<h2 id="s11"><span class="n">11</span><span class="zh">参考链接</span><span class="en">References</span></h2>
+<ul>
+  <li>PR: <a href="https://github.com/scverse/gget/pull/233">scverse/gget#233</a></li>
+  <li>Issue: <a href="https://github.com/scverse/gget/issues/18">#18</a></li>
+  <li>UCSC REST API help: <a href="https://genome.ucsc.edu/goldenPath/help/api.html">genome.ucsc.edu/goldenPath/help/api.html</a></li>
+  <li><span class="zh">探针端点</span><span class="en">Probed endpoint</span>: <code>https://api.genome.ucsc.edu/search?search=BRCA2&amp;genome=hg38</code></li>
+  <li>Kent WJ, Sugnet CW, Furey TS, et al. (2002). The human genome browser at UCSC. <em>Genome Research</em>. <a href="https://doi.org/10.1101/gr.229102">10.1101/gr.229102</a></li>
+</ul>
+
+<footer>
+  <span class="zh">本文档由 Claude Opus 4.8 (1M context) 于 2026-07-08 20:53 SGT 整理,基于对 PR #233 源码 diff 与 UCSC <code>/search</code> API 的<b>真机探针</b>核查。API 结构以核查当日为准,上游可能变更;合并前请以最新源码与真实 API 为准。评估为技术建议,非官方 review。</span>
+  <span class="en">Compiled by Claude Opus 4.8 (1M context) at 2026-07-08 20:53 SGT, based on the PR #233 diff and a <b>live probe</b> of the UCSC <code>/search</code> API. The API shape reflects the day of checking and may change upstream; verify against the latest source and live API before merging. This is a technical suggestion, not an official review.</span>
+</footer>
+
+</div>
+<script>
+  function setLang(l){
+    document.body.className = 'lang-' + l;
+    document.querySelectorAll('.langtoggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.l === l);
+    });
+  }
+</script>
+</body>
+</html>
