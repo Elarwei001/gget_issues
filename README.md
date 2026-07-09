@@ -10,6 +10,7 @@
 
 | PR | 模块 | 一句话 | 在线浏览 |
 |----|------|--------|----------|
+| [#232](https://github.com/scverse/gget/pull/232) | `gget alliance` | 新模块：包装 Alliance of Genome Resources REST API，自动分两种模式（基因 ID→`/gene` 详情；自由词→`/search`，按 category）；PI 点名（#162）；真机探针证实两模式字段 + 全部 6 类 category 映射 + 错误处理都对；含引用顺序/缺西语页/缺 live 测试/坏 category 静默返空等发现 | [🌐 打开](https://elarwei001.github.io/gget_issues/pr232-alliance.html) |
 | [#233](https://github.com/scverse/gget/pull/233) | `gget ucsc` | 新模块：包装 UCSC 官方 `/search` REST 端点，「基因名/词条 → UCSC ID + 位置（按轨道分组）」→ DataFrame/json，类比 `gget search`；真机探针证实结构吻合、quirk 处理正确；含引用顺序/缺西语页/坏 genome 报错被吞/缺 live 测试等发现 | [🌐 打开](https://elarwei001.github.io/gget_issues/pr233-ucsc.html) |
 | [#235](https://github.com/scverse/gget/pull/235) | `gget alphafold` | 加 `msa` 参数：传自定义 MSA、跳过 jackhmmer 搜索（免下 ~2GB 库）；a3m 解析复现 AlphaFold 原算法、改善可复现性；含 pre-commit 红根因 | [🌐 打开](https://elarwei001.github.io/gget_issues/pr235-alphafold-custom-msa.html) |
 | [#236](https://github.com/scverse/gget/pull/236) | `gget reactome` | 新模块：用 Reactome ContentService REST API 做三类查询（通路/搜索/实体），返回 tidy DataFrame；测试设计良好、含 pre-commit 红根因 | [🌐 打开](https://elarwei001.github.io/gget_issues/pr236-reactome.html) |

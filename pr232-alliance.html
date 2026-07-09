@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>gget alliance (PR #232) — 概览</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --ink:#e6e9ef; --muted:#9aa4b2;
+    --acc:#f5a623; --acc2:#5aa9e6; --green:#4cc38a; --red:#e5648a; --line:#2a2f3a; --code:#0b0d11;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 24px 80px}
+  header.top{position:relative;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:28px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:15px}
+  .stamp{position:absolute;top:0;right:0;font-size:12px;color:var(--muted);text-align:right}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--muted);margin:2px 4px 2px 0}
+  h2{font-size:21px;margin:38px 0 12px;padding-top:8px;border-top:1px solid var(--line);color:#fff}
+  h2 .n{color:var(--acc);font-variant-numeric:tabular-nums;margin-right:8px}
+  h3{font-size:17px;margin:22px 0 8px;color:var(--acc2)}
+  p{margin:10px 0}
+  a{color:var(--acc2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;color:#ffd9a0}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:13px;line-height:1.55}
+  pre code{background:none;border:none;padding:0;color:#d6deeb}
+  .tldr{background:linear-gradient(135deg,#1b2330,#171a21);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:16px 18px;margin:16px 0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#fff}
+  tr:nth-child(even) td{background:var(--panel)}
+  .ok{color:var(--green);font-weight:600}
+  .no{color:var(--red);font-weight:600}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc2);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .warn{background:#251c1c;border:1px solid #4a2b2b;border-left:4px solid var(--red);border-radius:8px;padding:12px 16px;margin:14px 0}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:5px 0}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:18px 0;columns:2;font-size:14px}
+  .toc a{display:block;padding:2px 0;color:var(--ink)}
+  .toc a:hover{color:var(--acc2)}
+  .muted{color:var(--muted)}
+  .primer{background:#132018;border:1px solid #26402f;border-left:4px solid var(--green);border-radius:10px;padding:14px 18px;margin:16px 0}
+  body.lang-zh .en{display:none}
+  body.lang-en .zh{display:none}
+  .langtoggle{margin-bottom:6px}
+  .langtoggle button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;margin-left:4px}
+  .langtoggle button.active{background:var(--acc2);color:#08121c;border-color:var(--acc2);font-weight:600}
+  footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body class="lang-zh">
+<div class="wrap">
+
+<header class="top">
+  <div class="stamp">
+    <div class="langtoggle">
+      <button data-l="zh" class="active" onclick="setLang('zh')">中文</button><button data-l="en" onclick="setLang('en')">EN</button>
+    </div>
+    Generated: 2026-07-09 21:18 SGT<br>by Claude Opus 4.8 (1M context)
+  </div>
+  <h1>🧬 <span class="zh">gget alliance — 查询 Alliance of Genome Resources</span><span class="en">gget alliance — querying the Alliance of Genome Resources</span></h1>
+  <div class="sub"><span class="zh">PR #232 分析:一个查询多模式生物整合库的新模块,健壮性与平台契合度评估</span><span class="en">PR #232 review: a new module over a multi-organism integrative resource — soundness &amp; platform-fit</span></div>
+  <div style="margin-top:10px">
+    <span class="pill">PR: scverse/gget#232</span>
+    <span class="pill">Issue: #162</span>
+    <span class="pill">New module</span>
+    <span class="pill">+597 / −0</span>
+    <span class="pill">author: Elarwei001</span>
+  </div>
+</header>
+
+<div class="primer">
+  <strong>📖 <span class="zh">背景科普</span><span class="en">Primer</span> · Alliance of Genome Resources</strong><br>
+  <span class="zh">生物学里有一批"模式生物数据库(MOD)":人(HGNC)、小鼠(MGI)、大鼠(RGD)、斑马鱼(ZFIN)、果蝇(FlyBase)、线虫(WormBase)、酵母(SGD)…… 每家各自维护自己物种的基因/等位基因/疾病/表型数据,格式与 ID 体系互不相同。<b>Alliance of Genome Resources</b> 是把这些库<b>整合到一个统一平台和 API</b> 的联盟,让你用一致的方式跨物种查基因。issue #162 想要的就是:让 gget 能查这个统一入口。</span>
+  <span class="en">Biology has a set of "model-organism databases (MODs)": human (HGNC), mouse (MGI), rat (RGD), zebrafish (ZFIN), fly (FlyBase), worm (WormBase), yeast (SGD)… each curating its own species' genes/alleles/disease/phenotype data with different formats and ID systems. The <b>Alliance of Genome Resources</b> is a consortium that <b>integrates these into one platform and API</b> so you can query genes across organisms uniformly. Issue #162 asks for gget to reach this unified entry point.</span>
+  <div class="muted" style="margin-top:6px">🔗 <a href="https://www.alliancegenome.org/">alliancegenome.org</a> · <a href="https://www.alliancegenome.org/swagger-ui/">REST API (swagger)</a></div>
+</div>
+
+<div class="toc">
+  <a href="#s1">1 · TL;DR</a>
+  <a href="#s2">2 · 背景 / 问题 (issue #162)</a>
+  <a href="#s3">3 · 上游:Alliance REST API</a>
+  <a href="#s4">4 · 两种模式 & 返回值形态</a>
+  <a href="#s5">5 · 如何使用</a>
+  <a href="#s6">6 · Scope / 边界</a>
+  <a href="#s7">7 · 评估(四 lens)</a>
+  <a href="#s8">8 · 实证探针结果</a>
+  <a href="#s9">9 · 测试</a>
+  <a href="#s10">10 · 可改进项(可执行)</a>
+  <a href="#s11">11 · 参考链接</a>
+</div>
+
+<div class="tldr" id="s1">
+  <strong>TL;DR:</strong>
+  <span class="zh">一个扎实、契合 gget 角色的新模块,由 PI(Lior Pachter)在 #162 直接点名。它包装 Alliance 官方 REST API,<b>自动分两种模式</b>:传基因 ID(如 <code>HGNC:1101</code>)走 <code>/gene</code> 取详情;传自由词走 <code>/search</code> 搜索(可按 <code>category</code> 选基因/等位基因/疾病/GO/变异/模型)。我对真实 API 做了探针:两种模式的字段、<b>全部 6 类 category 映射值</b>、错误处理都<b>逐一验证正确</b>。核心正确、可复现、维护成本低。<b>待改</b>(与 #233 同类):①文档引用顺序 ②updates.md 去 issue 链接 ③缺西语页 ④缺打真实 API 的 live 测试 ⑤坏 category 静默返回空(可加提示)。均为收尾项,不动核心。</span>
+  <span class="en">A solid, on-role new module, requested by the PI (Lior Pachter) in #162. It wraps the Alliance's official REST API and <b>auto-selects two modes</b>: a gene ID (e.g. <code>HGNC:1101</code>) fetches details via <code>/gene</code>; free text queries <code>/search</code> (filter by <code>category</code>: gene/allele/disease/GO/variant/model). I probed the live API: both modes' fields, <b>all six category mappings</b>, and the error paths are <b>each verified correct</b>. Core is correct, reproducible, low-maintenance. <b>To fix</b> (same class as #233): (1) doc citation order, (2) drop the issue link from updates.md, (3) add the Spanish page, (4) no live test against the real API, (5) a bad category silently returns empty (could warn). All finishing touches; the core is untouched.</span>
+</div>
+
+<h2 id="s2"><span class="n">2</span><span class="zh">背景 / 问题(issue #162)</span><span class="en">Background (issue #162)</span></h2>
+<p><span class="zh"><a href="https://github.com/scverse/gget/issues/162">Issue #162</a> 由 <b>lakigigar(Lior Pachter,gget 的 PI)</b> 提出,内容很简:"让 gget 能查 Alliance of Genome Resources 的 API",附了 swagger 链接。底层诉求:给一个基因 ID 或搜索词,从这个跨物种整合库拿到基因信息。</span>
+  <span class="en"><a href="https://github.com/scverse/gget/issues/162">Issue #162</a> is from <b>lakigigar (Lior Pachter, gget's PI)</b>, very brief: "let gget query the Alliance of Genome Resources API", with the swagger link. Underlying need: given a gene ID or search term, retrieve gene information from this cross-organism integrative resource.</span></p>
+<div class="note"><span class="zh">PR #232 由 <b>Elarwei001</b> 提交,基于 <code>dev</code>,新增 9 个文件(+597 行)。这是一次<b>自评审</b>。</span><span class="en">PR #232 is by <b>Elarwei001</b>, based on <code>dev</code>, adding 9 files (+597 lines). This is a self-review.</span></div>
+
+<h2 id="s3"><span class="n">3</span><span class="zh">上游:Alliance REST API</span><span class="en">Upstream: the Alliance REST API</span></h2>
+<table>
+  <tr><th><span class="zh">属性</span><span class="en">Property</span></th><th><span class="zh">值(探针实测)</span><span class="en">Value (probed)</span></th></tr>
+  <tr><td>Base</td><td><code>https://www.alliancegenome.org/api</code></td></tr>
+  <tr><td><span class="zh">用到的端点</span><span class="en">Endpoints used</span></td><td><code>/gene/{curie}</code>(取详情)· <code>/search?q=&amp;category=&amp;limit=</code>(搜索)</td></tr>
+  <tr><td><span class="zh">文档</span><span class="en">Documented?</span></td><td><span class="ok">✔</span> <span class="zh">官方 swagger UI</span><span class="en">official swagger UI</span></td></tr>
+  <tr><td><span class="zh">数据类型</span><span class="en">Type</span></td><td><span class="zh">查询式(活库),整合多个 MOD → 像 <code>gget search</code>/<code>info</code></span><span class="en">query-style (live), integrating many MODs → like <code>gget search</code>/<code>info</code></span></td></tr>
+  <tr><td><span class="zh">鉴权 / 托管</span><span class="en">Auth / hosting</span></td><td><span class="zh">无鉴权;机构级联盟托管</span><span class="en">no auth; institutional consortium hosting</span></td></tr>
+</table>
+
+<h2 id="s4"><span class="n">4</span><span class="zh">两种模式 & 返回值形态</span><span class="en">Two modes &amp; return shape</span></h2>
+<p><span class="zh">模块用 <code>_is_gene_id()</code> 判断输入像不像 curie(前缀 <code>HGNC/MGI/RGD/ZFIN/FB/WB/SGD…</code> + 冒号),自动分流:</span>
+  <span class="en">The module uses <code>_is_gene_id()</code> (a curie prefix like <code>HGNC/MGI/RGD/…</code> + colon) to route automatically:</span></p>
+<h3><span class="zh">模式 A:基因 ID → <code>/gene/{curie}</code></span><span class="en">Mode A: gene ID → <code>/gene/{curie}</code></span></h3>
+<p><span class="zh">响应外层有 <code>gene</code> 包装;模块把嵌套对象展平成标量列(用 <code>_text()</code> 从 <code>{displayText/formatText}</code> 取显示值):</span><span class="en">The response wraps a <code>gene</code> object; the module flattens nested fields to scalar columns (<code>_text()</code> pulls the display value from <code>{displayText/formatText}</code>):</span></p>
+<table>
+  <tr><th>Column</th><th><span class="zh">来源</span><span class="en">Source</span></th></tr>
+  <tr><td><code>id</code></td><td><code>gene.primaryExternalId</code> → <code>HGNC:1101</code></td></tr>
+  <tr><td><code>symbol</code> / <code>name</code></td><td><code>geneSymbol.displayText</code> / <code>geneFullName.displayText</code></td></tr>
+  <tr><td><code>species</code> / <code>taxon</code></td><td><code>taxon.name</code> / <code>taxon.curie</code></td></tr>
+  <tr><td><code>gene_type</code></td><td><code>geneType.name</code>(如 <code>protein_coding_gene</code>)</td></tr>
+  <tr><td><code>synonyms</code></td><td><code>geneSynonyms[].displayText</code></td></tr>
+  <tr><td><code>data_provider</code></td><td><code>dataProvider.abbreviation</code></td></tr>
+</table>
+<h3><span class="zh">模式 B:自由词 → <code>/search</code></span><span class="en">Mode B: free text → <code>/search</code></span></h3>
+<p><span class="zh">友好 <code>category</code>(gene/allele/disease/go/variant/model)经 <code>_CATEGORY_MAP</code> 映射成 API 值(如 <code>gene_search_result</code>);响应 <code>results[]</code> 展平成:</span><span class="en">A friendly <code>category</code> is mapped by <code>_CATEGORY_MAP</code> to the API value (e.g. <code>gene_search_result</code>); <code>results[]</code> flatten to:</span></p>
+<table>
+  <tr><th>Column</th><th><span class="zh">来源</span><span class="en">Source</span></th></tr>
+  <tr><td><code>id</code> / <code>symbol</code> / <code>name</code> / <code>species</code></td><td><span class="zh">同名字段</span><span class="en">same-named fields</span></td></tr>
+  <tr><td><code>category</code></td><td><code>category</code>(如 <code>gene_search_result</code>)</td></tr>
+  <tr><td><code>so_term_name</code></td><td><code>soTermName</code></td></tr>
+</table>
+<div class="note"><span class="zh"><b>gget 化到位</b>:两种异构响应各展平成一套清晰列的 DataFrame(或 <code>json=True</code> 给 list[dict]),并妥善处理了 <code>{displayText/formatText}</code> 这种嵌套显示对象。</span><span class="en"><b>Well gget-ified</b>: two heterogeneous responses each flatten to a clean-columned DataFrame (or list[dict] with <code>json=True</code>), handling the nested <code>{displayText/formatText}</code> display objects.</span></div>
+
+<h2 id="s5"><span class="n">5</span><span class="zh">如何使用</span><span class="en">How to use</span></h2>
+<pre><code># 模式 A:基因 ID → 详情
+gget alliance HGNC:1101
+
+# 模式 B:自由词搜索(按 category)
+gget alliance "brca2" --category disease --limit 10</code></pre>
+<pre><code>import gget
+gget.alliance("MGI:109337")                          # gene details (DataFrame)
+gget.alliance("brca2", category="allele", limit=5)   # search
+gget.alliance("brca2", json=True)                    # list[dict]</code></pre>
+
+<h2 id="s6"><span class="n">6</span><span class="zh">Scope / 边界</span><span class="en">Scope</span></h2>
+<ul>
+  <li><span class="ok zh">做:</span><span class="ok en">Does:</span> <span class="zh">基因 ID → 详情;自由词 → 6 类对象搜索;DataFrame/json 化;auto 分流。</span><span class="en">gene ID → details; free text → 6-category search; DataFrame/json; auto-routing.</span></li>
+  <li><span class="no zh">不做:</span><span class="no en">Doesn't:</span> <span class="zh">不做疾病/表型的深度关联分析、不下批量文件——保持在"数据访问"层。</span><span class="en">no deep disease/phenotype association analysis, no bulk-file download — stays at the "data access" layer.</span></li>
+</ul>
+
+<h2 id="s7"><span class="n">7</span><span class="zh">评估(四 lens)</span><span class="en">Assessment (four lenses)</span></h2>
+<table>
+  <tr><th>Lens</th><th><span class="zh">判断</span><span class="en">Verdict</span></th><th><span class="zh">依据</span><span class="en">Basis</span></th></tr>
+  <tr><td><span class="zh">Soundness</span><span class="en">Soundness</span></td><td class="ok"><span class="zh">强</span><span class="en">Strong</span></td><td><span class="zh">两种模式字段 + 全部 6 类 category 映射 + 错误处理(404→ValueError、5xx→RuntimeError、无结果→None)均对真实 API 验证正确;mock 测试覆盖各代码路径。小点:坏 category 静默返回空。</span><span class="en">both modes' fields + all six category mappings + error handling (404→ValueError, 5xx→RuntimeError, empty→None) verified against the live API; mocked tests cover the code paths. Minor: a bad category silently returns empty.</span></td></tr>
+  <tr><td><span class="zh">平台契合度</span><span class="en">Platform fit</span></td><td class="ok">PASS</td><td><span class="zh">纯数据访问,包装文档化 API;PI 亲自点名(#162);类比 search/info。契合无疑。</span><span class="en">pure data access over a documented API; PI-requested (#162); mirrors search/info. Clear fit.</span></td></tr>
+  <tr><td><span class="zh">可复现性</span><span class="en">Reproducibility</span></td><td><span class="zh"><b>较好</b></span><span class="en"><b>Good</b></span></td><td><span class="zh">官方端点、确定输出。但依赖活数据,且<b>没有</b>打真实 API 的 live 测试(fixture 仅空词报错)。</span><span class="en">official endpoints, deterministic. But live-data dependent, and there's <b>no</b> live test against the real API (the fixture only has the empty-term error).</span></td></tr>
+  <tr><td><span class="zh">维护成本</span><span class="en">Maintenance</span></td><td><span class="zh">低–中</span><span class="en">Low–moderate</span></td><td><span class="zh">单一文档化 API、无爬虫。但 Alliance 的字段名历史上改过(如 <code>primaryExternalId</code> 是较新命名)→ 有漂移风险,一个 live 测试能预警。</span><span class="en">single documented API, no scraping. But Alliance field names have changed historically (<code>primaryExternalId</code> is relatively new) → drift risk a live test would catch.</span></td></tr>
+</table>
+<p><span class="zh"><b>总评</b>:科学、契合 gget 角色、PI 点名、核心已对真实 API 逐项验证。剩下都是收尾:文档约定 + 一个 live 测试 +(可选)category 校验。<b>建议:按 §10 修完即可合并。</b></span>
+  <span class="en"><b>Overall</b>: sound, on-role, PI-requested, core verified point-by-point against the live API. What remains are finishing touches: doc conventions + a live test + (optional) category validation. <b>Recommendation: address §10, then good to merge.</b></span></p>
+
+<h2 id="s8"><span class="n">8</span><span class="zh">实证探针结果</span><span class="en">Live-probe results</span></h2>
+<p><span class="zh">对真实 Alliance API 的探针(2026-07-09):</span><span class="en">Probes of the live Alliance API (2026-07-09):</span></p>
+<table>
+  <tr><th><span class="zh">探针</span><span class="en">Probe</span></th><th><span class="zh">结果</span><span class="en">Result</span></th><th><span class="zh">代码</span><span class="en">Code</span></th></tr>
+  <tr><td><code>/gene/HGNC:1101</code></td><td><span class="zh">200;<code>gene</code> 包装 + <code>primaryExternalId/geneSymbol/geneFullName/taxon/geneType/dataProvider/geneSynonyms</code> 全在</span><span class="en">200; <code>gene</code> wrapper + all assumed fields present</span></td><td class="ok">✔</td></tr>
+  <tr><td><code>/search?q=BRCA2&amp;category=gene_search_result</code></td><td><span class="zh">200;<code>{results,total}</code>,字段 <code>id/symbol/name/species/category/soTermName</code> 全对</span><span class="en">200; <code>{results,total}</code>, fields match</span></td><td class="ok">✔</td></tr>
+  <tr><td><span class="zh">全部 6 类 category</span><span class="en">All 6 categories</span></td><td><span class="zh">allele=107 · disease=25 · go=77 · variant=24307 · model=89(均有结果)</span><span class="en">allele=107 · disease=25 · go=77 · variant=24307 · model=89 (all return results)</span></td><td class="ok"><span class="zh">✔ 映射值全对</span><span class="en">✔ all mappings valid</span></td></tr>
+  <tr><td><span class="zh">坏 category</span><span class="en">Bad category</span></td><td><span class="zh">200 + <code>{"total":0}</code>(无 results 键)</span><span class="en">200 + <code>{"total":0}</code> (no results key)</span></td><td><span class="zh">⚠ 静默 → None(无提示)</span><span class="en">⚠ silently → None (no warning)</span></td></tr>
+  <tr><td><span class="zh">数据 quirk</span><span class="en">Data quirk</span></td><td><span class="zh"><code>HGNC:1101</code>(人)的 <code>dataProvider</code> 竟是 <code>RGD</code></span><span class="en"><code>dataProvider</code> for human <code>HGNC:1101</code> is <code>RGD</code></span></td><td><span class="zh">如实透传(Alliance 数据本身如此)</span><span class="en">faithfully passed through (Alliance's own value)</span></td></tr>
+</table>
+
+<h2 id="s9"><span class="n">9</span><span class="zh">测试</span><span class="en">Tests</span></h2>
+<table>
+  <tr><th><span class="zh">测试</span><span class="en">Test</span></th><th><span class="zh">类型</span><span class="en">Type</span></th><th><span class="zh">覆盖</span><span class="en">Covers</span></th></tr>
+  <tr><td><code>_is_gene_id / _gene_row / _search_row / _text</code></td><td>mock</td><td><span class="zh">curie 判定、两种展平、显示对象取值 <span class="ok">✔</span></span><span class="en">curie detection, both flatteners, display-object text <span class="ok">✔</span></span></td></tr>
+  <tr><td><code>gene_id_mode / search_mode_json / category_mapping</code></td><td>mock</td><td><span class="zh">分流、列名、json、category→API 值 <span class="ok">✔</span></span><span class="en">routing, columns, json, category mapping <span class="ok">✔</span></span></td></tr>
+  <tr><td><code>no_results / http_error(500) / 404 / request_exception / gene_not_found</code></td><td>mock</td><td><span class="zh">各错误/空路径 <span class="ok">✔</span></span><span class="en">error/empty paths <span class="ok">✔</span></span></td></tr>
+  <tr><td><code>test_alliance.json</code> (from_json)</td><td><span class="zh">仅空词报错</span><span class="en">empty-term only</span></td><td class="no"><span class="zh">✘ 无真实 API 的 live 测试</span><span class="en">✘ no live test against the real API</span></td></tr>
+</table>
+<div class="warn"><span class="zh">Mock 覆盖很全(代码路径几乎都测到),但<b>没有一个打真实 Alliance API 的 live 测试</b>——上游若改字段名(Alliance 历史上改过),现有 mock 抓不到。建议加一个真值锚 live 用例(如 <code>alliance("HGNC:1101")</code> 断言 <code>symbol=="BRCA2"</code>、<code>species=="Homo sapiens"</code>;外加一个 <code>/search</code> 的),网络失败时 skip。</span>
+  <span class="en">Mock coverage is thorough (nearly all code paths), but there is <b>no live test hitting the real Alliance API</b> — if upstream renames fields (it has before), the mocks won't catch it. Suggest a truth-anchored live case (e.g. <code>alliance("HGNC:1101")</code> asserting <code>symbol=="BRCA2"</code>, <code>species=="Homo sapiens"</code>, plus a <code>/search</code> one), skipped on network failure.</span></div>
+
+<h2 id="s10"><span class="n">10</span><span class="zh">可改进项(可执行)</span><span class="en">Actionable improvements</span></h2>
+<ol>
+  <li><span class="zh"><b>文档引用顺序</b>(<code>en/alliance.md · # References</code>):现在 gget 在前、Alliance 在后。应<b>数据源在前</b>:先 Alliance of Genome Resources Consortium (2024),再 gget (Luebbert &amp; Pachter 2023)。</span>
+    <span class="en"><b>Citation order</b> (<code>alliance.md · # References</code>): currently gget first, Alliance second. Should be <b>data source first</b> — Alliance Consortium (2024), then gget.</span></li>
+  <li><span class="zh"><b>updates.md 去掉 issue 链接</b>:删除 changelog 里的 "Resolves [issue 162]"。</span>
+    <span class="en"><b>Drop the issue link in updates.md</b>: remove "Resolves [issue 162]" from the changelog entry.</span></li>
+  <li><span class="zh"><b>补西语页</b>:新建 <code>docs/src/es/alliance.md</code> + 在 <code>SUMMARY.md</code> 的 <code># Español</code> 区按字母序加一行。现在只加了英文条目。</span>
+    <span class="en"><b>Add the Spanish page</b>: create <code>docs/src/es/alliance.md</code> and a <code># Español</code> entry in <code>SUMMARY.md</code>. Only the English entry was added.</span></li>
+  <li><span class="zh"><b>加 live 测试</b>:真值锚 + 网络失败 skip(见 §9),抓上游字段漂移。</span>
+    <span class="en"><b>Add a live test</b>: truth-anchored, skipped when offline (see §9), to catch upstream field drift.</span></li>
+  <li><span class="zh"><b>(可选)校验 category</b>:未知 category 现在静默返回空;可对不在 <code>_CATEGORY_MAP</code> 的值给一句 warning 或列出可选值。</span>
+    <span class="en"><b>(optional) Validate category</b>: an unknown category silently returns empty; warn (or list valid values) for values not in <code>_CATEGORY_MAP</code>.</span></li>
+  <li><span class="zh"><b>(次要)复核 CLI 输出</b>:handler 里 <code>json=args.csv</code> 的写法(与 <code>gget ucsc</code> 同款),建议加一个 CLI 冒烟测试确认 <code>--csv</code> 与默认 JSON 输出符合预期。</span>
+    <span class="en"><b>(minor) Double-check the CLI output</b>: the handler's <code>json=args.csv</code> (same style as <code>gget ucsc</code>); a small CLI smoke test would confirm <code>--csv</code> vs default JSON output behaves as intended.</span></li>
+</ol>
+
+<h2 id="s11"><span class="n">11</span><span class="zh">参考链接</span><span class="en">References</span></h2>
+<ul>
+  <li>PR: <a href="https://github.com/scverse/gget/pull/232">scverse/gget#232</a> · Issue: <a href="https://github.com/scverse/gget/issues/162">#162</a></li>
+  <li>Alliance REST API (swagger): <a href="https://www.alliancegenome.org/swagger-ui/">alliancegenome.org/swagger-ui</a></li>
+  <li><span class="zh">探针端点</span><span class="en">Probed</span>: <code>https://www.alliancegenome.org/api/gene/HGNC:1101</code> · <code>/api/search?q=BRCA2&amp;category=…</code></li>
+  <li>Alliance of Genome Resources Consortium. (2024). Updates to the Alliance of Genome Resources central infrastructure. <em>Genetics</em>. <a href="https://doi.org/10.1093/genetics/iyae049">10.1093/genetics/iyae049</a></li>
+</ul>
+
+<footer>
+  <span class="zh">本文档由 Claude Opus 4.8 (1M context) 于 2026-07-09 21:18 SGT 整理,基于对 PR #232 源码 diff 与 Alliance REST API 的<b>真机探针</b>核查。API 结构以核查当日为准,上游可能变更;合并前请以最新源码与真实 API 为准。评估为技术建议,非官方 review。</span>
+  <span class="en">Compiled by Claude Opus 4.8 (1M context) at 2026-07-09 21:18 SGT, based on the PR #232 diff and a <b>live probe</b> of the Alliance REST API. The API shape reflects the day of checking and may change upstream; verify against the latest source and live API before merging. This is a technical suggestion, not an official review.</span>
+</footer>
+
+</div>
+<script>
+  function setLang(l){
+    document.body.className = 'lang-' + l;
+    document.querySelectorAll('.langtoggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.l === l);
+    });
+  }
+</script>
+</body>
+</html>

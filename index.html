@@ -31,6 +31,11 @@
     每份报告用 <a href="https://github.com/Elarwei001/personal-skills/tree/master/gget-issue-analysis"><code>gget-issue-analysis</code></a> skill 生成：自包含 HTML、开头有面向非生物背景读者的背景科普，随后覆盖「解决什么问题 / 价值 / 数据结构详解 / 如何解决 / 是否契合 gget 平台角色（四 lens 评估）/ live data test 设计 / 当前状态」。较新报告默认双语（中/EN，右上角切换）。
   </div>
 
+  <a class="card" href="./pr232-alliance.html">
+    <div class="t">gget alliance<span class="pr">PR #232</span></div>
+    <div class="d">新模块：包装 Alliance of Genome Resources 官方 REST API，自动分两种模式——基因 ID（<code>HGNC:1101</code>）走 <code>/gene</code> 取详情，自由词走 <code>/search</code>（按 category 选基因/等位基因/疾病/GO/变异/模型）。PI（Lior Pachter）亲自点名（#162）。真机探针证实两模式字段 + 全部 6 类 category 映射 + 错误处理都正确；含引用顺序 / 缺西语页 / 缺 live 测试 / 坏 category 静默返空等评审发现。</div>
+  </a>
+
   <a class="card" href="./pr233-ucsc.html">
     <div class="t">gget ucsc<span class="pr">PR #233</span></div>
     <div class="d">新模块：包装 UCSC 官方文档化的 <code>/search</code> REST 端点，把「基因名/词条 → UCSC ID + 基因组位置（按轨道分组）」整理成 DataFrame/json，类比 <code>gget search</code>。真机探针证实端点/结构吻合、quirk（URL 编码 ID、HTML 实体）处理正确；含引用顺序 / 缺西语页 / 坏 genome 报错被吞 / 缺 live 测试等评审发现。</div>
