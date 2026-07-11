@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生物学基础 · 单细胞与 CELLxGENE (Single-cell &amp; CELLxGENE)</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --ink:#e6e9ef; --muted:#9aa4b2;
+    --acc:#f5a623; --acc2:#5aa9e6; --green:#4cc38a; --red:#e5648a; --line:#2a2f3a; --code:#0b0d11;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:960px;margin:0 auto;padding:32px 24px 80px}
+  header.top{position:relative;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:8px}
+  h1{font-size:28px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:15px}
+  .stamp{position:absolute;top:0;right:0;font-size:12px;color:var(--muted);text-align:right}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--muted);margin:2px 4px 2px 0}
+  h2{font-size:21px;margin:38px 0 12px;padding-top:8px;border-top:1px solid var(--line);color:#fff}
+  h2 .n{color:var(--acc);font-variant-numeric:tabular-nums;margin-right:8px}
+  h3{font-size:17px;margin:22px 0 8px;color:var(--acc2)}
+  p{margin:10px 0}
+  a{color:var(--acc2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--code);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:13.5px;color:#ffd9a0}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;font-size:13px;line-height:1.55}
+  pre code{background:none;border:none;padding:0;color:#d6deeb}
+  .tldr{background:linear-gradient(135deg,#1b2330,#171a21);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:10px;padding:16px 18px;margin:16px 0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#fff}
+  tr:nth-child(even) td{background:var(--panel)}
+  .ok{color:var(--green);font-weight:600}
+  .no{color:var(--red);font-weight:600}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--acc2);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .warn{background:#251c1c;border:1px solid #4a2b2b;border-left:4px solid var(--red);border-radius:8px;padding:12px 16px;margin:14px 0}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:5px 0}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 20px;margin:18px 0;columns:2;font-size:14px}
+  .toc a{display:block;padding:2px 0;color:var(--ink)}
+  .toc a:hover{color:var(--acc2)}
+  .muted{color:var(--muted)}
+  .primer{background:#132018;border:1px solid #26402f;border-left:4px solid var(--green);border-radius:10px;padding:14px 18px;margin:16px 0}
+  body.lang-zh .en{display:none}
+  body.lang-en .zh{display:none}
+  .langtoggle{margin-bottom:6px}
+  .langtoggle button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;margin-left:4px}
+  .langtoggle button.active{background:var(--acc2);color:#08121c;border-color:var(--acc2);font-weight:600}
+  footer{margin-top:50px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body class="lang-zh">
+<div class="wrap">
+
+<header class="top">
+  <div class="stamp">
+    <div class="langtoggle">
+      <button data-l="zh" class="active" onclick="setLang('zh')">中文</button><button data-l="en" onclick="setLang('en')">EN</button>
+    </div>
+    Generated: 2026-07-11 16:31 SGT<br>by Claude Opus 4.8 (1M context)
+  </div>
+  <h1><span class="zh">单细胞与 CELLxGENE</span><span class="en">Single-cell biology &amp; CELLxGENE</span></h1>
+  <div class="sub"><span class="zh">给非生物背景读者:从"一个个细胞"到细胞图谱,以及 <code>gget cellxgene</code> 背后的数据长什么样</span><span class="en">For non-biologists: from "one cell at a time" to cell atlases, and what the data behind <code>gget cellxgene</code> looks like</span></div>
+  <div style="margin-top:10px">
+    <span class="pill">single-cell RNA-seq</span>
+    <span class="pill">cell types</span>
+    <span class="pill">CZ CELLxGENE Census</span>
+    <span class="pill">AnnData</span>
+  </div>
+</header>
+
+<div class="primer">
+  <strong>📖 <span class="zh">一句话入门</span><span class="en">One-line primer</span></strong><br>
+  <span class="zh">你身体里几乎每个细胞都带着<b>同一套 DNA</b>,但一个神经元和一个免疫细胞长得、干的活天差地别——差别不在"有哪些基因",而在<b>每个基因开多大</b>(基因表达)。<b>单细胞测序</b>能一次量出<b>成千上万个细胞、每个细胞里每个基因的表达量</b>,拼成一张"细胞 × 基因"的大表。<b>CZ CELLxGENE Census</b> 把全世界这类数据集汇总成一个可查询的"细胞图谱";<code>gget cellxgene</code> 就是去这个图谱里按组织/细胞类型/基因取数据。</span>
+  <span class="en">Almost every cell in your body carries the <b>same DNA</b>, yet a neuron and an immune cell look and behave completely differently — the difference isn't <em>which</em> genes they have, but <b>how much each gene is turned on</b> (gene expression). <b>Single-cell sequencing</b> measures, for <b>thousands of individual cells, the expression of every gene in each one</b>, forming a big "cells × genes" table. <b>CZ CELLxGENE Census</b> aggregates the world's such datasets into one queryable "cell atlas"; <code>gget cellxgene</code> pulls data from it by tissue / cell type / gene.</span>
+</div>
+
+<div class="toc">
+  <a href="#s1">1 · TL;DR</a>
+  <a href="#s2">2 · 为什么要看"单个细胞"</a>
+  <a href="#s3">3 · scRNA-seq:细胞 × 基因矩阵</a>
+  <a href="#s4">4 · 同一套 DNA,细胞为何不同</a>
+  <a href="#s5">5 · 细胞图谱与 CELLxGENE Census</a>
+  <a href="#s6">6 · 数据长什么样:AnnData</a>
+  <a href="#s7">7 · gget cellxgene 做什么</a>
+  <a href="#s8">8 · 参考链接</a>
+</div>
+
+<div class="tldr" id="s1">
+  <strong>TL;DR:</strong>
+  <span class="zh"><b>细胞</b>是生命的基本单位;同一个体的细胞共享<b>同一套基因组</b>,靠"<b>开哪些基因、开多大</b>"分化成不同<b>细胞类型</b>(神经元、T 细胞…)。<b>单细胞 RNA 测序(scRNA-seq)</b>逐个细胞量出所有基因的表达,得到一张 <b>细胞(行)× 基因(列)</b>的稀疏矩阵。把很多这样的数据集标准化、汇总,就是 <b>CZ CELLxGENE Census</b> —— 一个跨物种、可编程查询的细胞图谱。它返回的数据用 <b>AnnData</b> 容器装:<code>X</code>=表达矩阵、<code>obs</code>=每个细胞的元数据(组织/细胞类型/疾病…)、<code>var</code>=基因信息、<code>layers</code>=同一矩阵的其它版本。<code>gget cellxgene</code> 让你一行命令按条件从这个图谱取 AnnData 或元数据。</span>
+  <span class="en"><b>Cells</b> are the basic unit of life; cells of one individual share <b>one genome</b> and differentiate into <b>cell types</b> (neurons, T cells, …) by <b>which genes they turn on and how much</b>. <b>Single-cell RNA-seq (scRNA-seq)</b> measures every gene's expression in each cell, giving a <b>cells (rows) × genes (columns)</b> sparse matrix. Standardizing and pooling many such datasets is <b>CZ CELLxGENE Census</b> — a cross-species, programmatically queryable cell atlas. Its data comes in an <b>AnnData</b> container: <code>X</code> = the expression matrix, <code>obs</code> = per-cell metadata (tissue / cell type / disease …), <code>var</code> = gene info, <code>layers</code> = alternate versions of the matrix. <code>gget cellxgene</code> pulls an AnnData or metadata from this atlas by your criteria in one command.</span>
+</div>
+
+<h2 id="s2"><span class="n">2</span><span class="zh">为什么要看"单个细胞"</span><span class="en">Why look at single cells</span></h2>
+<p><span class="zh">早年的测序是"<b>bulk(混样)</b>":把一块组织里成千上万个细胞打碎、一起测,得到的是这群细胞的<b>平均值</b>。问题是——一块"肺组织"里其实混着上皮细胞、免疫细胞、血管细胞…… 平均值会把它们抹平,看不出"是哪种细胞、在干什么"。</span>
+  <span class="en">Classic sequencing was <b>bulk</b>: grind up a piece of tissue (thousands of cells) and sequence them together, giving the <b>average</b> over that cell population. The problem — a piece of "lung" actually mixes epithelial, immune, vascular… cells, and the average blends them so you can't tell which cell type is doing what.</span></p>
+<table>
+  <tr><th></th><th>Bulk RNA-seq</th><th>Single-cell RNA-seq</th></tr>
+  <tr><td><span class="zh">测量单位</span><span class="en">Unit</span></td><td><span class="zh">一群细胞的平均</span><span class="en">average over a population</span></td><td><span class="zh"><b>每个细胞</b>各自一份</span><span class="en"><b>each cell</b> separately</span></td></tr>
+  <tr><td><span class="zh">能回答</span><span class="en">Answers</span></td><td><span class="zh">"这块组织整体表达了啥"</span><span class="en">"what the tissue expresses overall"</span></td><td><span class="zh">"有哪些<b>细胞类型</b>、各自表达啥、比例如何"</span><span class="en">"which <b>cell types</b> are present, what each expresses, in what proportions"</span></td></tr>
+</table>
+<div class="note"><span class="zh">一个比喻:bulk 像"把一锅汤搅匀尝一口";单细胞像"把汤里每一粒食材分开,逐个看清"。</span><span class="en">Analogy: bulk is "stir the soup and taste one spoon"; single-cell is "separate every ingredient and inspect each one".</span></div>
+
+<h2 id="s3"><span class="n">3</span><span class="zh">scRNA-seq:细胞 × 基因矩阵</span><span class="en">scRNA-seq: the cells × genes matrix</span></h2>
+<p><span class="zh"><b>基因 → RNA → 蛋白</b>:一个基因"开工"时会先转录成 mRNA。一个细胞里某基因的 mRNA 越多,通常说明这个基因在该细胞里"开得越大"。<b>单细胞 RNA 测序</b>把组织打散成一个个细胞,给每个细胞的 RNA 贴上独有的"条形码",再一起测序,最后按条形码把读到的 RNA <b>归回各自的细胞</b>。结果就是一张大表:</span>
+  <span class="en"><b>Gene → RNA → protein</b>: when a gene is active it is transcribed into mRNA. The more mRNA of a gene in a cell, the more that gene is "on" there. <b>scRNA-seq</b> dissociates a tissue into single cells, tags each cell's RNA with a unique "barcode", sequences them together, and uses the barcodes to <b>assign reads back to their cell of origin</b>. The result is a big table:</span></p>
+<pre><code>            GeneA  GeneB  GeneC  ...   (每列一个基因 / one gene per column)
+Cell_1        0      5      0    ...
+Cell_2        3      0     12    ...
+Cell_3        0      0      0    ...   (大多是 0 → 稀疏矩阵 / mostly zeros → sparse)
+ ...
+(每行一个细胞 / one cell per row)</code></pre>
+<p><span class="zh">这张 <b>细胞 × 基因</b> 表就是单细胞数据的核心。它通常很大(几万~几百万个细胞 × 两三万个基因)且<b>稀疏</b>(绝大多数格子是 0,因为任一细胞只表达一部分基因)。</span>
+  <span class="en">This <b>cells × genes</b> table is the heart of single-cell data. It is usually large (tens of thousands to millions of cells × ~20–30k genes) and <b>sparse</b> (most entries are 0, since any one cell only expresses a subset of genes).</span></p>
+
+<h2 id="s4"><span class="n">4</span><span class="zh">同一套 DNA,细胞为何各不相同</span><span class="en">Same DNA, different cells</span></h2>
+<p><span class="zh">这是最关键的生物学直觉:<b>你身上几乎所有细胞的 DNA 都一样</b>(同一套基因组)。神经元、肌肉细胞、免疫细胞的不同,不来自"基因不同",而来自 <b>基因表达的不同</b>——每种细胞<b>选择性地开一批基因、关另一批</b>。</span>
+  <span class="en">This is the key intuition: <b>nearly all your cells share the same DNA</b> (one genome). A neuron, a muscle cell, and an immune cell differ not because their genes differ, but because their <b>gene expression</b> differs — each cell type selectively <b>turns some genes on and others off</b>.</span></p>
+<ul>
+  <li><span class="zh"><b>细胞类型(cell type)</b>:相对稳定的身份,如"T 细胞""肺上皮细胞"。由一套特征基因(marker)的表达定义。</span><span class="en"><b>Cell type</b>: a relatively stable identity (e.g. "T cell", "lung epithelial cell"), defined by a set of marker genes it expresses.</span></li>
+  <li><span class="zh"><b>细胞状态(cell state)</b>:同一类型的暂时状态,如"激活的""正在分裂的""受感染的"。</span><span class="en"><b>Cell state</b>: a transient condition of the same type — "activated", "dividing", "infected".</span></li>
+  <li><span class="zh"><b>怎么认出类型</b>:把成千上万个细胞按表达谱的相似度<b>聚类</b>,每一簇往往对应一种细胞类型;再看每簇高表达的 marker 基因给它命名。</span><span class="en"><b>How types are found</b>: cells are <b>clustered</b> by similarity of their expression profiles; each cluster usually maps to a cell type, named by its high marker genes.</span></li>
+</ul>
+<div class="note"><span class="zh">所以单细胞数据不仅是一张表——它让你能问:"肺里有几种细胞?每种占多少?某个基因(如 <code>ACE2</code>)主要在哪类细胞里表达?"这类问题 bulk 答不了。</span><span class="en">So single-cell data isn't just a table — it lets you ask: "how many cell types are in the lung? in what proportions? which cell type mainly expresses a given gene (e.g. <code>ACE2</code>)?" — questions bulk can't answer.</span></div>
+
+<h2 id="s5"><span class="n">5</span><span class="zh">细胞图谱与 CZ CELLxGENE Census</span><span class="en">Cell atlases &amp; CZ CELLxGENE Census</span></h2>
+<p><span class="zh">全世界实验室做了海量单细胞实验(不同组织、物种、疾病)。<b>细胞图谱(cell atlas)</b>的目标是把它们汇总成"人体(或小鼠…)所有细胞类型的参考地图"。但各家数据格式、基因命名、细胞类型标注五花八门,难以直接合用。</span>
+  <span class="en">Labs worldwide have produced enormous numbers of single-cell experiments (many tissues, species, diseases). A <b>cell atlas</b> aims to combine them into a reference "map of all cell types" of the human (or mouse…) body. But datasets differ wildly in format, gene naming, and cell-type labels, so they can't be used together as-is.</span></p>
+<p><span class="zh"><b>CZ CELLxGENE</b>(Chan Zuckerberg Initiative 主导)做两件事:①一个<b>门户</b>,把大量单细胞数据集<b>标准化</b>(统一的元数据字段、基因 ID、细胞类型本体)后集中托管、可在线浏览;②<b>Census</b> —— 把这些标准化数据整合成一个<b>可编程查询</b>的大对象:你不用下载整个数据集,而是"按条件切一块"(如"人 + 肺 + 某几种细胞类型 + 某几个基因")直接拿回内存。</span>
+  <span class="en"><b>CZ CELLxGENE</b> (led by the Chan Zuckerberg Initiative) does two things: (1) a <b>portal</b> that <b>standardizes</b> many single-cell datasets (uniform metadata fields, gene IDs, a cell-type ontology) and hosts them for browsing; (2) the <b>Census</b> — those standardized data integrated into one <b>programmatically queryable</b> object: instead of downloading whole datasets, you "slice by criteria" (e.g. "human + lung + a few cell types + a few genes") straight into memory.</span></p>
+<div class="note"><span class="zh"><b>版本很重要</b>:Census 有带日期的版本号(如 <code>2023-05-15</code>)。固定版本 → 查询结果可复现。这也是 <code>gget cellxgene</code> 有 <code>census_version</code> 参数的原因。</span><span class="en"><b>Versioning matters</b>: the Census has dated versions (e.g. <code>2023-05-15</code>). Pin a version → reproducible queries. That's why <code>gget cellxgene</code> has a <code>census_version</code> argument.</span></div>
+
+<h2 id="s6"><span class="n">6</span><span class="zh">数据长什么样:AnnData</span><span class="en">What the data looks like: AnnData</span></h2>
+<p><span class="zh">单细胞领域用一个标准容器 <b>AnnData</b>(annotated data,"带注释的数据")来装那张细胞×基因表 + 所有旁注。核心结构:</span>
+  <span class="en">The field uses a standard container, <b>AnnData</b> (annotated data), to hold the cells × genes table plus all its annotations. Core structure:</span></p>
+<table>
+  <tr><th>AnnData</th><th><span class="zh">是什么</span><span class="en">What it is</span></th></tr>
+  <tr><td><code>X</code></td><td><span class="zh"><b>表达矩阵</b>本身:行=细胞、列=基因(<code>n_obs × n_vars</code>)</span><span class="en">the <b>expression matrix</b>: rows=cells, cols=genes (<code>n_obs × n_vars</code>)</span></td></tr>
+  <tr><td><code>obs</code></td><td><span class="zh"><b>每个细胞</b>的元数据表(一行一个细胞):组织、细胞类型、疾病、性别、供体…</span><span class="en">per-<b>cell</b> metadata (one row per cell): tissue, cell type, disease, sex, donor…</span></td></tr>
+  <tr><td><code>var</code></td><td><span class="zh"><b>每个基因</b>的信息表(一行一个基因):基因 ID、基因名、长度…</span><span class="en">per-<b>gene</b> info (one row per gene): gene ID, gene name, length…</span></td></tr>
+  <tr><td><code>layers</code></td><td><span class="zh">同一 <code>X</code> 的<b>其它版本</b>(如原始计数 vs 归一化后),键=层名</span><span class="en"><b>alternate versions</b> of <code>X</code> (e.g. raw counts vs normalized), keyed by layer name</span></td></tr>
+  <tr><td><code>obsm</code> / <code>uns</code></td><td><span class="zh">细胞的降维坐标(如 UMAP)/ 杂项非结构化注释</span><span class="en">cell embeddings (e.g. UMAP) / miscellaneous unstructured annotations</span></td></tr>
+</table>
+<div class="note"><span class="zh">串回我们刚修的 CI bug(<a href="https://github.com/scverse/gget/pull/266">PR #266</a> / issue #265):gget 的测试用 <code>repr_dict()</code> 把一个 AnnData "拍平"成结构字典(记录 <code>obs</code>/<code>var</code>/<code>layers</code> 各有哪些键)来和期望值比对。cellxgene-census 某次更新后,返回的 AnnData 的 <code>layers</code> 里多出一个<b>键为 <code>None</code> 的空层</b>,于是结构字典里凭空多了 <code>layers: [None]</code>、测试就挂了。修法:让 <code>repr_dict</code> 忽略 <code>None</code> 键(那是噪声,不是有意义的层)。—— 现在你知道 <code>layers</code> 在生物学上是什么了,这个 bug 也就不神秘了。</span>
+  <span class="en">Tying back to the CI bug we just fixed (<a href="https://github.com/scverse/gget/pull/266">PR #266</a> / issue #265): gget's test uses <code>repr_dict()</code> to flatten an AnnData into a structure dict (which keys each of <code>obs</code>/<code>var</code>/<code>layers</code> has) and compare it to an expected value. After a cellxgene-census update, the returned AnnData's <code>layers</code> gained a spurious <b><code>None</code>-keyed empty layer</b>, so the structure dict grew a bogus <code>layers: [None]</code> and the test broke. The fix: make <code>repr_dict</code> ignore <code>None</code> keys (that's noise, not a meaningful layer). Now that you know what <code>layers</code> means biologically, the bug isn't mysterious.</span></div>
+
+<h2 id="s7"><span class="n">7</span><span class="zh">gget cellxgene 做什么</span><span class="en">What gget cellxgene does</span></h2>
+<p><span class="zh"><code>gget cellxgene</code> 是 CZ CELLxGENE Census 的一个便捷接口:你给出筛选条件(物种、组织、细胞类型、基因、Census 版本…),它就从图谱里"切"出你要的那块,返回一个 <b>AnnData</b>(表达矩阵 + 注释),或只返回<b>元数据</b>(不含表达矩阵、更轻)。</span>
+  <span class="en"><code>gget cellxgene</code> is a convenience interface to the CZ CELLxGENE Census: you give filter criteria (species, tissue, cell type, gene, Census version…) and it "slices" that piece out of the atlas, returning an <b>AnnData</b> (matrix + annotations) or just the <b>metadata</b> (no matrix, lighter).</span></p>
+<pre><code># Python — 取一小块 AnnData
+import gget
+adata = gget.cellxgene(
+    tissue="lung",
+    cell_type=["mucus secreting cell", "neuroendocrine cell"],
+    gene=["ACE2", "ABCA1", "SLC5A1"],
+    census_version="2023-05-15",
+)
+# adata.n_obs 个细胞 × adata.n_vars 个基因;adata.obs 里有 tissue/cell_type 等</code></pre>
+<div class="warn"><span class="zh">单细胞数据可以<b>非常大</b>:不加限制地取一个组织的全部细胞,可能是几十万行 × 两万列。务必用 <code>tissue</code>/<code>cell_type</code>/<code>gene</code> 收窄,或先只取 <code>meta_only</code> 元数据看看规模。</span>
+  <span class="en">Single-cell data can be <b>very large</b>: an unrestricted pull of a whole tissue can be hundreds of thousands of rows × ~20k columns. Narrow with <code>tissue</code>/<code>cell_type</code>/<code>gene</code>, or fetch <code>meta_only</code> metadata first to gauge the size.</span></div>
+
+<h2 id="s8"><span class="n">8</span><span class="zh">参考链接</span><span class="en">References</span></h2>
+<ul>
+  <li>CZ CELLxGENE: <a href="https://cellxgene.cziscience.com/">cellxgene.cziscience.com</a> · Census docs: <a href="https://chanzuckerberg.github.io/cellxgene-census/">chanzuckerberg.github.io/cellxgene-census</a></li>
+  <li>AnnData: <a href="https://anndata.readthedocs.io/">anndata.readthedocs.io</a> · scanpy(单细胞分析生态): <a href="https://scanpy.readthedocs.io/">scanpy.readthedocs.io</a></li>
+  <li><span class="zh">相关基础页</span><span class="en">Related basics</span>: <a href="./reference-genomics.html">参考基因组学入门 / Reference genomics</a> · <a href="./genome-browser-and-transcripts.html">基因组浏览器与转录本</a></li>
+  <li><span class="zh">本站相关</span><span class="en">On this site</span>: <a href="https://github.com/scverse/gget/pull/266">gget PR #266</a>(修 cellxgene 测试的 <code>layers</code> 漂移)</li>
+</ul>
+
+<footer>
+  <span class="zh">本页由 Claude Opus 4.8 (1M context) 于 2026-07-11 16:31 SGT 整理,面向非生物背景读者的科普。为清晰做了适度简化(实际的建库、比对、归一化、聚类、批次校正等细节远比此丰富);以专业教材/官方文档为准。</span>
+  <span class="en">Compiled by Claude Opus 4.8 (1M context) at 2026-07-11 16:31 SGT as a primer for non-biologists. Simplified for clarity (real library prep, alignment, normalization, clustering, batch correction, etc. are far richer); defer to textbooks/official docs for rigor.</span>
+</footer>
+
+</div>
+<script>
+  function setLang(l){
+    document.body.className = 'lang-' + l;
+    document.querySelectorAll('.langtoggle button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.l === l);
+    });
+  }
+</script>
+</body>
+</html>
