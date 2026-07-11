@@ -89,8 +89,13 @@
 
 <div class="tldr" id="s1">
   <strong>TL;DR:</strong>
-  <span class="zh"><b>细胞</b>是生命的基本单位;同一个体的细胞共享<b>同一套基因组</b>,靠"<b>开哪些基因、开多大</b>"分化成不同<b>细胞类型</b>(神经元、T 细胞…)。<b>单细胞 RNA 测序(scRNA-seq)</b>逐个细胞量出所有基因的表达,得到一张 <b>细胞(行)× 基因(列)</b>的稀疏矩阵。把很多这样的数据集标准化、汇总,就是 <b>CZ CELLxGENE Census</b> —— 一个跨物种、可编程查询的细胞图谱。它返回的数据用 <b>AnnData</b> 容器装:<code>X</code>=表达矩阵、<code>obs</code>=每个细胞的元数据(组织/细胞类型/疾病…)、<code>var</code>=基因信息、<code>layers</code>=同一矩阵的其它版本。<code>gget cellxgene</code> 让你一行命令按条件从这个图谱取 AnnData 或元数据。</span>
-  <span class="en"><b>Cells</b> are the basic unit of life; cells of one individual share <b>one genome</b> and differentiate into <b>cell types</b> (neurons, T cells, …) by <b>which genes they turn on and how much</b>. <b>Single-cell RNA-seq (scRNA-seq)</b> measures every gene's expression in each cell, giving a <b>cells (rows) × genes (columns)</b> sparse matrix. Standardizing and pooling many such datasets is <b>CZ CELLxGENE Census</b> — a cross-species, programmatically queryable cell atlas. Its data comes in an <b>AnnData</b> container: <code>X</code> = the expression matrix, <code>obs</code> = per-cell metadata (tissue / cell type / disease …), <code>var</code> = gene info, <code>layers</code> = alternate versions of the matrix. <code>gget cellxgene</code> pulls an AnnData or metadata from this atlas by your criteria in one command.</span>
+  <ul>
+    <li><span class="zh"><b>细胞</b>是生命的基本单位;同一个体的细胞共享<b>同一套基因组</b>,靠"<b>开哪些基因、开多大</b>"分化成不同<b>细胞类型</b>(神经元、T 细胞…)。</span><span class="en"><b>Cells</b> are the basic unit of life; cells of one individual share <b>one genome</b> and differentiate into <b>cell types</b> (neurons, T cells, …) by <b>which genes they turn on and how much</b>.</span></li>
+    <li><span class="zh"><b>单细胞 RNA 测序(scRNA-seq)</b>逐个细胞量出所有基因的表达,得到一张 <b>细胞(行)× 基因(列)</b> 的稀疏矩阵。</span><span class="en"><b>Single-cell RNA-seq (scRNA-seq)</b> measures every gene's expression in each cell, giving a <b>cells (rows) × genes (columns)</b> sparse matrix.</span></li>
+    <li><span class="zh">把很多这样的数据集标准化、汇总,就是 <b>CZ CELLxGENE Census</b> —— 一个跨物种、可编程查询的细胞图谱。</span><span class="en">Standardizing and pooling many such datasets is <b>CZ CELLxGENE Census</b> — a cross-species, programmatically queryable cell atlas.</span></li>
+    <li><span class="zh">它返回的数据用 <b>AnnData</b> 容器装:<code>X</code>=表达矩阵、<code>obs</code>=每个细胞的元数据(组织/细胞类型/疾病…)、<code>var</code>=基因信息、<code>layers</code>=同一矩阵的其它版本。</span><span class="en">Its data comes in an <b>AnnData</b> container: <code>X</code> = the expression matrix, <code>obs</code> = per-cell metadata (tissue / cell type / disease …), <code>var</code> = gene info, <code>layers</code> = alternate versions of the matrix.</span></li>
+    <li><span class="zh"><code>gget cellxgene</code> 让你一行命令按条件从这个图谱取 AnnData 或元数据。</span><span class="en"><code>gget cellxgene</code> pulls an AnnData or metadata from this atlas by your criteria in one command.</span></li>
+  </ul>
 </div>
 
 <h2 id="s2"><span class="n">2</span><span class="zh">为什么要看"单个细胞"</span><span class="en">Why look at single cells</span></h2>
