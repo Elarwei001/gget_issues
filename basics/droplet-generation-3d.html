@@ -53,9 +53,9 @@
   <p class="hint"><span class="zh">拖拽旋转 · 滚轮缩放</span><span class="en">Drag to rotate · scroll to zoom</span></p>
   <div class="row">
     <button id="playbtn" class="active" onclick="window.__toggle()"><span class="zh">⏸ 暂停</span><span class="en">⏸ Pause</span></button>
-    <button onclick="window.__setSpeed(0.5)"><span class="zh">0.5×</span><span class="en">0.5×</span></button>
-    <button onclick="window.__setSpeed(1)" class="active" id="sp1"><span class="zh">1×</span><span class="en">1×</span></button>
-    <button onclick="window.__setSpeed(2)"><span class="zh">2×</span><span class="en">2×</span></button>
+    <button class="spd" data-s="0.5" onclick="window.__setSpeed(0.5)">0.5×</button>
+    <button class="spd active" data-s="1" onclick="window.__setSpeed(1)">1×</button>
+    <button class="spd" data-s="2" onclick="window.__setSpeed(2)">2×</button>
   </div>
   <div class="desc"><span class="zh"><b>流动聚焦(flow-focusing):</b>中央水相带着<b>细胞</b>(粉)和<b>微珠</b>(深)向右流,在<b>交叉口</b>被上下两股<b>油</b>(琥珀)夹紧、剪断,一个个<b>大小一致</b>的液滴连续生成、向右流走。目标是每滴 1 细胞 + 1 珠;但多数液滴按泊松分布<b>只有珠、没细胞</b>(正常损耗)。</span>
     <span class="en"><b>Flow-focusing:</b> the central aqueous stream carries <b>cells</b> (pink) and <b>beads</b> (dark) to the right; at the <b>junction</b> two <b>oil</b> streams (amber) from top &amp; bottom squeeze and pinch it into <b>uniform</b> droplets that flow off. The goal is 1 cell + 1 bead per droplet, but by Poisson most droplets have a <b>bead only, no cell</b> (expected loss).</span></div>
@@ -168,10 +168,7 @@ window.__toggle = ()=>{ running=!running;
     ? '<span class="zh">⏸ 暂停</span><span class="en">⏸ Pause</span>'
     : '<span class="zh">▶ 播放</span><span class="en">▶ Play</span>'; };
 window.__setSpeed = (s)=>{ speed=s;
-  document.querySelectorAll('.row button').forEach(b=>{ if(b.textContent.trim().startsWith(s+'')) b.classList.add('active'); });
-  ['0.5','1','2'].forEach(v=>{ /* clear others */ });
-  document.querySelectorAll('.row button').forEach(b=>{ const t=b.textContent.trim();
-    if(t==='0.5×'||t==='1×'||t==='2×') b.classList.toggle('active', t===(s+'×')); }); };
+  document.querySelectorAll('.spd').forEach(b=>b.classList.toggle('active', parseFloat(b.dataset.s)===s)); };
 
 const clock = new THREE.Clock();
 function animate(){
