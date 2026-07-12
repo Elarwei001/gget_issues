@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>交互式 3D · 油包水液滴与 barcode (Droplet &amp; barcode 3D)</title>
+<style>
+  :root{ --bg:#0f1115; --panel:#171a21; --panel2:#1d212b; --ink:#e6e9ef; --muted:#9aa4b2;
+    --acc:#f5a623; --acc2:#5aa9e6; --green:#4cc38a; --red:#e5648a; --line:#2a2f3a; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden}
+  #scene{position:fixed;inset:0}
+  a{color:var(--acc2);text-decoration:none} a:hover{text-decoration:underline}
+  code{background:#0b0d11;border:1px solid var(--line);border-radius:5px;padding:0 5px;font-family:"SF Mono",Menlo,monospace;font-size:12.5px;color:#ffd9a0}
+  .overlay{position:fixed;top:16px;left:16px;max-width:360px;background:rgba(23,26,33,.9);
+    border:1px solid var(--line);border-radius:12px;padding:14px 16px;backdrop-filter:blur(6px)}
+  .overlay h1{font-size:17px;margin:0 0 4px}
+  .overlay .hint{color:var(--muted);font-size:12.5px;margin:0 0 10px}
+  .steps{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .steps button{background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+    border-radius:7px;padding:4px 9px;font-size:12.5px;cursor:pointer}
+  .steps button.active{background:var(--acc2);color:#08121c;border-color:var(--acc2);font-weight:600}
+  .desc{font-size:13.5px;min-height:52px}
+  .panel{position:fixed;bottom:16px;left:16px;max-width:360px;background:rgba(23,26,33,.9);
+    border:1px solid var(--line);border-radius:12px;padding:12px 16px;backdrop-filter:blur(6px);font-size:13px}
+  .panel .t{color:var(--muted);font-size:12px;margin-bottom:6px}
+  .swatches{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+  .sw{width:26px;height:34px;border-radius:5px;display:flex;align-items:flex-end;justify-content:center;
+    font-size:11px;font-weight:700;color:#08121c;padding-bottom:2px;border:1px solid rgba(255,255,255,.15)}
+  .legend{margin-top:8px;color:var(--muted);font-size:11.5px}
+  .legend span{display:inline-block;margin-right:8px}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:middle;margin-right:3px}
+  .langtoggle{position:fixed;top:16px;right:16px;background:rgba(23,26,33,.9);border:1px solid var(--line);
+    border-radius:8px;padding:4px 6px}
+  .langtoggle button{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:6px;padding:1px 8px;font-size:12px;cursor:pointer;margin-left:3px}
+  .langtoggle button.active{background:var(--acc2);color:#08121c;border-color:var(--acc2);font-weight:600}
+  .back{position:fixed;bottom:16px;right:16px;font-size:12.5px;background:rgba(23,26,33,.9);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+  body.lang-zh .en{display:none} body.lang-en .zh{display:none}
+  #fallback{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:30px;text-align:center;color:var(--muted)}
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+</head>
+<body class="lang-zh">
+
+<div id="scene"></div>
+
+<div class="langtoggle">
+  <button data-l="zh" class="active" onclick="setLang('zh')">中文</button><button data-l="en" onclick="setLang('en')">EN</button>
+</div>
+
+<div class="overlay">
+  <h1><span class="zh">油包水液滴 &amp; barcode</span><span class="en">Water-in-oil droplets &amp; barcode</span></h1>
+  <p class="hint"><span class="zh">拖拽旋转 · 滚轮缩放 · 点击一个水滴看它的 barcode</span><span class="en">Drag to rotate · scroll to zoom · click a droplet to see its barcode</span></p>
+  <div class="steps" id="steps"></div>
+  <div class="desc" id="desc"></div>
+</div>
+
+<div class="panel">
+  <div class="t"><span class="zh">选中的水滴 / barcode</span><span class="en">Selected droplet / barcode</span></div>
+  <div id="barcodeOut"><span class="zh" style="color:var(--muted)">点击一个水滴…</span><span class="en" style="color:var(--muted)">click a droplet…</span></div>
+  <div class="legend">
+    <span><i class="dot" style="background:#4cc38a"></i>A</span>
+    <span><i class="dot" style="background:#5aa9e6"></i>C</span>
+    <span><i class="dot" style="background:#f5a623"></i>G</span>
+    <span><i class="dot" style="background:#e5648a"></i>T</span>
+  </div>
+</div>
+
+<a class="back" href="./single-cell-and-cellxgene.html"><span class="zh">← 返回单细胞基础页</span><span class="en">← Back to the single-cell primer</span></a>
+
+<div id="fallback"><div>
+  <p><span class="zh">3D 场景需要 WebGL 和从 CDN 加载 Three.js。若此处空白,请检查网络/浏览器是否支持 WebGL。</span><span class="en">The 3D scene needs WebGL and loads Three.js from a CDN. If this stays blank, check your network / WebGL support.</span></p>
+</div></div>
+
+<script>
+  function setLang(l){
+    document.body.className = 'lang-' + l;
+    document.querySelectorAll('.langtoggle button').forEach(b=>b.classList.toggle('active', b.dataset.l===l));
+    if(window.__renderDesc) window.__renderDesc();
+    if(window.__renderBarcode) window.__renderBarcode();
+  }
+  window.addEventListener('error', e=>{ if(String(e.message||'').match(/import|module|three/i)){ document.getElementById('fallback').style.display='flex'; }});
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const container = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(container.clientWidth, container.clientHeight);
+container.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x0f1115, 0.02);
+const camera = new THREE.PerspectiveCamera(50, container.clientWidth/container.clientHeight, 0.1, 200);
+camera.position.set(0, 2.5, 13);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.autoRotate = true; controls.autoRotateSpeed = 0.5;
+controls.minDistance = 4; controls.maxDistance = 40;
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+const dir = new THREE.DirectionalLight(0xffffff, 0.9); dir.position.set(6, 9, 7); scene.add(dir);
+const amber = new THREE.PointLight(0xf5a623, 0.35, 60); amber.position.set(-8,-4,4); scene.add(amber);
+
+// "oil" hint: faint amber haze sphere around everything
+const oil = new THREE.Mesh(new THREE.SphereGeometry(60,16,16),
+  new THREE.MeshBasicMaterial({ color:0x2a2416, side:THREE.BackSide, transparent:true, opacity:0.5 }));
+scene.add(oil);
+
+const BASE_COLORS = { A:0x4cc38a, C:0x5aa9e6, G:0xf5a623, T:0xe5648a };
+const BASES = ['A','C','G','T'];
+function randCode(n){ let s=''; for(let i=0;i<n;i++) s += BASES[Math.floor(Math.random()*4)]; return s; }
+
+const R = 1.5;
+const POS = [[0,0,0],[2.5,0.4,0.4],[-2.4,0.3,-0.5],[1.2,2.0,-1.3],[-1.4,-1.9,0.9],[0.5,-1.6,-2.1],[-0.7,1.8,1.9]];
+const droplets = [];
+
+POS.forEach((p,i)=>{
+  const g = new THREE.Group(); g.position.set(p[0],p[1],p[2]);
+
+  const water = new THREE.Mesh(new THREE.SphereGeometry(R,48,48),
+    new THREE.MeshStandardMaterial({ color:0x5aa9e6, transparent:true, opacity:0.16, roughness:0.15, metalness:0, depthWrite:false }));
+  water.userData.i = i; g.add(water);
+
+  const shell = new THREE.Mesh(new THREE.SphereGeometry(R*1.04,28,20),
+    new THREE.MeshBasicMaterial({ color:0xf5a623, wireframe:true, transparent:true, opacity:0.22 }));
+  shell.visible = false; g.add(shell);
+
+  const cell = new THREE.Mesh(new THREE.SphereGeometry(R*0.42,32,32),
+    new THREE.MeshStandardMaterial({ color:0xe86a9a, roughness:0.55 }));
+  cell.position.set(-R*0.35, -R*0.1, 0); g.add(cell);
+
+  const bead = new THREE.Mesh(new THREE.SphereGeometry(R*0.26,32,32),
+    new THREE.MeshStandardMaterial({ color:0x2b3240, roughness:0.35, metalness:0.2 }));
+  bead.position.set(R*0.42, R*0.05, 0); g.add(bead);
+
+  const code = randCode(6);
+  const bar = new THREE.Group();
+  bar.position.set(bead.position.x, bead.position.y + R*0.42, bead.position.z);
+  [...code].forEach((b,j)=>{
+    const c = BASE_COLORS[b];
+    const box = new THREE.Mesh(new THREE.BoxGeometry(0.13,0.1,0.13),
+      new THREE.MeshStandardMaterial({ color:c, emissive:c, emissiveIntensity:0.35, roughness:0.4 }));
+    box.position.y = j*0.12; bar.add(box);
+  });
+  g.add(bar);
+
+  scene.add(g);
+  droplets.push({ group:g, water, shell, cell, bead, bar, code, base:p, phase:Math.random()*6.28 });
+});
+
+// ---- interaction: distinguish click from orbit-drag ----
+const ray = new THREE.Raycaster(); const m = new THREE.Vector2();
+let down = null, selected = -1;
+renderer.domElement.addEventListener('pointerdown', e=>{ down = {x:e.clientX, y:e.clientY}; });
+renderer.domElement.addEventListener('pointerup', e=>{
+  if(!down) return;
+  if(Math.hypot(e.clientX-down.x, e.clientY-down.y) < 5) pick(e);
+  down = null;
+});
+function pick(e){
+  const r = renderer.domElement.getBoundingClientRect();
+  m.x = ((e.clientX-r.left)/r.width)*2-1;
+  m.y = -((e.clientY-r.top)/r.height)*2+1;
+  ray.setFromCamera(m, camera);
+  const hit = ray.intersectObjects(droplets.map(d=>d.water))[0];
+  if(hit) selectDroplet(hit.object.userData.i);
+}
+function selectDroplet(i){
+  selected = i;
+  controls.autoRotate = false;
+  droplets.forEach((d,k)=>{
+    d.water.material.opacity = (k===i) ? 0.28 : 0.07;
+    d.water.material.color.setHex(k===i ? 0x8fd0ff : 0x5aa9e6);
+    d.bar.visible = true;
+  });
+  window.__renderBarcode();
+}
+
+// ---- barcode panel ----
+window.__renderBarcode = function(){
+  const out = document.getElementById('barcodeOut');
+  if(selected < 0){
+    out.innerHTML = document.body.classList.contains('lang-en')
+      ? '<span style="color:var(--muted)">click a droplet…</span>'
+      : '<span style="color:var(--muted)">点击一个水滴…</span>';
+    return;
+  }
+  const code = droplets[selected].code;
+  const label = document.body.classList.contains('lang-en') ? ('Droplet #'+(selected+1)+' — bead barcode:') : ('水滴 #'+(selected+1)+' — 珠的 barcode:');
+  const sw = [...code].map(b=>{
+    const hex = '#' + BASE_COLORS[b].toString(16).padStart(6,'0');
+    return '<div class="sw" style="background:'+hex+'">'+b+'</div>';
+  }).join('');
+  out.innerHTML = '<div style="margin-bottom:6px">'+label+'</div><div class="swatches">'+sw+'</div>';
+};
+
+// ---- steps ----
+const STEPS = [
+  { id:'overview', zh:'① 油包水', en:'① Emulsion',
+    dzh:'这是一团"油包水"乳浊液:每个<b>蓝色透明球=一个水滴</b>,悬在<b>油</b>(琥珀色背景)里。拖拽旋转、滚轮缩放。',
+    den:'A water-in-oil emulsion: each <b>blue transparent sphere = a water droplet</b>, suspended in <b>oil</b> (the amber background). Drag to rotate, scroll to zoom.' },
+  { id:'contents', zh:'② 1 细胞 + 1 珠', en:'② 1 cell + 1 bead',
+    dzh:'每个水滴里恰好装 <b>1 个细胞</b>(粉球)+ <b>1 颗微珠</b>(深色球,上方是它的 barcode 色条)。靠稀释 + 泊松分布保证"每滴至多一个细胞"。',
+    den:'Each droplet holds exactly <b>one cell</b> (pink) + <b>one bead</b> (dark sphere, with its barcode bar above it). Dilution + Poisson loading keep it to at most one cell per droplet.' },
+  { id:'surfactant', zh:'③ 表面活性剂', en:'③ Surfactant',
+    dzh:'开启每滴表面的<b>表面活性剂"外衣"</b>(橙色网格)。它挡住两滴之间薄油膜的破裂,所以液滴<b>挨着也不融合</b>。',
+    den:'Show each droplet\'s <b>surfactant "skin"</b> (amber mesh). It keeps the thin oil film between droplets from rupturing, so droplets <b>touch but don\'t merge</b>.' },
+  { id:'barcode', zh:'④ barcode 每珠唯一', en:'④ Unique barcodes',
+    dzh:'每颗珠的 <b>barcode 色条各不相同</b> → 不同水滴 = 不同珠 = 不同标签。<b>点击任意水滴</b>,左下角会显示它的 barcode(A/C/G/T 四色)。',
+    den:'Every bead\'s <b>barcode bar differs</b> → different droplet = different bead = different label. <b>Click any droplet</b> to show its barcode (A/C/G/T colors) at the bottom-left.' },
+];
+let step = 'overview';
+const stepsEl = document.getElementById('steps');
+STEPS.forEach(s=>{
+  const b = document.createElement('button');
+  b.dataset.id = s.id;
+  b.innerHTML = '<span class="zh">'+s.zh+'</span><span class="en">'+s.en+'</span>';
+  b.onclick = ()=>setStep(s.id);
+  stepsEl.appendChild(b);
+});
+function setStep(id){
+  step = id;
+  stepsEl.querySelectorAll('button').forEach(b=>b.classList.toggle('active', b.dataset.id===id));
+  droplets.forEach(d=>{ d.shell.visible = (id==='surfactant'); });
+  if(id==='barcode') droplets.forEach(d=>d.bar.visible=true);
+  window.__renderDesc();
+}
+window.__renderDesc = function(){
+  const s = STEPS.find(x=>x.id===step);
+  document.getElementById('desc').innerHTML = document.body.classList.contains('lang-en') ? s.den : s.dzh;
+};
+
+setStep('overview');
+window.__renderBarcode();
+
+// ---- loop ----
+const clock = new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+  droplets.forEach(d=>{ d.group.position.y = d.base[1] + Math.sin(t*0.8 + d.phase)*0.06; });
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+addEventListener('resize', ()=>{
+  camera.aspect = container.clientWidth/container.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(container.clientWidth, container.clientHeight);
+});
+</script>
+</body>
+</html>
